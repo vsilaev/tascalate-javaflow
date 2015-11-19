@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.apache.commons</groupId>
+	<artifactId>org.apache.commons.javaflow.parent</artifactId>
+	<version>2.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>JavFlow</name>
+	<url>http://maven.apache.org</url>
+
+	<developers>
+		<developer>
+			<id>tcurdt</id>
+			<name>Torsten Curdt</name>
+			<email>tcurdt at apache.org</email>
+		</developer>
+		<developer>
+			<id>kohsuke</id>
+			<name>Kohsuke Kawaguchi</name>
+			<email>kohsuke at apache.org</email>
+		</developer>
+	</developers>
+
+	<contributors>
+		<contributor>
+			<name>Eugene Kuleshov</name>
+			<email>eu at javatx.org</email>
+		</contributor>
+		<contributor>
+			<name>Valery Silaev</name>
+			<email>vsilaev at java.net</email>
+		</contributor>
+	</contributors>
+
+
+	<modules>
+		<module>org.apache.commons.javaflow.api</module>
+		<module>org.apache.commons.javaflow.spi</module>
+		<module>org.apache.commons.javaflow.examples</module>
+		<module>org.apache.commons.javaflow.extras</module>
+		<module>org.apache.commons.javaflow.utils</module>
+		<module>org.apache.commons.javaflow.providers.asm3</module>
+		<module>org.apache.commons.javaflow.providers.asm4</module>
+		<module>org.apache.commons.javaflow.providers.asm5</module>
+		<module>org.apache.commons.javaflow.tools.jar</module>
+		<module>org.apache.commons.javaflow.tools.javaagent</module>
+		<module>org.apache.commons.javaflow.tools.maven</module>
+		<module>org.apache.commons.javaflow.tools.ant</module>
+
+	</modules>
+
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.11</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.6</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19</version>
+				<configuration>
+					<includes>
+						<include>**/*TestSuite.java</include>
+					</includes>
+					<excludes>
+						<exclude>**/Abstract*</exclude>
+					</excludes>
+					<testFailureIgnore>true</testFailureIgnore>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

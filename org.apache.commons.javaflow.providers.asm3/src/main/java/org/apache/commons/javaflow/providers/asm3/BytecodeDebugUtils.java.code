@@ -1,0 +1,36 @@
+package org.apache.commons.javaflow.bytecode.transformation.asm3;
+
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.util.ASMifierClassVisitor;
+import org.objectweb.asm.util.CheckClassAdapter;
+import org.objectweb.asm.util.TraceClassVisitor;
+
+class BytecodeDebugUtils {
+
+	private BytecodeDebugUtils() {}
+	
+    static ClassVisitor decorateClassVisitor(ClassVisitor visitor, final boolean check, final PrintStream dumpStream) {
+    	if (check) {
+    		visitor = new CheckClassAdapter(visitor);
+    	}
+    	
+    	if (null != dumpStream) {
+    		visitor = new TraceClassVisitor(visitor, new PrintWriter(dumpStream));
+    	}
+    	
+    	return visitor;
+    }
+    
+    static void dumpClass(final byte[] bytecode) {
+    	dumpClass(bytecode, System.err);
+    }
+    
+    static void dumpClass(final byte[] bytecode, final PrintStream out) {
+    	new ClassReader(bytecode).accept(new ASMifierClassVisitor(new PrintWriter(out)), 0);
+    }
+
+}

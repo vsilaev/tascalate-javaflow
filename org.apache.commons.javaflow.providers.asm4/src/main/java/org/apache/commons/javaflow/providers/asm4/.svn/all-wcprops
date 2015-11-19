@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/repos/asf/!svn/ver/893171/commons/sandbox/javaflow/trunk/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm
+END
+MonitoringFrame.java
+K 25
+svn:wc:ra_dav:version-url
+V 148
+/repos/asf/!svn/ver/733503/commons/sandbox/javaflow/trunk/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/MonitoringFrame.java
+END
+ContinuationClassAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 157
+/repos/asf/!svn/ver/733503/commons/sandbox/javaflow/trunk/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationClassAdapter.java
+END
+ContinuationMethodAnalyzer.java
+K 25
+svn:wc:ra_dav:version-url
+V 159
+/repos/asf/!svn/ver/893170/commons/sandbox/javaflow/trunk/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java
+END
+AsmClassTransformer.java
+K 25
+svn:wc:ra_dav:version-url
+V 152
+/repos/asf/!svn/ver/733955/commons/sandbox/javaflow/trunk/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/AsmClassTransformer.java
+END
+ContinuationMethodAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 158
+/repos/asf/!svn/ver/893171/commons/sandbox/javaflow/trunk/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAdapter.java
+END

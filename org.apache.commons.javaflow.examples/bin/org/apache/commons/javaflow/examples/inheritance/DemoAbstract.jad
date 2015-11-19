@@ -1,0 +1,21 @@
+// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.kpdus.com/jad.html
+// Decompiler options: packimports(3) 
+// Source File Name:   DemoAbstract.java
+
+package org.apache.commons.javaflow.examples.inheritance;
+
+
+// Referenced classes of package org.apache.commons.javaflow.examples.inheritance:
+//            IDemo, Execution
+
+public abstract class DemoAbstract
+    implements IDemo
+{
+
+    public DemoAbstract()
+    {
+    }
+
+    Execution outer;
+}
