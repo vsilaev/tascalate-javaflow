@@ -37,11 +37,6 @@ public @continuable class LambdasExample {
 		};
 		r2.run();
 
-		
-		// Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
-		@ccs Runnable exe = this::lambdaDemo;
-		exe.run();
-
 		// Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
 		@ccs Runnable closure = () -> {
 			System.out.println("Lambda by arrow function -- before");
@@ -49,6 +44,12 @@ public @continuable class LambdasExample {
 			System.out.println("Lambda by arrow function -- after");
 		};
 		closure.run();
+		
+		// Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
+		// Arrays are supported as well
+		@ccs Runnable[] exe = {this::lambdaDemo};
+		exe[0].run();
+
 
 		// Unfortunately, any default methods should be re-wrapped like below
 		// See org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters
