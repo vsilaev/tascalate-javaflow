@@ -10,8 +10,7 @@ import org.apache.commons.javaflow.api.ccs;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
 
-@continuable
-public class LambdasExample {
+public @continuable class LambdasExample {
 	public static void main(final String[] argv) throws Exception {
 		LambdasExample example = new LambdasExample();
 		
@@ -24,8 +23,8 @@ public class LambdasExample {
 	}
 	
 	
-	@continuable
-	private void run() {
+	
+	private @continuable void run() {
 		
 		//  @Continuable method references and @Continuable SAM interfaces are supported
 		ContinuableRunnable r1 = this::lambdaDemo;
@@ -61,22 +60,20 @@ public class LambdasExample {
 		
 	}
 	
-	@continuable // Must be annotated to be used as lambda by method-ref
-	void lambdaDemo() {
+	// Must be annotated to be used as lambda by method-ref
+	@continuable void lambdaDemo() {
 		System.out.println("Lambda by method reference -- before");
 		Continuation.suspend(" ** Lambda by method reference** ");
 		System.out.println("Lambda by method reference -- after");
 	}
 	
-	@continuable
-	void yieldString1(String s) {
+	@continuable void yieldString1(String s) {
 		System.out.println("Before yield I " + s);
 		Continuation.suspend("yield I " + s);
 		System.out.println("After yield I " + s);
 	}
 	
-	@continuable
-	void yieldString2(String s) {
+	@continuable void yieldString2(String s) {
 		System.out.println("Before yield II");
 		Continuation.suspend("yield II " + s);
 		System.out.println("After yield II");

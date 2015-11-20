@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.utils;
+package org.apache.commons.javaflow.tools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -176,35 +176,47 @@ public final class RewritingUtils {
 
 
     public static void main(final String[] args) throws FileNotFoundException, IOException {
-    	final ResourceTransformationFactory factory = createDefaultTransformerFactoryInstance();
+    	final ResourceTransformationFactory factory = createTransformerFactoryInstance();
         for (int i=0; i<args.length; i+=2) {
             System.out.println("rewriting " + args[i]);
             
-            final URLClassLoader classLoader = new URLClassLoader(
-            		new URL[]{new File(args[i]).toURI().toURL()}, 
-            		safeParentClassLoader()
-            );
-            
-            final ResourceTransformer transformerDelegate = factory.createTransformer(
-            	factory.createResolver(new ClasspathResourceLoader(classLoader))
-            );
-            
-            final ResourceTransformer transformer = new ResourceTransformer() {
-				public byte[] transform(final byte[] original) {
-					final byte[] transformed = transformerDelegate.transform(original);
-					return null != transformed ? transformed : original;
-				}
-			};
-
+            final ResourceTransformer transformer = createTransformer(new URL[]{new File(args[i]).toURI().toURL()}, factory);
             RewritingUtils.rewriteJar(
-                    new JarInputStream(new FileInputStream(args[i])),
-                    transformer,
-                    new JarOutputStream(new FileOutputStream(args[i+1]))
-                    );
+            	new JarInputStream(new FileInputStream(args[i])),
+            	transformer,
+            	new JarOutputStream(new FileOutputStream(args[i+1]))
+            );
         }
 
         System.out.println("done");
         
+    }
+    
+    public static ResourceTransformer createTransformer(final URL[] extraURL) {
+    	return createTransformer(extraURL, createTransformerFactoryInstance());
+    }
+
+    
+    public static ResourceTransformer createTransformer(final URL[] extraURL, final TransformerType type) {
+    	return createTransformer(extraURL, createTransformerFactoryInstance(type));
+    }
+    
+    public static ResourceTransformer createTransformer(final URL[] extraURL, final ResourceTransformationFactory factory) {
+        final URLClassLoader classLoader = new URLClassLoader(
+        		extraURL, 
+        		safeParentClassLoader()
+        );
+        
+        final ResourceTransformer transformerDelegate = factory.createTransformer(
+        	factory.createResolver(new ClasspathResourceLoader(classLoader))
+        );
+        
+        return new ResourceTransformer() {
+			public byte[] transform(final byte[] original) {
+				final byte[] transformed = transformerDelegate.transform(original);
+				return null != transformed ? transformed : original;
+			}
+		};
     }
     
     final private static ClassLoader safeParentClassLoader() {
@@ -212,8 +224,21 @@ public final class RewritingUtils {
     	return null == ownClassLoader ? ClassLoader.getSystemClassLoader() : ownClassLoader;
     }
     
-    public static ResourceTransformationFactory createDefaultTransformerFactoryInstance() {
-    	final Class<? extends ResourceTransformationFactory> transformerFactoryClass = getDefaultResourceTransformerFactoryClass();
+    public static ResourceTransformationFactory createTransformerFactoryInstance() {
+    	return createTransformerFactoryInstance(null);
+    }
+    
+    public static ResourceTransformationFactory createTransformerFactoryInstance(final TransformerType transformerType) {
+    	final Class<? extends ResourceTransformationFactory> transformerFactoryClass;
+    	if (null == transformerType) {
+    		transformerFactoryClass = getDefaultResourceTransformerFactoryClass();
+    	} else {
+    		try {
+				transformerFactoryClass = transformerType.implementaion();
+			} catch (final ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+    	}
 		try {
 			return transformerFactoryClass.newInstance();
 		} catch (final InstantiationException ex) {
@@ -224,16 +249,9 @@ public final class RewritingUtils {
     }
     
 	public static Class<? extends ResourceTransformationFactory> getDefaultResourceTransformerFactoryClass() {
-		for (final String transformerFactoryClassName : new String[]{
-				"org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory",
-				"org.apache.commons.javaflow.providers.asm4.Asm4ResourceTransformationFactory",
-				"org.apache.commons.javaflow.providers.asm3.Asm3ResourceTransformationFactory",
-				"org.apache.commons.javaflow.providers.bcel.BcelResourceTransformationFactory"
-			} ) {
+		for (final TransformerType transformerType : TransformerType.values()) {
 			try {
-				@SuppressWarnings("unchecked")
-				final Class<? extends ResourceTransformationFactory> c = (Class<? extends ResourceTransformationFactory>) Class.forName(transformerFactoryClassName);
-				return c;
+				return transformerType.implementaion();
 			} catch (final ClassNotFoundException ex) {
 				System.err.println(ex);
 			}
@@ -241,4 +259,23 @@ public final class RewritingUtils {
 		throw new RuntimeException("No bytecode transformation class is found for JavaFlow bytecode modifications");
 	}
 	
+	public static enum TransformerType {
+		ASM5("org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory"),
+		ASM4("org.apache.commons.javaflow.providers.asm4.Asm4ResourceTransformationFactory"),
+		ASM3("org.apache.commons.javaflow.providers.asm3.Asm3ResourceTransformationFactory"),
+		BCEL("org.apache.commons.javaflow.providers.bcel.BcelResourceTransformationFactory");
+		
+		final private String implementation;
+		
+		private TransformerType(final String implementation) {
+			this.implementation = implementation;
+		}
+		
+		Class<? extends ResourceTransformationFactory> implementaion() throws ClassNotFoundException { 
+			@SuppressWarnings("unchecked")
+			final Class<? extends ResourceTransformationFactory> c = (Class<? extends ResourceTransformationFactory>) 
+				Class.forName(implementation);
+			return c;
+		}
+	}
 }

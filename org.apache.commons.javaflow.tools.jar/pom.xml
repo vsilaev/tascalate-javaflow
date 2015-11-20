@@ -58,7 +58,7 @@
 						<index>true</index>
 						<compress>true</compress>
 						<manifest>
-							<mainClass>org.apache.commons.javaflow.utils.RewritingUtils</mainClass>
+							<mainClass>org.apache.commons.javaflow.tools.RewritingUtils</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

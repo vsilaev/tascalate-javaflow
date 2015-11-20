@@ -101,6 +101,7 @@ class CallSiteFinder {
 			size -= getStackSizeChange(n);
 			if (size == 0) {
 				if (n instanceof VarInsnNode) {
+					// Local variable (incl. this) or parameter
 					final VarInsnNode v = (VarInsnNode)n;
 					final Set<String> annotations;
 					if (v.var > argCount) { // 0 -- this, 1..argCount-1 -- params
@@ -110,6 +111,7 @@ class CallSiteFinder {
 					}
 					return new Result(v, m, annotations);
 				} else if (n instanceof FieldInsnNode) {
+					// static/instance field
 					return new Result(n, m, Collections.emptySet());
 				} else {
 					// Not interested in other types like directly reused return value from chained calls

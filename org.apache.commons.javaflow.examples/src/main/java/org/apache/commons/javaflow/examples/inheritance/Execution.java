@@ -5,11 +5,9 @@ import org.apache.commons.javaflow.api.ccs;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
 
-@continuable 
-public class Execution implements Runnable {
+public @continuable class Execution implements Runnable {
 	
-	@continuable 
-	public void run() {
+	public @continuable void run() {
 		// Single abstract method of anonymous class inside @Continuable method
 		// You may omit TYPE_USE Continuable annotation on anonymous runnable class
 		
@@ -56,8 +54,7 @@ public class Execution implements Runnable {
 
 	}
 	
-	@continuable 
-	void suspend(final int i) {
+	@continuable void suspend(final int i) {
 		System.out.println("Exe before suspend");
 		Continuation.suspend(i);
 		System.out.println("Exe after suspend");
