@@ -27,7 +27,6 @@
     </target>
 
     <!-- USE 3 taskdef below to instrument classes before packaging or when packaging is unnecessary -->
-    <!--
     <target name="instrument-classes" description="JavaFlow Instrumentation" depends="compile">
         <taskdef name="javaflow" classname="org.apache.commons.javaflow.ant.AntRewriteTask" classpathref="ant-lib-classpath"/>
 	<echo message="JavaFlow instrumentation of compiled classes in ${classes.dir}" />
@@ -38,10 +37,11 @@
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${i-classes.dir}"/>
     </target>
+
     <target name="all" depends="clean,jar"/>
-    -->
 
     <!-- USE 3 taskdef below to instrument classes in resulting jar -->
+    <!--
     <target name="jar" depends="compile">
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}"/>
@@ -55,4 +55,5 @@
 
 
     <target name="all" depends="clean,instrument-jar"/>
+    -->
 </project>
