@@ -104,7 +104,7 @@ class CallSiteFinder {
 					final VarInsnNode v = (VarInsnNode)n;
 					final Set<String> annotations;
 					if (v.var > argCount) { // 0 -- this, 1..argCount-1 -- params
-						annotations = getVarAnnotations(varAnnotations, v.var, m);
+						annotations = getVarAnnotations(varAnnotations, v);
 					} else {
 						annotations = getParamAnnotations(paramAnnotations, v.var - 1); // -1 while instance method
 					}
@@ -122,33 +122,33 @@ class CallSiteFinder {
 		return null;
 	}
 	
-	protected Set<String> getVarAnnotations(final List<LocalVariableAnnotationNode> varAnnotations, final int varIdx, final AbstractInsnNode methodCall) {
+	protected Set<String> getVarAnnotations(final List<LocalVariableAnnotationNode> varAnnotations, final VarInsnNode v) {
 		final Set<String> result = new TreeSet<>();
 		for (final LocalVariableAnnotationNode n : varAnnotations) {
-			final int idx = n.index.indexOf(varIdx);
+			final int idx = n.index.indexOf(v.var);
 			if (idx < 0) {
 				continue;
 			}
 			final LabelNode start = (LabelNode) n.start.get(idx);
 			final LabelNode end = (LabelNode) n.end.get(idx);
-			if (isCallBetweenBounds(methodCall, start, end)) {
+			if (isVarBetweenBounds(v, start, end)) {
 				result.add(n.desc);
 			}
 		}
 		return result;
 	}
 	
-	protected boolean isCallBetweenBounds(final AbstractInsnNode m, final LabelNode lo, final LabelNode hi) {
+	protected boolean isVarBetweenBounds(final AbstractInsnNode var, final LabelNode lo, final LabelNode hi) {
 		AbstractInsnNode x;
 		boolean loFound = false;
-		for (x = m; !(x == null || loFound); x = x.getPrevious()) {
+		for (x = var; !(x == null || loFound); x = x.getPrevious()) {
 			loFound = x == lo;
 		}
 		if (!loFound)
 			return false;
 
 		boolean hiFound = false;
-		for (x = m; !(x == null || hiFound); x = x.getNext()) {
+		for (x = var; !(x == null || hiFound); x = x.getNext()) {
 			hiFound = x == hi;
 		}
 		
