@@ -25,6 +25,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	private String outerClassMethodDesc;
 	
 	Set<String> continuableMethods = new HashSet<String>();
+	Set<String> desugaredLambdaBodies = new HashSet<String>();
 	
 	private boolean isInterface = false;
 	private boolean isAnnotation = false;
@@ -50,7 +51,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 				} catch (final IOException exIgnore) {
 					// Should never happen here -- when lambda is being defined 
 					// the declaring class is already loaded
-					
 				}
 			}
 		}
@@ -86,7 +86,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 		visitInheritanceChain();
 		// If desugared lambda method in outer class
 		if ( (access & Opcodes.ACC_PRIVATE) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("lambda$") ){
-			continuableMethods.add(name + desc);
+			desugaredLambdaBodies.add(name + desc);
 			return null;
 		}
 		if (isLambda && (access & Opcodes.ACC_PRIVATE) == 0 && (access & Opcodes.ACC_STATIC) == 0) {
@@ -121,6 +121,11 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	public void visitEnd() {
 		visitInheritanceChain();
 		checkOuterClass();
+		if (!continuableMethods.isEmpty()) {
+			// Take desugared lambda bodies in consideration 
+			// only when we have at least one continuable method
+			continuableMethods.addAll(desugaredLambdaBodies);
+		}
 	}
 	
 	private boolean inheritanceChainVisited = false;
@@ -149,7 +154,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 			if (!continuableMethods.isEmpty()) {
 				final ContinuableClassInfoInternal outer = resolve(outerClassName);
 				if (null != outer && outer.isContinuableMethod(0, outerClassMethodName, outerClassMethodDesc, null)) {
-					;
+					// Reserved;
 				}
 			}
 		}		
