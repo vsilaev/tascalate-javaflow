@@ -174,9 +174,8 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
     
     boolean checkContinuableAnnotation(final Collection<String> annotationDescriptors) {
-    	final Asm5ContinuableClassInfoResolver xcciResolver = Asm5ContinuableClassInfoResolver.class.cast(cciResolver);
     	for (final String annotationDescriptor : annotationDescriptors) {
-    		if (xcciResolver.isContinuableAnnotation(annotationDescriptor)) {
+    		if (cciResolver.isContinuableAnnotation(annotationDescriptor)) {
     			return true;
     		}
     	}

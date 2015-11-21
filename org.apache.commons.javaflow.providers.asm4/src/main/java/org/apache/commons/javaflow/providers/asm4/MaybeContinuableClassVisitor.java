@@ -13,7 +13,6 @@ import org.objectweb.asm.Type;
 
 class MaybeContinuableClassVisitor extends ClassVisitor {
 	private final Asm4ContinuableClassInfoResolver environment; 
-	private boolean classContinuableAnnotationFound = false;
 	private boolean classContinuatedMarkerFound = false;
 	private String superclass;
 	private String[] superinterfaces;
@@ -47,14 +46,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	}
 	
 	@Override
-	public AnnotationVisitor visitAnnotation(final String description, boolean visible) {
-		if (!classContinuableAnnotationFound) {
-			classContinuableAnnotationFound = environment.isContinuableAnnotation(description);
-		}
-		return null;
-	}
-	
-	@Override
 	public void visitOuterClass(String owner, String name, String desc) { 
 		outerClassName = owner;
 		outerClassMethodName = name;
@@ -63,32 +54,30 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
 	@Override
 	public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
-		visitInheritanceChain();
-
-		if (classContinuableAnnotationFound || (outerClassName != null && outerClassMethodName != null)) {
-			return new MethodVisitor(Opcodes.ASM4) {
-				
-				private boolean methodContinuableAnnotationFound = false;
-				
-				@Override
-				public AnnotationVisitor visitAnnotation(final String description, boolean visible) {
-					if (!methodContinuableAnnotationFound) {
-						methodContinuableAnnotationFound = environment.isContinuableAnnotation(description);
-					}
-					return null;
-				}
-				
-				@Override 
-				public void visitEnd() {
-					if (methodContinuableAnnotationFound) {
-						continuableMethods.add(name + desc);
-					}
-				}
-				
-			};
-		} else {
+		if (isAnnotation) {
 			return null;
 		}
+		
+		return new MethodVisitor(Opcodes.ASM4) {
+			
+			private boolean methodContinuableAnnotationFound = false;
+			
+			@Override
+			public AnnotationVisitor visitAnnotation(final String description, boolean visible) {
+				if (!methodContinuableAnnotationFound) {
+					methodContinuableAnnotationFound = environment.isContinuableAnnotation(description);
+				}
+				return null;
+			}
+			
+			@Override 
+			public void visitEnd() {
+				if (methodContinuableAnnotationFound) {
+					continuableMethods.add(name + desc);
+				}
+			}
+			
+		};
 	}
 	
 	@Override
@@ -114,17 +103,16 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	private void visitParentClass(final String classInternalName) {
 		final ContinuableClassInfoInternal parent = resolve(classInternalName);
 		if (null != parent) {
-			classContinuableAnnotationFound = true;
 			continuableMethods.addAll(parent.continuableMethods());
 		}
 	}
 	
 	private void checkOuterClass() {
-		if (!classContinuableAnnotationFound && (outerClassName != null && outerClassMethodName != null)) {
+		if (!isAnnotation && (outerClassName != null && outerClassMethodName != null)) {
 			if (!continuableMethods.isEmpty()) {
 				final ContinuableClassInfoInternal outer = resolve(outerClassName);
 				if (null != outer && outer.isContinuableMethod(0, outerClassMethodName, outerClassMethodDesc, null)) {
-					classContinuableAnnotationFound = true;
+					// Reserved;
 				}
 			}
 		}
@@ -138,8 +126,13 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 		}
 	}
 
-	boolean isContinuable() { return classContinuableAnnotationFound; }
-	boolean isProcessed() { return isInterface || classContinuatedMarkerFound; }
+	boolean isContinuable() { 
+		return !isAnnotation && !continuableMethods.isEmpty();
+	}
+	
+	boolean isProcessed() {
+		return isInterface || classContinuatedMarkerFound;
+	}
 	
 	private final static String CONTINUABLE_MARKER_INTERFACE_NAME = Type.getInternalName(Continuable.class); 
 	private final static String OBJECT_CLASS_INTERNAL_NAME = Type.getInternalName(Object.class);

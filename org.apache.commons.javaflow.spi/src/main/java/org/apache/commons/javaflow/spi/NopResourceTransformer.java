@@ -18,9 +18,9 @@ package org.apache.commons.javaflow.spi;
 
 public final class NopResourceTransformer implements ResourceTransformer {
 
-    public static final NopResourceTransformer INSTANCE = new NopResourceTransformer();
+    final public static NopResourceTransformer INSTANCE = new NopResourceTransformer();
     
-    public byte[] transform( byte[] original ) {
+    public byte[] transform(final byte[] original) {
         return original;
     }
 

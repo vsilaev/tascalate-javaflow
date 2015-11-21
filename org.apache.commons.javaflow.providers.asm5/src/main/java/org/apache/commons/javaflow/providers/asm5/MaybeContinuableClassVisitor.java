@@ -16,7 +16,6 @@ import org.objectweb.asm.Type;
 
 class MaybeContinuableClassVisitor extends ClassVisitor {
 	private final Asm5ContinuableClassInfoResolver environment; 
-	private boolean classContinuableAnnotationFound = false;
 	private boolean classContinuatedMarkerFound = false;
 	private String superclass;
 	private String[] superinterfaces;
@@ -27,7 +26,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	Set<String> continuableMethods = new HashSet<String>();
 	Set<String> desugaredLambdaBodies = new HashSet<String>();
 	
-	private boolean isInterface = false;
 	private boolean isAnnotation = false;
 	private boolean isLambda = false;
 
@@ -39,7 +37,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	final private static Pattern LAMBDA_CLASS_NAME = Pattern.compile("^(.*)\\$\\$Lambda\\$\\d+$");
 	
 	public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
-		isInterface = (access & Opcodes.ACC_INTERFACE) > 0;
+		//boolean isInterface = (access & Opcodes.ACC_INTERFACE) > 0;
 		isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
 		
 		if ((access & Opcodes.ACC_SUPER) != 0 && (access & Opcodes.ACC_FINAL) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0) {
@@ -58,20 +56,12 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 		superclass = superName;
 		superinterfaces = interfaces;
 		
-		if (!isInterface && null != interfaces) for (final String interfaceInternalName : interfaces) {
+		if (!isAnnotation && null != interfaces) for (final String interfaceInternalName : interfaces) {
 			if (CONTINUABLE_MARKER_INTERFACE_NAME.equals(interfaceInternalName)) {
 				classContinuatedMarkerFound = true;
 				break;
 			}
 		}
-	}
-	
-	@Override
-	public AnnotationVisitor visitAnnotation(final String description, boolean visible) {
-		if (!classContinuableAnnotationFound) {
-			classContinuableAnnotationFound = environment.isContinuableAnnotation(description);
-		}
-		return null;
 	}
 	
 	@Override
@@ -83,7 +73,10 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
 	@Override
 	public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
-		visitInheritanceChain();
+		if (isAnnotation) {
+			return null;
+		}
+		
 		// If desugared lambda method in outer class
 		if ( (access & Opcodes.ACC_PRIVATE) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("lambda$") ){
 			desugaredLambdaBodies.add(name + desc);
@@ -150,14 +143,14 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	}
 	
 	private void checkOuterClass() {
-		if (outerClassName != null && outerClassMethodName != null) {
+		if (!isAnnotation && (outerClassName != null && outerClassMethodName != null)) {
 			if (!continuableMethods.isEmpty()) {
 				final ContinuableClassInfoInternal outer = resolve(outerClassName);
 				if (null != outer && outer.isContinuableMethod(0, outerClassMethodName, outerClassMethodDesc, null)) {
 					// Reserved;
 				}
 			}
-		}		
+		}
 	}
 	
 	private ContinuableClassInfoInternal resolve(final String classInternalName) {
@@ -169,14 +162,12 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	}
 
 	boolean isContinuable() { 
-		return 
-			(classContinuableAnnotationFound && isAnnotation) || 
-			!continuableMethods.isEmpty(); 
+		return !isAnnotation && !continuableMethods.isEmpty();
 	}
 	
 	// Java8 allows implementation in interfaces
-	boolean isProcessed() { 
-		return /*isInterface || */classContinuatedMarkerFound; 
+	boolean isProcessed() {
+		return /*isInterface || */classContinuatedMarkerFound;
 	}
 	
 	private final static String CONTINUABLE_MARKER_INTERFACE_NAME = Type.getInternalName(Continuable.class); 

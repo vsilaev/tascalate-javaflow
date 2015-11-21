@@ -8,9 +8,9 @@ package org.apache.commons.javaflow.spi;
  * @author Kohsuke Kawaguchi
  */
 public class CompositeTransformer implements ResourceTransformer {
-    private final ResourceTransformer[] transformers;
+    final private ResourceTransformer[] transformers;
 
-    public CompositeTransformer(ResourceTransformer[] transformers) {
+    public CompositeTransformer(final ResourceTransformer[] transformers) {
         this.transformers = transformers;
     }
 

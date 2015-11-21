@@ -28,7 +28,7 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
 	public ContinuableClassInfo forget(String className) {
 		return visitedClasses.remove(className);
 	}
-	
+
 	public ContinuableClassInfo resolve(final String classInternalName, final byte[] classBytes) {
 		return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
 	}
@@ -64,10 +64,10 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
 	}
 	
 	private boolean resolveContinuableAnnotation(final String annotationClassDescriptor, final ClassReader reader) {
-		final MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
-		reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+		final MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(this); 
+		reader.accept(maybeContinuableAnnotationVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 		
-		if (maybeContinuableClassVisitor.isContinuable()) {
+		if (maybeContinuableAnnotationVisitor.isContinuable()) {
 			markContinuableAnnotation(annotationClassDescriptor);
 			return true;
 		} else {
@@ -93,7 +93,7 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
 		continuableAnnotations.add(annotationClassDescriptor);
 	}
 	
-	protected boolean isContinuableAnnotation(final String annotationClassDescriptor) {
+	public boolean isContinuableAnnotation(final String annotationClassDescriptor) {
 		switch (getAnnotationProcessingState(annotationClassDescriptor)) {
 			case SUPPORTED:
 				return true;

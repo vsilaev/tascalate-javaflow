@@ -25,7 +25,6 @@ public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoRes
 		markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE);
 	}
 	
-	
 	public ContinuableClassInfo forget(String className) {
 		return visitedClasses.remove(className);
 	}
@@ -65,10 +64,10 @@ public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoRes
 	}
 	
 	private boolean resolveContinuableAnnotation(final String annotationClassDescriptor, final ClassReader reader) {
-		final MaybeContinuableClassAdapter maybeContinuableClassVisitor = new MaybeContinuableClassAdapter(this); 
-		reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+		final MaybeContinuableAnnotationAdapter maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationAdapter(this); 
+		reader.accept(maybeContinuableAnnotationVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 		
-		if (maybeContinuableClassVisitor.isContinuable()) {
+		if (maybeContinuableAnnotationVisitor.isContinuable()) {
 			markContinuableAnnotation(annotationClassDescriptor);
 			return true;
 		} else {
@@ -94,7 +93,7 @@ public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoRes
 		continuableAnnotations.add(annotationClassDescriptor);
 	}
 	
-	protected boolean isContinuableAnnotation(final String annotationClassDescriptor) {
+	public boolean isContinuableAnnotation(final String annotationClassDescriptor) {
 		switch (getAnnotationProcessingState(annotationClassDescriptor)) {
 			case SUPPORTED:
 				return true;

@@ -13,5 +13,4 @@ import org.apache.commons.javaflow.api.ContinuableAnnotation;
 @Target({ElementType.METHOD})
 @ContinuableAnnotation
 public @interface MyContinuable {
-
 }

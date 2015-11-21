@@ -28,5 +28,5 @@ package org.apache.commons.javaflow.spi;
  * @see AsmClassTransformer
  */
 public interface ResourceTransformer {
-    abstract public byte[] transform( final byte[] original );
+    abstract public byte[] transform( byte[] original );
 }
