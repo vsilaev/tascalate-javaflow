@@ -2,7 +2,6 @@ package org.apache.commons.javaflow.examples.inheritance;
 
 import org.apache.commons.javaflow.api.continuable;
 
-//@Continuable -- inherited via DemoAbstract
 public class DemoConcrete extends DemoAbstract {
 
 	// should declare while parents do not 

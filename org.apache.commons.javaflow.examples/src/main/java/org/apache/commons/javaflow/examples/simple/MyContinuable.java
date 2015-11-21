@@ -10,7 +10,7 @@ import org.apache.commons.javaflow.api.ContinuableAnnotation;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD})
 @ContinuableAnnotation
 public @interface MyContinuable {
 

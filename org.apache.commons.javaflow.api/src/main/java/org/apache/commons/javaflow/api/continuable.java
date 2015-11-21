@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD})
 @ContinuableAnnotation
 public @interface continuable {}

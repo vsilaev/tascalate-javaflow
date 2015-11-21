@@ -5,17 +5,14 @@ import org.apache.commons.javaflow.api.ccs;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
 
-public @continuable class Execution implements Runnable {
+public class Execution implements Runnable {
 	
 	public @continuable void run() {
 		// Single abstract method of anonymous class inside @Continuable method
-		// You may omit TYPE_USE Continuable annotation on anonymous runnable class
-		
 		// Direct invocation over concrete type
 		new Runnable() {
 			@Override
-			@continuable // meanwhile method annotation is mandatory
-			public void run() {
+			public @continuable void run() {
 				System.out.println("Anonymous class -- before");
 				Continuation.suspend("SAM Interface");
 				System.out.println("Anonymous class -- after");

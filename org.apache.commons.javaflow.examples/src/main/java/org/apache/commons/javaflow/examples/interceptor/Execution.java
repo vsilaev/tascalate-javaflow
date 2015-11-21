@@ -3,7 +3,6 @@ package org.apache.commons.javaflow.examples.interceptor;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.core.StackRecorder;
 
-@continuable
 public class Execution implements Runnable {
 	
 	@continuable 
@@ -18,7 +17,6 @@ public class Execution implements Runnable {
 	}
 	
 	
-	@continuable
 	// Guard is required to balance stack variables
 	static class InterceptorGuard implements InterceptorInterface {
 		final InterceptorInterface next;

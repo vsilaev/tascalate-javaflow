@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import org.apache.commons.javaflow.api.Continuation;
 
-@MyContinuable 
 public class Execution implements Runnable {
 	
 	@Override

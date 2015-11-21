@@ -10,7 +10,7 @@ import org.apache.commons.javaflow.api.ccs;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
 
-public @continuable class LambdasExample {
+public class LambdasExample {
 	public static void main(final String[] argv) throws Exception {
 		LambdasExample example = new LambdasExample();
 		

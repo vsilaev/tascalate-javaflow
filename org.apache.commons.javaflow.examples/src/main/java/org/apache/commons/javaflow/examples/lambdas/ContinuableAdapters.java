@@ -19,7 +19,7 @@ public class ContinuableAdapters {
 	}
 	
 	
-	@continuable interface cConsumer<T> extends Consumer<T> {
+	interface cConsumer<T> extends Consumer<T> {
 		@continuable void accept(T t);
 		
 		default cConsumer<T> andThen(Consumer<? super T> after) {
@@ -33,7 +33,7 @@ public class ContinuableAdapters {
 	    }
 	}
 	
-	@continuable interface cIterable<T> extends Iterable<T> {
+	interface cIterable<T> extends Iterable<T> {
 		default @continuable void forEach(@ccs Consumer<? super T> action) {
 			for (Iterator<T> it = iterator(); it.hasNext(); ) {
 				T v = it.next();

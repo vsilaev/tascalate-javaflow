@@ -9,11 +9,9 @@ import java.lang.invoke.MethodType;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
 
-@continuable 
 public class SimpleDynamicLinkage {
 	
-	@continuable 
-	static void sayHello() {
+	@continuable static void sayHello() {
 		System.out.println("There we go!");
 		for (char c = 'A'; c < 'G'; c++)
 			Continuation.suspend("Data" + c);

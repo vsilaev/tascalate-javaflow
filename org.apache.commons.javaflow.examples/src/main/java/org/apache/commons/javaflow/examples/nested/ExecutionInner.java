@@ -3,7 +3,6 @@ package org.apache.commons.javaflow.examples.nested;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
 
-@continuable
 public class ExecutionInner implements Runnable {
 	final private int i;
 	
@@ -12,8 +11,7 @@ public class ExecutionInner implements Runnable {
 	}
 	
 	@Override
-	@continuable
-	public void run() {
+	public @continuable void run() {
 		for (char c = 'A'; c < 'E'; c++) {
 			StringBuilder v = new StringBuilder();
 			v.append(c).append(i);
