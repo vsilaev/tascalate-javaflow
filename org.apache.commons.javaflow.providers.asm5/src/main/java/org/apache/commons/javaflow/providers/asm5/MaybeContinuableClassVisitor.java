@@ -85,11 +85,11 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 	public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
 		visitInheritanceChain();
 		// If desugared lambda method in outer class
-		if ( (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC)) != 0 && name.startsWith("lambda$") ){
+		if ( (access & Opcodes.ACC_PRIVATE) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("lambda$") ){
 			continuableMethods.add(name + desc);
 			return null;
 		}
-		if (isLambda && (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC)) == 0) {
+		if (isLambda && (access & Opcodes.ACC_PRIVATE) == 0 && (access & Opcodes.ACC_STATIC) == 0) {
 			// Non-private non-static methods in lambda are SAM implementation + additional bridges
 			continuableMethods.add(name + desc);
 			return null;

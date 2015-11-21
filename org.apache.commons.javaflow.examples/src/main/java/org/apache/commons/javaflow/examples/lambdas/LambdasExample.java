@@ -22,7 +22,7 @@ public class LambdasExample {
 
 	}
 	
-	
+	String ref = " ** ";
 	
 	private @continuable void run() {
 		
@@ -32,7 +32,7 @@ public class LambdasExample {
 		
 		ContinuableRunnable r2 = () -> {
 			System.out.println("ContinuableRunnable by arrow function -- before");
-			Continuation.suspend(" ** ContinuableRunnable by arrow function ** ");
+			Continuation.suspend(" ** ContinuableRunnable by arrow function");
 			System.out.println("ContinuableRunnable by arrow function -- after");
 		};
 		r2.run();
@@ -40,7 +40,7 @@ public class LambdasExample {
 		// Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
 		@ccs Runnable closure = () -> {
 			System.out.println("Lambda by arrow function -- before");
-			Continuation.suspend(" ** Lambda by arrow function ** ");
+			Continuation.suspend(" ** Lambda by arrow function" + ref);
 			System.out.println("Lambda by arrow function -- after");
 		};
 		closure.run();
