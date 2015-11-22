@@ -1,19 +1,17 @@
 package org.apache.commons.javaflow.examples.invokedynamic;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
 
 import org.apache.commons.javaflow.api.Continuation;
+import org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory;
+import org.apache.commons.javaflow.utils.ContinuationClassLoader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
 public class DynamicInvokerExample {
 
 	public static void main(String[] args) throws Exception {
-
-		Class<Runnable> dynamicClass = generateDynamicInvokerClass("demo/SimpleDynamicInvoker");
+		Class<Runnable> dynamicClass = generateDynamicInvokerClass("org/apache/commons/javaflow/examples/invokedynamic/SimpleDynamicInvoker");
 		Runnable demo = dynamicClass.newInstance();
 
 		for (Continuation cc = Continuation.startWith(demo); null != cc; cc = Continuation.continueWith(cc)) {
@@ -35,20 +33,14 @@ public class DynamicInvokerExample {
 			"bootstrapDynamic", "()V"
 		);
 
-		// Hack to make class bytes available during agent instrumentation
-		ClassLoader delegateClassLoader = new URLClassLoader(new URL[]{}, DynamicInvokerExample.class.getClassLoader()) {
-			@Override
-			public InputStream getResourceAsStream(String name) {
-				if (name.equals(dynamicInvokerClassName + ".class")) {
-					return new ByteArrayInputStream(dynamicClassBytes);
-				}
-				return super.getResourceAsStream(name);
-			}
-			
-		};
-		
+		@SuppressWarnings("resource")
+		ContinuationClassLoader delegateClassLoader = new ContinuationClassLoader(
+			new URL[]{}, DynamicInvokerExample.class.getClassLoader(),
+			new Asm5ResourceTransformationFactory()
+		);
+
 		@SuppressWarnings("unchecked")
-		Class<Runnable> dynamicClass = (Class<Runnable>)generator.defineClass(delegateClassLoader, dynamicInvokerClassName, dynamicClassBytes);
+		Class<Runnable> dynamicClass = (Class<Runnable>)delegateClassLoader.defineClassFromData(dynamicClassBytes, dynamicInvokerClassName);
 		return dynamicClass;
 	}
 

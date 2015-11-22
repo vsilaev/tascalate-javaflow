@@ -18,11 +18,13 @@ package org.apache.commons.javaflow.utils;
 
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +51,37 @@ import java.util.List;
 public class ContinuationClassLoader extends URLClassLoader {
 
     private final static Log log = LogFactory.getLog(ContinuationClassLoader.class);
+    
+    static class CurrentClass {
+    	final String className;
+    	final byte[] classData;
+    	
+    	CurrentClass(String className, byte[] classData) {
+    		this.className = className;
+    		this.classData = classData;
+    	}
+    }
+    
+    final private static ThreadLocal<CurrentClass> CURRENT_CLASS = new ThreadLocal<ContinuationClassLoader.CurrentClass>();
+    
+    static class ExtendedResourceLoader implements ResourceLoader {
+    	final private ResourceLoader delegate;
+    	
+    	ExtendedResourceLoader(final ResourceLoader delegate) {
+    		this.delegate = delegate;
+    	}
+
+		public InputStream getResourceAsStream(String name) throws IOException {
+			CurrentClass current = CURRENT_CLASS.get();
+			if (null != current && (current.className + ".class").equals(name)) {
+				return new ByteArrayInputStream(current.classData);
+			} else {
+				return delegate.getResourceAsStream(name);
+			}
+		}
+    	
+    	
+    }
 
     private final ResourceTransformationFactory transforationFactory;
     private final ContinuableClassInfoResolver cciResolver;
@@ -105,7 +138,9 @@ public class ContinuationClassLoader extends URLClassLoader {
         if(transformationFactory==null)
             throw new IllegalArgumentException();
         this.transforationFactory = transformationFactory;
-        this.cciResolver = transformationFactory.createResolver(new ClasspathResourceLoader(this));
+        this.cciResolver = transformationFactory.createResolver(
+        	new ExtendedResourceLoader(new ClasspathResourceLoader(this))
+        );
         acc = AccessController.getContext();
     }
 
@@ -310,7 +345,7 @@ public class ContinuationClassLoader extends URLClassLoader {
      *
      * @return the Class instance created from the given data
      */
-    protected Class<?> defineClassFromData(final byte[] classData, final String classname) {
+    public Class<?> defineClassFromData(final byte[] classData, final String classname) {
         return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
             public Class<?> run() {
                 // define a package if necessary.
@@ -324,12 +359,20 @@ public class ContinuationClassLoader extends URLClassLoader {
                 }
 
             	final ResourceTransformer transformer = transforationFactory.createTransformer(cciResolver);
-            	byte[] transfomred = transformer.transform(classData);
+            	byte[] transfomred;
+            	CurrentClass prevClass = CURRENT_CLASS.get();
+            	CURRENT_CLASS.set(new CurrentClass(classname, classData));
+            	try {
+            		transfomred = transformer.transform(classData);
+            	} finally {
+            		CURRENT_CLASS.set(prevClass);
+            	}
+            	
             	if (null == transfomred)
             		transfomred = classData;
 
             	final ProtectionDomain domain = this.getClass().getProtectionDomain();
-                return defineClass(classname, transfomred, 0, transfomred.length, domain);
+                return defineClass(null, transfomred, 0, transfomred.length, domain);
             }
         }, acc);
     }
