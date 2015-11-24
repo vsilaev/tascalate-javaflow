@@ -4,6 +4,8 @@
   <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects>
     <project>org.apache.commons.javaflow.api</project>
+    <project>org.apache.commons.javaflow.spi</project>
+    <project>org.apache.commons.javaflow.providers.asm5</project>
   </projects>
   <buildSpec>
     <buildCommand>

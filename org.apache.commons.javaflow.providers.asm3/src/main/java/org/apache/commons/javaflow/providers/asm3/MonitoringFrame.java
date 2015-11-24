@@ -31,12 +31,12 @@ public class MonitoringFrame extends Frame {
     // keeps track of monitored locals
     private List<Integer> monitored;
 
-    public MonitoringFrame(Frame arg0) {
-        super(arg0);
+    public MonitoringFrame(Frame frame) {
+        super(frame);
     }
 
-    public MonitoringFrame(int arg0, int arg1) {
-        super(arg0, arg1);
+    public MonitoringFrame(int nLocals, int nStack) {
+        super(nLocals, nStack);
         monitored = new LinkedList<Integer>();
     }
 

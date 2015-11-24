@@ -1,6 +1,9 @@
 package org.apache.commons.javaflow.providers.asm5;
 
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.BasicVerifier;
 
@@ -17,22 +20,31 @@ public class FastClassVerifier extends BasicVerifier {
     }
 
     @Override
+    public BasicValue copyOperation(final AbstractInsnNode insn, BasicValue value) throws AnalyzerException {
+    	// Fix error with analyzer for try-with-resources (it sees uninitialized values)
+		if (insn.getOpcode() == Opcodes.ALOAD && !value.isReference()) {
+			value = newValue(Type.getType("Lnull;"));
+		}
+		return super.copyOperation(insn, value);
+    }
+    
+    @Override
+    public BasicValue unaryOperation(final AbstractInsnNode insn, BasicValue value) throws AnalyzerException {
+    	// Fix error with analyzer for try-with-resources (it sees uninitialized values)
+		if (insn.getOpcode() == Opcodes.ALOAD && !value.isReference()) {
+			value = newValue(Type.getType("Lnull;"));
+		}
+		return super.unaryOperation(insn, value);    
+	}
+    
+    
+    @Override
     public BasicValue newValue(final Type type) {
         if (type == null) {
             return BasicValue.UNINITIALIZED_VALUE;
         }
 
-        boolean isArray = type.getSort() == Type.ARRAY;
-        if (isArray) {
-            switch (type.getElementType().getSort()) {
-                case Type.BOOLEAN:
-                case Type.CHAR:
-                case Type.BYTE:
-                case Type.SHORT:
-                    return new BasicValue(type);
-            }
-        }
-
+        final boolean isArray = type.getSort() == Type.ARRAY;
         BasicValue v = super.newValue(type);
         if (BasicValue.REFERENCE_VALUE.equals(v)) {
             if (isArray) {
@@ -54,6 +66,10 @@ public class FastClassVerifier extends BasicVerifier {
         Type expectedType = expected.getType();
         Type type = value.getType();
         switch (expectedType.getSort()) {
+	        case Type.BOOLEAN:
+	        case Type.CHAR:
+	        case Type.BYTE:
+	        case Type.SHORT:
             case Type.INT:
             case Type.FLOAT:
             case Type.LONG:
@@ -63,14 +79,10 @@ public class FastClassVerifier extends BasicVerifier {
             case Type.OBJECT:
                 if ("Lnull;".equals(type.getDescriptor())) {
                     return true;
-                } else if (type.getSort() == Type.OBJECT
-                        || type.getSort() == Type.ARRAY)
-                {
+                } else {
                     // We are transforming valid bytecode to (hopefully) valid bytecode
                 	// hence pairs of "value" and "expected" must be compatible
                 	return true;//isAssignableFrom(expectedType, type);
-                } else {
-                    return false;
                 }
             default:
                 throw new Error("Internal error");
