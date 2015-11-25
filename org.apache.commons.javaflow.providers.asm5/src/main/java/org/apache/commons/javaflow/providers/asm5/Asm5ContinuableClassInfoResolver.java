@@ -25,6 +25,10 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
 		markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE);
 	}
 	
+	public ResourceLoader resourceLoader() {
+		return resourceLoader;
+	}
+	
 	public ContinuableClassInfo forget(String className) {
 		return visitedClasses.remove(className);
 	}

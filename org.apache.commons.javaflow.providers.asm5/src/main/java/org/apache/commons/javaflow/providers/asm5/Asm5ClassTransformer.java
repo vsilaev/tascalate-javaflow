@@ -35,7 +35,7 @@ final class Asm5ClassTransformer implements ResourceTransformer {
 	}
 
 	public byte[] transform(final byte[] original) {
-		final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+		final ClassWriter cw = new ComputeClassWriter(ClassWriter.COMPUTE_FRAMES, cciResolver.resourceLoader());
 		final ContinuableClassVisitor visitor = new ContinuableClassVisitor(
 			cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
 			cciResolver,

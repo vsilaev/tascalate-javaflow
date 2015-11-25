@@ -7,4 +7,5 @@ public interface ContinuableClassInfoResolver {
 	abstract public ContinuableClassInfo resolve(String className) throws IOException;
 	abstract public ContinuableClassInfo resolve(String className, byte[] classBytes);
 	abstract public boolean isContinuableAnnotation(String annotationClassDescriptor);
+	abstract public ResourceLoader resourceLoader();
 }

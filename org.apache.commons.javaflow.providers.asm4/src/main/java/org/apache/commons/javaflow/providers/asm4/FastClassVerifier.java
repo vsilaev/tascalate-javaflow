@@ -22,20 +22,11 @@ public class FastClassVerifier extends BasicVerifier {
     @Override
     public BasicValue copyOperation(final AbstractInsnNode insn, BasicValue value) throws AnalyzerException {
     	// Fix error with analyzer for try-with-resources (it sees uninitialized values)
-		if (insn.getOpcode() == Opcodes.ALOAD && !value.isReference()) {
+    	if ((insn.getOpcode() == Opcodes.ALOAD || insn.getOpcode() == Opcodes.ASTORE) && !value.isReference()) {
 			value = newValue(Type.getType("Lnull;"));
 		}
 		return super.copyOperation(insn, value);
     }
-    
-    @Override
-    public BasicValue unaryOperation(final AbstractInsnNode insn, BasicValue value) throws AnalyzerException {
-    	// Fix error with analyzer for try-with-resources (it sees uninitialized values)
-		if (insn.getOpcode() == Opcodes.ALOAD && !value.isReference()) {
-			value = newValue(Type.getType("Lnull;"));
-		}
-		return super.unaryOperation(insn, value);    
-	}
     
     
     @Override
@@ -88,5 +79,4 @@ public class FastClassVerifier extends BasicVerifier {
                 throw new Error("Internal error");
         }
     }
-
 }

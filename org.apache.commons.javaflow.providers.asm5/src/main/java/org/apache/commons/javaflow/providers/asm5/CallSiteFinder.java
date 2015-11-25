@@ -19,7 +19,6 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableAnnotationNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
@@ -171,10 +170,6 @@ class CallSiteFinder {
 	}
 	
 	protected static int getStackSizeChange(final AbstractInsnNode ins) {
-		if (ins instanceof LabelNode || ins instanceof LineNumberNode) {
-			return 0;
-		}
-		
 		/**
 		 * See http://cs.au.dk/~mis/dOvs/jvmspec/ref-Java.html
 		 */
@@ -182,10 +177,14 @@ class CallSiteFinder {
 		final int s;
 		final int o = ins.getOpcode();
 
+		if (o < 0) {
+			return 0;
+		}
+		
 		switch (o) {
 			case NOP: return 0;
 			
-			case ACONST_NULL: return 0;
+			case ACONST_NULL: return 1;
 			
 			case ICONST_M1:
 			case ICONST_0:
