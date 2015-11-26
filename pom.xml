@@ -39,6 +39,7 @@
 		<module>org.apache.commons.javaflow.api</module>
 		<module>org.apache.commons.javaflow.spi</module>
 		<module>org.apache.commons.javaflow.examples</module>
+		<module>org.apache.commons.javaflow.examples-dyninvoke</module>
 		<module>org.apache.commons.javaflow.extras</module>
 		<module>org.apache.commons.javaflow.utils</module>
 		<module>org.apache.commons.javaflow.providers.asm3</module>

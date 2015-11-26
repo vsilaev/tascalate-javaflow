@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-  <name>org.apache.commons.javaflow.examples</name>
+  <name>org.apache.commons.javaflow.examples-dyninvoke</name>
   <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects>
     <project>org.apache.commons.javaflow.api</project>
+    <project>org.apache.commons.javaflow.spi</project>
+    <project>org.apache.commons.javaflow.providers.asm5</project>
+    <project>org.apache.commons.javaflow.utils</project>
   </projects>
   <buildSpec>
     <buildCommand>
