@@ -53,7 +53,7 @@ public final class RewritingUtils {
     /*
      * @todo multiple transformers
      */
-    public static void rewriteClassFile(
+    public static boolean rewriteClassFile(
             final File pInput,
             final ResourceTransformer transformer,
             final File pOutput
@@ -61,9 +61,17 @@ public final class RewritingUtils {
 
         final byte[] original = toByteArray(pInput);
         byte[] transformed = transformer.transform(original);
-        final FileOutputStream os = new FileOutputStream(pOutput);
-        os.write(transformed);
-        os.close();
+        if (transformed != original /*Exact equality means not transformed*/ || !pOutput.equals(pInput)) {
+        	final FileOutputStream os = new FileOutputStream(pOutput);
+        	try {
+        		os.write(transformed);
+        	} finally {
+        		os.close();
+        	}
+        	return true;
+        } else {
+        	return false;
+        }
     }
 
     public static boolean rewriteJar(
