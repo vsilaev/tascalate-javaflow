@@ -70,6 +70,7 @@ public class ContinuableClassVisitor extends ClassAdapter {
 		final String[] newInterfaces;
 		if (skipEnchancing) {
 			classInfo.markClassProcessed();
+			newInterfaces = interfaces;
 			throw AbortTransformationException.INSTANCE;
 		} else {
 			final int size = null == interfaces ? 0 : interfaces.length;
@@ -77,7 +78,7 @@ public class ContinuableClassVisitor extends ClassAdapter {
 			System.arraycopy(interfaces, 0, newInterfaces, 0, size);
 			newInterfaces[size] = CONTINUABLE_MARKER_INTERFACE_NAME;
 		}
-		cv.visit(version, access, name, signature, superName, interfaces);
+		cv.visit(version, access, name, signature, superName, newInterfaces);
 	}
 
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
