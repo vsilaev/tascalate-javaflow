@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.apache.commons.javaflow.core.ContinuationDeath;
 import org.apache.commons.javaflow.core.ReflectionUtils;
+import org.apache.commons.javaflow.core.ResumeContext;
 import org.apache.commons.javaflow.core.StackRecorder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -128,22 +129,28 @@ public final class Continuation implements Serializable {
         	log.debug("starting new flow from " + ReflectionUtils.getClassName(pTarget) + "/" + ReflectionUtils.getClassLoaderName(pTarget));
         }
 
-        return continueWith(new Continuation(new StackRecorder(pTarget)), pContext);
+        return new Continuation(new StackRecorder(pTarget)).resume(pContext);
     }
 
     /**
+     * This method is deprecated, please use {@link #resume()} instead
+     * 
      * Resumes the execution of the specified continuation from where it's left off.
      *
      * <p>
      * This is a short hand for <tt>continueWith(resumed,null)</tt>.
      *
      * @see #continueWith(Continuation, Object)
+     * 
+     * @deprecated
      */
     public static Continuation continueWith(final Continuation pOldContinuation) {
-        return continueWith(pOldContinuation, null);
+        return continueWith(pOldContinuation, (Object)null);
     }
 
     /**
+     * This method is deprecated, please use {@link #resume(Object)} instead
+     * 
      * Resumes the execution of the specified continuation from where it's left off
      * and creates a new continuation representing the new state.
      *
@@ -158,36 +165,81 @@ public final class Continuation implements Serializable {
      *      If the execution completes and there's nothing more to continue, return null.
      *      Otherwise, the execution has been {@link #suspend() suspended}, in which case
      *      a new non-null continuation is returned.
-     * @see #getContext()
+     * @see #resume(Object) #getContext()
+     * 
+     * @deprecate
      */
     public static Continuation continueWith(final Continuation pOldContinuation, final Object pContext) {
         if (pOldContinuation == null) {
             throw new IllegalArgumentException("continuation parameter must not be null.");
         }
 
+        return pOldContinuation.resume(pContext);
+    }
+    
+    /**
+     * Resumes the execution of the specified continuation from where it's left off.
+     *
+     * <p>
+     * This is a short hand for <tt>resume(null)</tt>.
+     *
+     * @see #resume(Object)
+     * 
+     */    
+    public Continuation resume() {
+    	return resume((Object)null);
+    }
+    
+    /**
+     * 
+     * Resumes the execution of the specified continuation from where it's left off
+     * and creates a new continuation representing the new state.
+     *
+     * This method blocks until the continuation suspends or completes.
+     *
+     * @param value
+     *      This value can be obtained from {@link #getContext()} until this method returns.
+     *      Can be null.
+     * @return
+     *      If the execution completes and there's nothing more to continue, return null.
+     *      Otherwise, the execution has been {@link #suspend() suspended}, in which case
+     *      a new non-null continuation is returned.
+     * @see #getContext()
+     * 
+     * @deprecate
+     */    
+    public Continuation resume(final Object value) {
+    	return continueWith(ResumeContext.resumeWithValue(value));
+    }
+    
+    public void destroy() {
+    	continueWith(ResumeContext.resumeWithError(new ContinuationDeath(ContinuationDeath.MODE_EXIT)));
+    }
+    
+    protected Continuation continueWith(final ResumeContext pContext) {
         if (log.isDebugEnabled()) {
-        	log.debug("continueing with continuation " + ReflectionUtils.getClassName(pOldContinuation) + "/" + ReflectionUtils.getClassLoaderName(pOldContinuation));
+        	log.debug("continueing with continuation " + ReflectionUtils.getClassName(this) + "/" + ReflectionUtils.getClassLoaderName(this));
         }
 
         while(true) {
             try {
-                StackRecorder pStackRecorder =
-                    new StackRecorder(pOldContinuation.stackRecorder).execute(pContext);
-                if(pStackRecorder == null) {
+                final StackRecorder pStackRecorder =
+                    new StackRecorder(stackRecorder).execute(pContext);
+                if (pStackRecorder == null) {
                     return null;
                 } else {
                     return new Continuation(pStackRecorder);
                 }
-            } catch (ContinuationDeath e) {
+            } catch (final ContinuationDeath e) {
                 if(e.mode.equals(ContinuationDeath.MODE_AGAIN))
                     continue;       // re-execute immediately
                 if(e.mode.equals(ContinuationDeath.MODE_EXIT))
                     return null;    // no more thing to continue
                 if(e.mode.equals(ContinuationDeath.MODE_CANCEL))
-                    return pOldContinuation;
+                    return this;
                 throw new IllegalStateException("Illegal mode "+e.mode);
             }
-        }
+        }    	
     }
 
     public boolean isSerializable() {

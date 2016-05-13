@@ -52,7 +52,7 @@ public final class StackRecorder extends Stack {
     public transient boolean isCapturing = false;
 
     /** Context object passed by the client code to continuation during resume */
-    private transient Object context;
+    private transient ResumeContext context;
     /** Result object passed by the continuation to the client code during suspend */
     public transient Object value;
 
@@ -77,18 +77,24 @@ public final class StackRecorder extends Stack {
         if(stackRecorder == null) {
             throw new IllegalStateException("No continuation is running");
         }
-
+        final boolean needCheck = stackRecorder.isRestoring;
+        
         stackRecorder.isCapturing = !stackRecorder.isRestoring;
         stackRecorder.isRestoring = false;
         stackRecorder.value       = value;
         
         // flow breaks here, actual return will be executed in resumed continuation
         // return in continuation to be suspended is executed as well but ignored
-        
-        return stackRecorder.context;
+        if (needCheck) {
+        	stackRecorder.context.checkError();
+        }
+        return stackRecorder.context.value();
     }
 
-    public StackRecorder execute(final Object context) {
+    public StackRecorder execute(final ResumeContext context) {
+    	if (null == context) {
+    		throw new IllegalArgumentException("ResumeContext parameter may not be null");
+    	}
         final StackRecorder old = registerThread();
         try {
             isRestoring = !isEmpty(); // start restoring if we have a filled stack
@@ -134,7 +140,7 @@ public final class StackRecorder extends Stack {
     }
 
     public Object getContext() {
-        return context;
+        return null == context ? null : context.value();
     }
 
     /**

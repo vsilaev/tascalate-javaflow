@@ -67,7 +67,7 @@ public class CoIterator<T> implements Iterator<T> {
 	
 	protected void advanceIfNecessary() {
 		if (advance)
-			cc = Continuation.continueWith(cc);
+			cc = cc.resume();
 		advance = false;
 	}
 }

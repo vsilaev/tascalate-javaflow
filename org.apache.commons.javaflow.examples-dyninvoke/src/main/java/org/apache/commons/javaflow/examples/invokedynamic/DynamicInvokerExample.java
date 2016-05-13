@@ -14,7 +14,7 @@ public class DynamicInvokerExample {
 		Class<Runnable> dynamicClass = generateDynamicInvokerClass("org/apache/commons/javaflow/examples/invokedynamic/SimpleDynamicInvoker");
 		Runnable demo = dynamicClass.newInstance();
 
-		for (Continuation cc = Continuation.startWith(demo); null != cc; cc = Continuation.continueWith(cc)) {
+		for (Continuation cc = Continuation.startWith(demo); null != cc; cc = cc.resume()) {
 			System.out.println("Interrupted " + cc.value());
 		}
 	}

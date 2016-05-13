@@ -7,7 +7,7 @@ public class NestedExample {
 
 	public static void main(final String[] argv) throws Exception {
 	
-		for (Continuation cc = Continuation.startWith(new ExecutionOuter()); null != cc; cc = Continuation.continueWith(cc)) {
+		for (Continuation cc = Continuation.startWith(new ExecutionOuter()); null != cc; cc = cc.resume()) {
 			System.out.println("Interrupted " + cc.value());
 		}
 		

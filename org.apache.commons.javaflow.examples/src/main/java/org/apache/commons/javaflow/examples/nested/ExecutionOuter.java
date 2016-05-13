@@ -9,7 +9,7 @@ public class ExecutionOuter implements Runnable {
 	public @continuable void run() {
 		for (int i = 1; i <= 5; i++) {
 			System.out.println("Execution " + i);
-			for (Continuation cc = Continuation.startWith(new ExecutionInner(i)); null != cc; cc = Continuation.continueWith(cc)) {
+			for (Continuation cc = Continuation.startWith(new ExecutionInner(i)); null != cc; cc = cc.resume()) {
 				
 				System.out.println("\tFrom inner " + cc.value());
 				Continuation.suspend(i);

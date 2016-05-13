@@ -14,7 +14,7 @@ public class LambdasExample {
 	public static void main(final String[] argv) throws Exception {
 		LambdasExample example = new LambdasExample();
 		
-		for (Continuation cc = Continuation.startWith(example::run); null != cc; cc = Continuation.continueWith(cc)) {
+		for (Continuation cc = Continuation.startWith(example::run); null != cc; cc = cc.resume()) {
 			System.out.println("Interrupted " + cc.value());
 		}
 		
