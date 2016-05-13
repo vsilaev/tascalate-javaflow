@@ -18,10 +18,10 @@ package org.apache.commons.javaflow.api;
 
 import java.io.Serializable;
 
-import org.apache.commons.javaflow.core.ContinuationDeath;
 import org.apache.commons.javaflow.core.ReflectionUtils;
-import org.apache.commons.javaflow.core.ResumeContext;
+import org.apache.commons.javaflow.core.ResumeParameter;
 import org.apache.commons.javaflow.core.StackRecorder;
+import org.apache.commons.javaflow.core.SuspendResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,12 +46,15 @@ public final class Continuation implements Serializable {
     private static final long serialVersionUID = 2L;
     
     private final StackRecorder stackRecorder;
-
+    private final Object value;
+    
     /**
      * Create a new continuation, which continue a previous continuation.
      */
-    private Continuation( final StackRecorder pStackRecorder ) {
-        stackRecorder = pStackRecorder;
+    private Continuation( final StackRecorder stackRecorder, final Object value ) {
+        this.stackRecorder = stackRecorder;
+        this.value = value;
+        
     }
 
 
@@ -83,7 +86,7 @@ public final class Continuation implements Serializable {
      * <p>
      * Unlike the {@link #startWith(Runnable)} method, this method doesn't actually
      * execute the <tt>Runnable</tt> object. It will be executed when
-     * it's {@link #continueWith(Continuation) continued}.
+     * it's {@link #resume() continued}.
      * 
      * @return
      *      always return a non-null valid object.
@@ -92,7 +95,7 @@ public final class Continuation implements Serializable {
         if(pTarget == null) {
             throw new IllegalArgumentException("target is null");
         }
-        return new Continuation(new StackRecorder(pTarget));
+        return new Continuation( new StackRecorder(pTarget), null );
     }
 
     /**
@@ -102,7 +105,7 @@ public final class Continuation implements Serializable {
      * <p>
      * This is a short hand for <tt>startWith(target,null)</tt>.
      *
-     * @see #startWith(Runnable, Object).
+     * @see #startWith(Runnable, Object)
      */
     public static Continuation startWith( final Runnable pTarget ) {
         return startWith(pTarget, null);
@@ -207,39 +210,35 @@ public final class Continuation implements Serializable {
      *      a new non-null continuation is returned.
      * @see #getContext()
      * 
-     * @deprecate
      */    
     public Continuation resume(final Object value) {
-    	return resumeWith(ResumeContext.resumeWithValue(value));
+    	return resumeWith(ResumeParameter.value(value));
     }
     
     public void destroy() {
-    	resumeWith(ResumeContext.resumeWithError(new ContinuationDeath(ContinuationDeath.MODE_EXIT)));
+    	resumeWith(ResumeParameter.exit());
     }
     
-    protected Continuation resumeWith(final ResumeContext pContext) {
+    protected Continuation resumeWith(final ResumeParameter param) {
         if (log.isDebugEnabled()) {
         	log.debug("continueing with continuation " + ReflectionUtils.getClassName(this) + "/" + ReflectionUtils.getClassLoaderName(this));
         }
 
         while(true) {
-            try {
-                final StackRecorder pStackRecorder =
-                    new StackRecorder(stackRecorder).execute(pContext);
-                if (pStackRecorder == null) {
-                    return null;
-                } else {
-                    return new Continuation(pStackRecorder);
-                }
-            } catch (final ContinuationDeath e) {
-                if(ContinuationDeath.MODE_AGAIN.equals(e.mode))
-                    continue;       // re-execute immediately
-                if(ContinuationDeath.MODE_EXIT.equals(e.mode))
-                    return null;    // no more thing to continue
-                if(ContinuationDeath.MODE_CANCEL.equals(e.mode))
-                    return this;
-                throw new IllegalStateException("Illegal mode "+e.mode);
-            }
+            final StackRecorder nextStackRecorder = new StackRecorder(stackRecorder);
+            final SuspendResult result = nextStackRecorder.execute(param);
+            if (SuspendResult.EXIT == result) {
+            	// no more thing to continue
+            	return null;
+            } else if (SuspendResult.CANCEL == result) {
+        		// return immediately with itself
+        		return this;
+        	} else if (SuspendResult.AGAIN == result) {
+        		// re-execute immediately
+        		continue;
+        	}
+            
+            return new Continuation(nextStackRecorder, result.value());
         }    	
     }
 
@@ -255,24 +254,24 @@ public final class Continuation implements Serializable {
      *      The value is passed from the continuation to the client code via {@link #suspend(Object)}
      */
     public Object value() {
-    	return stackRecorder.value;
+    	return value;
     }
     
     /**
      * Stops the running continuation.
      *
      * <p>
-     * This method can be only called inside {@link #continueWith} or {@link #startWith} methods.
+     * This method can be only called inside {@link #resume} or {@link #startWith} methods.
      * When called, the thread returns from the above methods with a new {@link Continuation}
      * object that captures the thread state.
      *
      * @return
      *      The value to be returned to suspended code after continuation is resumed.
-     *      The value is passed from the client code via @link #continueWith(Continuation, Object)
+     *      The value is passed from the client code via {@link #resume(Object)}
      *      and is identical to value returned by {@link #getContext}.
      *      
      * @throws IllegalStateException
-     *      if this method is called outside the {@link #continueWith} or {@link #startWith} methods.
+     *      if this method is called outside the {@link #resume} or {@link #startWith} methods.
      */
     public static Object suspend() {
     	return suspend(null);
@@ -284,11 +283,11 @@ public final class Continuation implements Serializable {
      * <p>
      * This method can be only called inside {@link #continueWith} or {@link #startWith} methods.
      * When called, the thread returns from the above methods with a new {@link Continuation}
-     * object that captures the thread state and with {@link #value} equals to parameter passed.
+     * object that captures the thread state and with {@link #result} equals to parameter passed.
      *
      * @param value 
      *      The intermediate result yielded by suspended continuations
-     *      The value may be accessed via {@link #value} method of continuation returned
+     *      The value may be accessed via {@link #result} method of continuation returned
      *
      * @return
      *      The value to be returned to suspended code after continuation is resumed.
@@ -299,7 +298,7 @@ public final class Continuation implements Serializable {
      *      if this method is called outside the {@link #continueWith} or {@link #startWith} methods.
      */    
     public static Object suspend(final Object value) {
-        return StackRecorder.suspend(value);
+        return StackRecorder.suspend(SuspendResult.valueOf(value));
     }
 
 
@@ -315,7 +314,7 @@ public final class Continuation implements Serializable {
      * This method is similiar to how {@link System#exit(int)} works for JVM.
      */
     public static void exit() {
-        throw new ContinuationDeath(ContinuationDeath.MODE_EXIT);
+        StackRecorder.exit();
     }
 
     /**
@@ -364,7 +363,7 @@ public final class Continuation implements Serializable {
      * return when a program running inside uses this method.
      */
     public static void again() {
-        throw new ContinuationDeath(ContinuationDeath.MODE_AGAIN);
+    	StackRecorder.suspend(SuspendResult.AGAIN);
     }
 
     /**
@@ -381,7 +380,7 @@ public final class Continuation implements Serializable {
      * return when a program running inside uses this method.
      */
     public static void cancel() {
-        throw new ContinuationDeath(ContinuationDeath.MODE_CANCEL);
+    	StackRecorder.suspend(SuspendResult.CANCEL);
     }
 
     public String toString() {

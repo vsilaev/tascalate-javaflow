@@ -10,28 +10,17 @@ package org.apache.commons.javaflow.core;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class ContinuationDeath extends Error {
+final class ContinuationDeath extends Error {
     
 	private static final long serialVersionUID = 1L;
 
-	final public String mode;
+    public ContinuationDeath() {
 
-    public ContinuationDeath(String mode) {
-        this.mode = mode;
+    }
+    
+    public Throwable fillInStackTrace() {
+    	return this;
     }
 
-    /**
-     * Signals that the continuation wants to exit the execution.
-     */
-    public static final String MODE_EXIT = "exit";
-    /**
-     * Signals that the execution should restart immediately
-     * from where it resumed.
-     */
-    public static final String MODE_AGAIN = "again";
-    /**
-     * Signals that the exeuction should suspend,
-     * by using the original continuation.
-     */
-    public static final String MODE_CANCEL = "cancel";
+    final static ContinuationDeath INSTANCE = new ContinuationDeath();
 }

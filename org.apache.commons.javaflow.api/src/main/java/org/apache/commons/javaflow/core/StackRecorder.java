@@ -51,10 +51,10 @@ public final class StackRecorder extends Stack {
      */
     public transient boolean isCapturing = false;
 
-    /** Context object passed by the client code to continuation during resume */
-    private transient ResumeContext context;
+    /** Parameter object passed by the client code to continuation during resume */
+    private transient ResumeParameter parameter;
     /** Result object passed by the continuation to the client code during suspend */
-    public transient Object value;
+    private transient SuspendResult result;
 
     /**
      * Creates a new empty {@link StackRecorder} that runs the given target.
@@ -70,35 +70,35 @@ public final class StackRecorder extends Stack {
         super(pParent);
     }
 
-    public static Object suspend(final Object value) {
+    public static Object suspend(final SuspendResult value) {
         log.debug("suspend()");
 
         final StackRecorder stackRecorder = get();
         if(stackRecorder == null) {
             throw new IllegalStateException("No continuation is running");
         }
-        final boolean needCheck = stackRecorder.isRestoring;
+        final boolean needCheckExit = stackRecorder.isRestoring;
         
         stackRecorder.isCapturing = !stackRecorder.isRestoring;
         stackRecorder.isRestoring = false;
-        stackRecorder.value       = value;
+        stackRecorder.result      = value;
         
         // flow breaks here, actual return will be executed in resumed continuation
         // return in continuation to be suspended is executed as well but ignored
-        if (needCheck) {
-        	stackRecorder.context.checkError();
+        if (needCheckExit) {
+        	stackRecorder.parameter.checkExit();
         }
-        return stackRecorder.context.value();
+        return stackRecorder.parameter.value();
     }
 
-    public StackRecorder execute(final ResumeContext context) {
-    	if (null == context) {
+    public SuspendResult execute(final ResumeParameter parameter) {
+    	if (null == parameter) {
     		throw new IllegalArgumentException("ResumeContext parameter may not be null");
     	}
         final StackRecorder old = registerThread();
         try {
             isRestoring = !isEmpty(); // start restoring if we have a filled stack
-            this.context = context;
+            this.parameter = parameter;
             
             if (isRestoring) {
             	if (log.isDebugEnabled()) {
@@ -120,13 +120,13 @@ public final class StackRecorder extends Stack {
                 // when resuming this continuation. we have a separate Runnable
                 // for this, so throw it away
                 popReference();
-                return this;
+                return this.result;
             } else {
-                return null;    // nothing more to continue
+                return SuspendResult.EXIT;    // nothing more to continue
             }
         } catch(final ContinuationDeath cd) {
             // this isn't an error, so no need to log
-            throw cd;
+        	return SuspendResult.EXIT;
         } catch(final Error e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -134,13 +134,18 @@ public final class StackRecorder extends Stack {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            this.context = null;
+            this.parameter = null;
+            this.result = null;
             deregisterThread(old);
         }
     }
 
+    public static void exit() {
+    	throw ContinuationDeath.INSTANCE;
+    }
+    
     public Object getContext() {
-        return null == context ? null : context.value();
+        return null == parameter ? null : parameter.value();
     }
 
     /**
