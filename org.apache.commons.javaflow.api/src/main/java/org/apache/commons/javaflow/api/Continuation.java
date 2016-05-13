@@ -167,7 +167,7 @@ public final class Continuation implements Serializable {
      *      a new non-null continuation is returned.
      * @see #resume(Object) #getContext()
      * 
-     * @deprecate
+     * @deprecated
      */
     public static Continuation continueWith(final Continuation pOldContinuation, final Object pContext) {
         if (pOldContinuation == null) {
@@ -187,7 +187,7 @@ public final class Continuation implements Serializable {
      * 
      */    
     public Continuation resume() {
-    	return resume((Object)null);
+    	return resume(null);
     }
     
     /**
