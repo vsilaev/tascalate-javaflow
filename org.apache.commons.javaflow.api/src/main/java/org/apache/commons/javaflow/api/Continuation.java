@@ -60,15 +60,17 @@ public final class Continuation implements Serializable {
      *
      * <p>
      * This method returns the same context object given to {@link #startWith(Runnable, Object)}
-     * or {@link #continueWith(Continuation, Object)}.
+     * or {@link #resume(Object)}.
      *
      * <p>
      * A different context can be used for each run of a continuation, so
      * this mechanism can be used to associate some state with each execution.
      *
      * @return
-     *      null if this method is invoked outside {@link #startWith(Runnable, Object)}
-     *      or {@link #continueWith(Continuation, Object)} .
+     *      Currently associated continuation context
+     * @throws 
+     *      NullPointerException if this method is invoked outside {@link #startWith(Runnable, Object)}
+     *      or {@link #resume(Object)} .
      */
     public static Object getContext() {
         return StackRecorder.get().getContext();
@@ -87,6 +89,9 @@ public final class Continuation implements Serializable {
      *      always return a non-null valid object.
      */
     public static Continuation startSuspendedWith( final Runnable pTarget ) {
+        if(pTarget == null) {
+            throw new IllegalArgumentException("target is null");
+        }
         return new Continuation(new StackRecorder(pTarget));
     }
 
@@ -121,15 +126,11 @@ public final class Continuation implements Serializable {
      * @see #getContext()
      */
     public static Continuation startWith( final Runnable pTarget, final Object pContext ) {
-        if(pTarget == null) {
-            throw new IllegalArgumentException("target is null");
-        }
-
         if (log.isDebugEnabled()) {
         	log.debug("starting new flow from " + ReflectionUtils.getClassName(pTarget) + "/" + ReflectionUtils.getClassLoaderName(pTarget));
         }
 
-        return new Continuation(new StackRecorder(pTarget)).resume(pContext);
+        return startSuspendedWith(pTarget).resume(pContext);
     }
 
     /**
@@ -209,14 +210,14 @@ public final class Continuation implements Serializable {
      * @deprecate
      */    
     public Continuation resume(final Object value) {
-    	return continueWith(ResumeContext.resumeWithValue(value));
+    	return resumeWith(ResumeContext.resumeWithValue(value));
     }
     
     public void destroy() {
-    	continueWith(ResumeContext.resumeWithError(new ContinuationDeath(ContinuationDeath.MODE_EXIT)));
+    	resumeWith(ResumeContext.resumeWithError(new ContinuationDeath(ContinuationDeath.MODE_EXIT)));
     }
     
-    protected Continuation continueWith(final ResumeContext pContext) {
+    protected Continuation resumeWith(final ResumeContext pContext) {
         if (log.isDebugEnabled()) {
         	log.debug("continueing with continuation " + ReflectionUtils.getClassName(this) + "/" + ReflectionUtils.getClassLoaderName(this));
         }
@@ -231,11 +232,11 @@ public final class Continuation implements Serializable {
                     return new Continuation(pStackRecorder);
                 }
             } catch (final ContinuationDeath e) {
-                if(e.mode.equals(ContinuationDeath.MODE_AGAIN))
+                if(ContinuationDeath.MODE_AGAIN.equals(e.mode))
                     continue;       // re-execute immediately
-                if(e.mode.equals(ContinuationDeath.MODE_EXIT))
+                if(ContinuationDeath.MODE_EXIT.equals(e.mode))
                     return null;    // no more thing to continue
-                if(e.mode.equals(ContinuationDeath.MODE_CANCEL))
+                if(ContinuationDeath.MODE_CANCEL.equals(e.mode))
                     return this;
                 throw new IllegalStateException("Illegal mode "+e.mode);
             }
