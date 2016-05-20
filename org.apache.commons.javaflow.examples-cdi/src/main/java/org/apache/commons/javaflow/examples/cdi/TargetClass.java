@@ -10,14 +10,14 @@ import org.apache.commons.javaflow.api.Continuation;
 @ThreadScoped
 public class TargetClass implements TargetInterface {
 
-	@Override
-	@TransactionalMethod
-	@ContinuableMethod 
-	public void execute(final String prefix) {
-		System.out.println("In target BEFORE suspend");
-		final Object value = Continuation.suspend(this + " @ " + prefix);
-		System.out.println("In target AFTER suspend: " + value);
-	}
+    @Override
+    @TransactionalMethod
+    @ContinuableMethod 
+    public void execute(final String prefix) {
+        System.out.println("In target BEFORE suspend");
+        final Object value = Continuation.suspend(this + " @ " + prefix);
+        System.out.println("In target AFTER suspend: " + value);
+    }
 
-	
+
 }

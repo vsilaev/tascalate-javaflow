@@ -10,7 +10,7 @@ import org.apache.commons.javaflow.examples.cdi.annotations.SecureBean;
 @SecureBean @Interceptor
 @Priority(Interceptor.Priority.PLATFORM_BEFORE + 2)
 public class SecureBeanInterceptor  {
-    
+
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {
         System.out.println("Security Interceptor before call");

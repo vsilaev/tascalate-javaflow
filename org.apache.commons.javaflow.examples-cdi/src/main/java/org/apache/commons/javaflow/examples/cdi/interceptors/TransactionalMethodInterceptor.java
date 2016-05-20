@@ -10,7 +10,7 @@ import org.apache.commons.javaflow.examples.cdi.annotations.TransactionalMethod;
 @TransactionalMethod @Interceptor
 @Priority(Interceptor.Priority.PLATFORM_BEFORE + 1)
 public class TransactionalMethodInterceptor  {
-    
+
     @AroundInvoke
     public Object manageTransaction(InvocationContext ctx) throws Throwable {
         System.out.println("Begin transaction...");
