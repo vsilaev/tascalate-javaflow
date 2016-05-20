@@ -1,9 +1,14 @@
 package org.apache.commons.javaflow.api;
 
+import org.apache.commons.javaflow.core.Continuable;
 import org.apache.commons.javaflow.core.StackRecorder;
 
 final public class InterceptorSupport {
     private InterceptorSupport() {}
+    
+    public static boolean isInstrumented(final Object target) {
+        return target instanceof Continuable;
+    }
     
     public static Object beforeExecution() {
         StackRecorder stackRecorder = StackRecorder.get();

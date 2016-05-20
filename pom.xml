@@ -40,6 +40,7 @@
 		<module>org.apache.commons.javaflow.spi</module>
 		<module>org.apache.commons.javaflow.examples</module>
 		<module>org.apache.commons.javaflow.examples-dyninvoke</module>
+		<module>org.apache.commons.javaflow.examples-cdi</module>
 		<module>org.apache.commons.javaflow.extras</module>
 		<module>org.apache.commons.javaflow.utils</module>
 		<module>org.apache.commons.javaflow.providers.asm3</module>
@@ -64,7 +65,6 @@
 				<artifactId>commons-logging</artifactId>
 				<version>1.2</version>
 			</dependency>
-
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
