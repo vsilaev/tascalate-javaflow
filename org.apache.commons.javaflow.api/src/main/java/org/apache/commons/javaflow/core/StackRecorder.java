@@ -110,7 +110,7 @@ public final class StackRecorder extends Stack {
             runnable.run();
 
             if (isCapturing) {
-                if(isEmpty()) {
+                if ( isEmpty() ) {
                     // if we were really capturing the stack, at least we should have
                     // one object in the reference stack. Otherwise, it usually means
                     // that the application wasn't instrumented correctly.
@@ -119,9 +119,14 @@ public final class StackRecorder extends Stack {
                 // top of the reference stack is the object that we'll call into
                 // when resuming this continuation. we have a separate Runnable
                 // for this, so throw it away
-                popReference();
+                if (runnable != popReference()) {
+                	throw new IllegalStateException("stack corruption on suspend. Is "+runnable.getClass()+" instrumented for javaflow?");
+                }
                 return this.result;
             } else {
+            	if (!isEmpty()) {
+            		throw new IllegalStateException("stack corruption on exit. Is "+runnable.getClass()+" instrumented for javaflow?");
+            	}
                 return SuspendResult.EXIT;    // nothing more to continue
             }
         } catch(final ContinuationDeath cd) {
