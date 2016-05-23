@@ -1,7 +1,9 @@
 package org.apache.commons.javaflow.examples.cdi;
 
+import org.apache.commons.javaflow.api.continuable;
+
 interface TargetInterface {
 
-    void execute(String prefix);
+    @continuable void execute(String prefix);
 
 }

@@ -38,9 +38,6 @@
 	<modules>
 		<module>org.apache.commons.javaflow.api</module>
 		<module>org.apache.commons.javaflow.spi</module>
-		<module>org.apache.commons.javaflow.examples</module>
-		<module>org.apache.commons.javaflow.examples-dyninvoke</module>
-		<module>org.apache.commons.javaflow.examples-cdi</module>
 		<module>org.apache.commons.javaflow.extras</module>
 		<module>org.apache.commons.javaflow.utils</module>
 		<module>org.apache.commons.javaflow.providers.asm3</module>
@@ -50,7 +47,9 @@
 		<module>org.apache.commons.javaflow.tools.javaagent</module>
 		<module>org.apache.commons.javaflow.tools.maven</module>
 		<module>org.apache.commons.javaflow.tools.ant</module>
-
+		<module>org.apache.commons.javaflow.examples</module>
+		<module>org.apache.commons.javaflow.examples-dyninvoke</module>
+		<module>org.apache.commons.javaflow.examples-cdi</module>
 	</modules>
 
 

@@ -123,9 +123,10 @@ public final class StackRecorder extends Stack {
                 // top of the reference stack is the object that we'll call into
                 // when resuming this continuation. we have a separate Runnable
                 // for this, so throw it away
-                if (runnable != popReference()) {
+                final Object ref = popReference(); 
+                if (runnable != ref && !(ref instanceof Runnable) /* For CDI-like Proxies */) {
                 	throw new IllegalStateException(
-                	        "Stack corruption on suspend (no reference). "
+                	        "Stack corruption on suspend (invalid reference). "
                 	        + "Is " + descriptionOf(runnable.getClass()) 
                 	        + " instrumented for javaflow?"
                 	);
