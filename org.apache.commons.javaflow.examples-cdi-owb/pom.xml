@@ -12,7 +12,7 @@
 	<artifactId>org.apache.commons.javaflow.examples-cdi-owb</artifactId>
 	<packaging>jar</packaging>
 
-	<name>JavaFlow / Examples / CDI OpenWebBeans</name>
+	<name>JavaFlow / Examples / CDI OpenWebBeans</name> 
 	<url>http://maven.apache.org</url>
 
 	<dependencies>
