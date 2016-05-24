@@ -5,6 +5,7 @@
 	<interceptors>
 		<class>org.apache.commons.javaflow.examples.cdi.owb.interceptors.TransactionalMethodInterceptor</class>
 		<class>org.apache.commons.javaflow.examples.cdi.owb.interceptors.SecureBeanInterceptor</class>
+		<class>org.apache.commons.javaflow.examples.cdi.owb.interceptors.LoggableMethodInterceptor</class>
 	</interceptors>
   	<decorators>
 	</decorators>
