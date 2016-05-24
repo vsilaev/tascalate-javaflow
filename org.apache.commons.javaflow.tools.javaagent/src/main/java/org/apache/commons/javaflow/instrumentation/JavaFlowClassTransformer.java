@@ -10,17 +10,15 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory;
-
+import org.apache.commons.javaflow.providers.asm5.ClassNameResolver;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
 
 public class JavaFlowClassTransformer implements ClassFileTransformer {
 	final private static Log log = LogFactory.getLog(JavaFlowClassTransformer.class);
@@ -38,7 +36,7 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 		final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
 
 		synchronized (resolver) {
-			final CurrentTarget currentTarget = createTarget(className, classBeingRedefined, classfileBuffer);
+			final ClassNameResolver.Result currentTarget = ClassNameResolver.resolveClassName(className, classBeingRedefined, classfileBuffer);
 			try {
 				// Execute with current class as extra resource (in-memory)
 				// Mandatory for Java8 lambdas and alike
@@ -61,28 +59,7 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 			}
 		}
 	}
-	
-	protected CurrentTarget createTarget(final String className, final Class<?> classBeingRedefined, final byte[] classfileBuffer) {
-		String resolvedClassName = className != null ? className :
-			classBeingRedefined != null ? classBeingRedefined.getName().replace('.', '/') : null;
-		
-		final String[] classNameFromBytes = {null};	
-		if (null == resolvedClassName) {
-			try {
-				final ClassReader cv = new ClassReader(classfileBuffer);
-				cv.accept(new ClassVisitor(Opcodes.ASM5) {
-					public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-						classNameFromBytes[0] = name;
-						throw STOP;
-					}
-				}, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-			} catch (final StopException exIgnore) {
-				
-			}
-			resolvedClassName = classNameFromBytes[0];
-		}
-		return new CurrentTarget(resolvedClassName, classfileBuffer);
-	}
+
 	
 	protected ClassLoader getSafeClassLoader(final ClassLoader classLoader) {
 		return null != classLoader ? classLoader : ClassLoader.getSystemClassLoader(); 
@@ -102,6 +79,5 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 	}
 
 	final private static Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
-	final private static StopException STOP = new StopException();
 }
 	

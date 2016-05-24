@@ -47,6 +47,7 @@
 		<module>org.apache.commons.javaflow.tools.javaagent</module>
 		<module>org.apache.commons.javaflow.tools.maven</module>
 		<module>org.apache.commons.javaflow.tools.ant</module>
+		<module>org.apache.commons.javaflow.tools.owb-javaagent</module>
 		<module>org.apache.commons.javaflow.examples</module>
 		<module>org.apache.commons.javaflow.examples-dyninvoke</module>
 		<module>org.apache.commons.javaflow.examples-cdi-weld</module>

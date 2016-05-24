@@ -18,6 +18,7 @@ package org.apache.commons.javaflow.providers.asm5;
 
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.spi.StopException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
@@ -44,7 +45,7 @@ final class Asm5ClassTransformer implements ResourceTransformer {
 		);
 		try {
 			new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
-		} catch (final AbortTransformationException ex) {
+		} catch (final StopException ex) {
 			// Preliminary stop visiting non-continuable class
 			return null;
 		}

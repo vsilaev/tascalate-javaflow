@@ -19,6 +19,7 @@ package org.apache.commons.javaflow.providers.asm3;
 import org.apache.commons.javaflow.core.Continuable;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+import org.apache.commons.javaflow.spi.StopException;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -53,10 +54,10 @@ public class ContinuableClassVisitor extends ClassAdapter {
 		className = name;
 		classInfo = cciResolver.resolve(name, originalBytes);
 
-		if (null == classInfo || classInfo.isClassProcessed()) {
+		if (null == classInfo || classInfo.isClassProcessed() || StopException.__dirtyCheckSkipContinuationsOnClass(version, access, name, signature, superName, interfaces)) {
 			skipEnchancing = true;
 			// Must exit by throwing exception, otherwise NPE is possible in nested visitor
-			throw AbortTransformationException.INSTANCE;
+			throw StopException.INSTANCE;
 		}
 
 		if (null != interfaces)
@@ -71,7 +72,7 @@ public class ContinuableClassVisitor extends ClassAdapter {
 		if (skipEnchancing) {
 			classInfo.markClassProcessed();
 			newInterfaces = interfaces;
-			throw AbortTransformationException.INSTANCE;
+			throw StopException.INSTANCE;
 		} else {
 			final int size = null == interfaces ? 0 : interfaces.length;
 			newInterfaces = new String[size + 1];

@@ -1,4 +1,4 @@
-package org.apache.commons.javaflow.instrumentation;
+package org.apache.commons.javaflow.spi;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -7,12 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
-
 public class ExtendedClasspathResourceLoader extends ClasspathResourceLoader {
 	final private static ThreadLocal<Map<String, byte[]>> IN_MEMORY_RESOURCES = new ThreadLocal<Map<String,byte[]>>();
 	
-	ExtendedClasspathResourceLoader(final ClassLoader classLoader) {
+	public ExtendedClasspathResourceLoader(final ClassLoader classLoader) {
 		super(classLoader);
 	}
 	

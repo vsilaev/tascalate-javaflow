@@ -1,0 +1,6 @@
+To run example correctly you MUST use the following Java agent:
+
+-javaagent:../org.apache.commons.javaflow.tools.owb-javaagent/target/JavaFlowOwbInstrumentationAgent.jar
+
+It instruments OpenWebBeans generated proxies to work correctly with continuations!
+First (by order) agent (-javaagent:../org.apache.commons.javaflow.tools.javaagent/target/JavaFlowInstrumentationAgent.jar ) is only necessary if you are using Java 8 lambdas, or instrument classes at run-time
