@@ -1,4 +1,4 @@
-package org.apache.commons.javaflow.instrumentation.owb;
+package org.apache.commons.javaflow.instrumentation.cdi;
 
 import org.apache.commons.javaflow.core.StackRecorder;
 
@@ -8,14 +8,14 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.Method;
 
-abstract class AroundOwbProxyInvokeAdvice extends AdviceAdapter {
+abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     final protected String className;
     final protected String methodName;
     
     private Label startFinally;
     private int stackRecorderVar;
     
-    protected AroundOwbProxyInvokeAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
+    protected AroundCdiProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
         super(api, mv, acc, methodName, desc);
         this.className = className;
         this.methodName = methodName;

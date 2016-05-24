@@ -1,8 +1,8 @@
-package org.apache.commons.javaflow.instrumentation.owb;
+package org.apache.commons.javaflow.instrumentation.cdi;
 
 import java.lang.instrument.Instrumentation;
 
-public class JavaFlowOwbInstrumentationAgent {
+public class CdiProxyInstrumentationAgent {
 
     /**
      * JVM hook to statically load the javaagent at startup.
@@ -33,7 +33,7 @@ public class JavaFlowOwbInstrumentationAgent {
     }
 
     private static void setupInstrumentation(Instrumentation instrumentation) {
-        instrumentation.addTransformer(new JavaFlowOwbClassTransformer(), true);
+        instrumentation.addTransformer(new CdiProxyClassTransformer(), true);
     }
 
 }

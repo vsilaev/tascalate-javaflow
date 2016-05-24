@@ -1,1 +1,1 @@
--javaagent:../org.apache.commons.javaflow.tools.javaagent/target/JavaFlowInstrumentationAgent.jar
+-javaagent:../org.apache.commons.javaflow.tools.javaagent/target/JavaFlowInstrumentationAgent.jar -javaagent:../org.apache.commons.javaflow.tools.cdi-javaagent/target/CdiProxyInstrumentationAgent.jar

@@ -24,5 +24,6 @@ package org.apache.commons.javaflow.core;
  * @author <a href="mailto:stephan@apache.org">Stephan Michels</a>
  * @version CVS $Id: Continuable.java 733503 2009-01-11 19:51:40Z tcurdt $
  */
+@Deprecated
 public interface Continuable {
 }

@@ -1,10 +1,10 @@
-package org.apache.commons.javaflow.instrumentation.owb;
+package org.apache.commons.javaflow.instrumentation.cdi;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
-class AroundOwbScopeProxyAdvice extends AroundOwbProxyInvokeAdvice {
+class AroundOwbScopeProxyAdvice extends AroundCdiProxyInvocationAdvice {
     
     final private Type proxiedInstanceProviderType; 
 

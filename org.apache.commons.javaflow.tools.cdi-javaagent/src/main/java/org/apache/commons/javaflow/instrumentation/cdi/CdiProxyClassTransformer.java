@@ -1,4 +1,4 @@
-package org.apache.commons.javaflow.instrumentation.owb;
+package org.apache.commons.javaflow.instrumentation.cdi;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -18,8 +18,8 @@ import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
-public class JavaFlowOwbClassTransformer implements ClassFileTransformer {
-    private static final Log log = LogFactory.getLog(JavaFlowOwbClassTransformer.class);
+public class CdiProxyClassTransformer implements ClassFileTransformer {
+    private static final Log log = LogFactory.getLog(CdiProxyClassTransformer.class);
 
     private final ResourceTransformationFactory resourceTransformationFactory = new Asm5ResourceTransformationFactory();
 
@@ -43,7 +43,7 @@ public class JavaFlowOwbClassTransformer implements ClassFileTransformer {
                         public byte[] call() {
                             ClassReader reader = new ClassReader(classfileBuffer);
                             ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
-                            reader.accept(new OwbProxyClassAdapter(writer, resolver), ClassReader.EXPAND_FRAMES);
+                            reader.accept(new CdiProxyClassAdapter(writer, resolver), ClassReader.EXPAND_FRAMES);
                             return writer.toByteArray();
                         }
                     }, 
@@ -53,6 +53,7 @@ public class JavaFlowOwbClassTransformer implements ClassFileTransformer {
                 return null;
             } catch (RuntimeException ex) {
                 log.error(ex);
+                ex.printStackTrace(System.out);
                 return null;
             } catch (Error ex) {
                 log.error(ex);

@@ -1,4 +1,4 @@
-package org.apache.commons.javaflow.instrumentation.owb;
+package org.apache.commons.javaflow.instrumentation.cdi;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,16 +14,17 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.Opcodes;
 
-class OwbProxyClassAdapter extends ClassVisitor {
+class CdiProxyClassAdapter extends ClassVisitor {
 
     private String className;
-    private Type proxiedInstanceType;
-    private Type proxiedInstanceProviderType;
+    private Type owbProxiedInstanceType;
+    private Type owbProxiedInstanceProviderType;
+    private boolean isWeldProxy;
     private ContinuableClassInfo classInfo;
     
     private final ContinuableClassInfoResolver cciResolver;
     
-    OwbProxyClassAdapter(ClassVisitor delegate, ContinuableClassInfoResolver cciResolver) {
+    CdiProxyClassAdapter(ClassVisitor delegate, ContinuableClassInfoResolver cciResolver) {
         super(Opcodes.ASM5, delegate);
         this.cciResolver = cciResolver;
     }
@@ -36,12 +37,20 @@ class OwbProxyClassAdapter extends ClassVisitor {
         for (final String interfaze : interfaces) {
             if (MARKER_INTERFACES.contains(interfaze)) {
                 hasMarker = true;
+            }
+            if (WELD_PROXY_OBJECT.equals(interfaze)) {
+                isWeldProxy = true;
                 break;
             }
         }
 
         if (!hasMarker) {
            throw StopException.INSTANCE;
+        }
+        
+        if (isWeldProxy && className.endsWith("$$_WeldSubclass")) {
+            // Not a scope/interceptor proxy
+            isWeldProxy = false;
         }
         
         try {
@@ -52,17 +61,16 @@ class OwbProxyClassAdapter extends ClassVisitor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
         super.visit(version, access, name, signature, superName, interfaces);
     }
     
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         if (AroundOwbInterceptorProxyAdvice.FIELD_PROXIED_INSTANCE.equals(name)) {
-            proxiedInstanceType = Type.getType(desc);
+            owbProxiedInstanceType = Type.getType(desc);
         }
         if (AroundOwbScopeProxyAdvice.FIELD_INSTANCE_PROVIDER.equals(name)) {
-            proxiedInstanceProviderType = Type.getType(desc);
+            owbProxiedInstanceProviderType = Type.getType(desc);
         }
         return super.visitField(access, name, desc, signature, value);
     }
@@ -71,23 +79,30 @@ class OwbProxyClassAdapter extends ClassVisitor {
     public MethodVisitor visitMethod(int acc, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = cv.visitMethod(acc, name, desc, signature, exceptions);
         if (isContinuableMethodProxy(acc, name, desc, signature, exceptions)) {
-            if (null != proxiedInstanceType) {
-                mv = new AroundOwbInterceptorProxyAdvice(api, mv, acc, className, name, desc, proxiedInstanceType); 
-            } else if (null != proxiedInstanceProviderType) {
-                mv = new AroundOwbScopeProxyAdvice(api, mv, acc, className, name, desc, proxiedInstanceProviderType); 
+            if (isWeldProxy) {
+                mv = new AroundWeldProxyInvocationAdvice(api, mv, acc, className, name, desc);
+            } else if (null != owbProxiedInstanceType) {
+                mv = new AroundOwbInterceptorProxyAdvice(api, mv, acc, className, name, desc, owbProxiedInstanceType); 
+            } else if (null != owbProxiedInstanceProviderType) {
+                mv = new AroundOwbScopeProxyAdvice(api, mv, acc, className, name, desc, owbProxiedInstanceProviderType); 
             }
         }
         return mv;
     }
     
     protected boolean isContinuableMethodProxy(int acc, String name, String desc, String signature, String[] exceptions) {
+        int idx = name.lastIndexOf("$$super");
+        if (idx > 0) {
+            name = name.substring(0, idx);
+        }
         return ! "<init>".equals(name) && classInfo.isContinuableMethod(acc, name, desc, signature);
     }
     
     private static final String OWB_INTERCEPTOR_PROXY  = "org/apache/webbeans/proxy/OwbInterceptorProxy";
     private static final String OWB_NORMAL_SCOPE_PROXY = "org/apache/webbeans/proxy/OwbNormalScopeProxy";
+    private static final String WELD_PROXY_OBJECT      = "org/jboss/weld/bean/proxy/ProxyObject";
     
     private static final Set<String> MARKER_INTERFACES = new HashSet<String>(Arrays.asList(
-            OWB_INTERCEPTOR_PROXY, OWB_NORMAL_SCOPE_PROXY
+            OWB_INTERCEPTOR_PROXY, OWB_NORMAL_SCOPE_PROXY, WELD_PROXY_OBJECT
     )); 
 }
