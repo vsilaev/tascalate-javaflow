@@ -8,7 +8,7 @@ class AroundWeldProxyInvocationAdvice extends AroundCdiProxyInvocationAdvice {
     protected AroundWeldProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
         super(api, mv, acc, className, methodName, desc);
     }
-    
+
     @Override
     protected void loadProxiedInstance() {
         loadThis();
@@ -16,4 +16,3 @@ class AroundWeldProxyInvocationAdvice extends AroundCdiProxyInvocationAdvice {
     }
 
 }
-    

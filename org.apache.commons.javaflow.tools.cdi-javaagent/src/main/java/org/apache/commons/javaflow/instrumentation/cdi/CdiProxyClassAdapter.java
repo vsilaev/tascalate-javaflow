@@ -21,38 +21,40 @@ class CdiProxyClassAdapter extends ClassVisitor {
     private Type owbProxiedInstanceProviderType;
     private boolean isWeldProxy;
     private ContinuableClassInfo classInfo;
-    
+
     private final ContinuableClassInfoResolver cciResolver;
-    
+
     CdiProxyClassAdapter(ClassVisitor delegate, ContinuableClassInfoResolver cciResolver) {
         super(Opcodes.ASM5, delegate);
         this.cciResolver = cciResolver;
     }
 
-    
+
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         className = name;
         boolean hasMarker = false;
         for (final String interfaze : interfaces) {
             if (MARKER_INTERFACES.contains(interfaze)) {
-                hasMarker = true;
-            }
-            if (WELD_PROXY_OBJECT.equals(interfaze)) {
-                isWeldProxy = true;
+                if (WELD_PROXY_OBJECT.equals(interfaze)) {
+                    if (!className.endsWith("$$_WeldSubclass")) {
+                        // *$$_WeldSubclass is not a scope/interceptor proxy
+                        // Otherwise it's indeed a proxy
+                        isWeldProxy = true;
+                        hasMarker = true;
+                    }
+                } else {
+                    hasMarker = true;
+                }
+                // Exclusive, may exit early
                 break;
             }
         }
 
         if (!hasMarker) {
-           throw StopException.INSTANCE;
+            throw StopException.INSTANCE;
         }
-        
-        if (isWeldProxy && className.endsWith("$$_WeldSubclass")) {
-            // Not a scope/interceptor proxy
-            isWeldProxy = false;
-        }
-        
+
         try {
             classInfo = cciResolver.resolve(superName);
             if (null == classInfo) {
@@ -63,7 +65,7 @@ class CdiProxyClassAdapter extends ClassVisitor {
         }
         super.visit(version, access, name, signature, superName, interfaces);
     }
-    
+
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         if (AroundOwbInterceptorProxyAdvice.FIELD_PROXIED_INSTANCE.equals(name)) {
@@ -74,7 +76,7 @@ class CdiProxyClassAdapter extends ClassVisitor {
         }
         return super.visitField(access, name, desc, signature, value);
     }
-    
+
     @Override
     public MethodVisitor visitMethod(int acc, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = cv.visitMethod(acc, name, desc, signature, exceptions);
@@ -89,7 +91,7 @@ class CdiProxyClassAdapter extends ClassVisitor {
         }
         return mv;
     }
-    
+
     protected boolean isContinuableMethodProxy(int acc, String name, String desc, String signature, String[] exceptions) {
         int idx = name.lastIndexOf("$$super");
         if (idx > 0) {
@@ -97,12 +99,12 @@ class CdiProxyClassAdapter extends ClassVisitor {
         }
         return ! "<init>".equals(name) && classInfo.isContinuableMethod(acc, name, desc, signature);
     }
-    
+
     private static final String OWB_INTERCEPTOR_PROXY  = "org/apache/webbeans/proxy/OwbInterceptorProxy";
     private static final String OWB_NORMAL_SCOPE_PROXY = "org/apache/webbeans/proxy/OwbNormalScopeProxy";
     private static final String WELD_PROXY_OBJECT      = "org/jboss/weld/bean/proxy/ProxyObject";
-    
+
     private static final Set<String> MARKER_INTERFACES = new HashSet<String>(Arrays.asList(
             OWB_INTERCEPTOR_PROXY, OWB_NORMAL_SCOPE_PROXY, WELD_PROXY_OBJECT
-    )); 
+            )); 
 }

@@ -11,16 +11,16 @@ import org.objectweb.asm.commons.Method;
 abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     final protected String className;
     final protected String methodName;
-    
+
     private Label startFinally;
     private int stackRecorderVar;
-    
+
     protected AroundCdiProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
         super(api, mv, acc, methodName, desc);
         this.className = className;
         this.methodName = methodName;
     }
-    
+
     abstract protected void loadProxiedInstance();
 
     @Override
@@ -38,20 +38,20 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         getField(STACK_RECORDER_TYPE, "isRestoring", Type.BOOLEAN_TYPE);
         visitJumpInsn(IFEQ, startDelegated);
-        
+
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_POP_REF);
         pop();
-        
+
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         loadProxiedInstance();
         invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_PUSH_REF);
 
         visitLabel(startDelegated);
-        
+
         super.onMethodEnter();
     }
-    
+
     @Override
     public void visitCode() {
         super.visitCode();
@@ -83,7 +83,7 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         getField(STACK_RECORDER_TYPE, "isCapturing", Type.BOOLEAN_TYPE);
         visitJumpInsn(IFEQ, done);
-        
+
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_POP_REF);
         pop();
@@ -91,14 +91,14 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
         loadThis();
         invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_PUSH_REF);
         visitLabel(done);
-      
+
     }
-    
+
     private static final Type STACK_RECORDER_TYPE = Type.getType(StackRecorder.class);
     private static final Method STACK_RECORDER_GET;
     private static final Method STACK_RECORDER_POP_REF;
     private static final Method STACK_RECORDER_PUSH_REF;
-    
+
     static {
         try {
             STACK_RECORDER_GET = Method.getMethod(StackRecorder.class.getMethod("get"));
@@ -110,5 +110,5 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
             throw new RuntimeException(e);
         }
     }
-    
+
 }
