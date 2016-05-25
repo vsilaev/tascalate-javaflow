@@ -22,7 +22,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     Set<String> continuableMethods = new HashSet<String>();
 
-    private boolean isInterface = false;
     private boolean isAnnotation = false;
 
     public MaybeContinuableClassVisitor(final Asm4ContinuableClassInfoResolver environment) {
@@ -31,7 +30,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     }
 
     public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
-        isInterface = (access & Opcodes.ACC_INTERFACE) > 0;
         isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
 
         superclass = superName;
@@ -43,7 +41,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         if (!isAnnotation && MaybeContinuableClassVisitor.MARKER_FIELD_NAME.equals(name) && (access & Opcodes.ACC_STATIC) != 0) {
             classContinuatedMarkerFound = true;
         }
-        return super.visitField(access, name, desc, signature, value);
+        return null;
     }
 
     @Override
@@ -132,7 +130,8 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     }
 
     boolean isProcessed() {
-        return isInterface || classContinuatedMarkerFound;
+        // Processed only after marker field is added
+        return classContinuatedMarkerFound;
     }
 
     final static String MARKER_FIELD_NAME = "___$$$CONT$$$___";

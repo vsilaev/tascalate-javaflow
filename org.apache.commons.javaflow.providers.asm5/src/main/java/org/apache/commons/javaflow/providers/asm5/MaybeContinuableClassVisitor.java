@@ -25,7 +25,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     Set<String> continuableMethods = new HashSet<String>();
     Set<String> desugaredLambdaBodies = new HashSet<String>();
 
-    //private boolean isInterface = false;
     private boolean isAnnotation = false;
     private boolean isLambda = false;
 
@@ -37,7 +36,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     final private static Pattern LAMBDA_CLASS_NAME = Pattern.compile("^(.*)\\$\\$Lambda\\$\\d+$");
 
     public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
-        //isInterface = (access & Opcodes.ACC_INTERFACE) > 0;
         isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
 
         if ((access & Opcodes.ACC_SUPER) != 0 && (access & Opcodes.ACC_FINAL) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0) {
@@ -61,7 +59,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         if (!isAnnotation && MaybeContinuableClassVisitor.MARKER_FIELD_NAME.equals(name) && (access & Opcodes.ACC_STATIC) != 0) {
             classContinuatedMarkerFound = true;
         }
-        return super.visitField(access, name, desc, signature, value);
+        return null;
     }
 
     @Override
@@ -166,9 +164,10 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         return !isAnnotation && !continuableMethods.isEmpty();
     }
 
-    // Java8 allows implementation in interfaces
     boolean isProcessed() {
-        return /*isInterface || */classContinuatedMarkerFound;
+        // Processed only after marker field is added
+        // Additionally, Java8 allows implementation in interfaces        
+        return classContinuatedMarkerFound;
     }
 
     final static String MARKER_FIELD_NAME = "___$$$CONT$$$___";

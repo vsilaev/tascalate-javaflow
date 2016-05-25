@@ -93,11 +93,11 @@ public class ContinuableClassVisitor extends ClassVisitor {
         final boolean skip = skipEnchancing || null == classInfo || mv == null
                 || (access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_NATIVE)) > 0 || "<init>".equals(name)
                 || !classInfo.isContinuableMethod(access, name, desc, signature);
-                if (skip) {
-                    return mv;
-                } else {
-                    return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, cciResolver, mv);
-                }
+        if (skip) {
+            return mv;
+        } else {
+            return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, cciResolver, mv);
+        }
     }
 
 

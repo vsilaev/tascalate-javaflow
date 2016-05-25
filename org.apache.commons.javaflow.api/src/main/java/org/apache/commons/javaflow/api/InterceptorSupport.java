@@ -1,13 +1,24 @@
 package org.apache.commons.javaflow.api;
 
-import org.apache.commons.javaflow.core.Continuable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 import org.apache.commons.javaflow.core.StackRecorder;
 
 final public class InterceptorSupport {
     private InterceptorSupport() {}
     
     public static boolean isInstrumented(final Object target) {
-        return target instanceof Continuable;
+        if (null == target) {
+            return false;
+        }
+        try {
+            final Field field = target.getClass().getField("___$$$CONT$$$___");
+            return (field.getModifiers() & Modifier.STATIC) != 0;
+        } catch (final NoSuchFieldException ex) {
+            // It's ok, just report "false" back
+        }
+        return false;
     }
     
     public static Object beforeExecution() {
