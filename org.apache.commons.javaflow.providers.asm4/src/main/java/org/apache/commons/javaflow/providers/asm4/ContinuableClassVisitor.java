@@ -16,14 +16,13 @@
  */
 package org.apache.commons.javaflow.providers.asm4;
 
-import org.apache.commons.javaflow.core.Continuable;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 /**
  * ContinuableClassVisitor
@@ -31,68 +30,75 @@ import org.objectweb.asm.Type;
  * @author Evgueni Koulechov
  */
 public class ContinuableClassVisitor extends ClassVisitor {
-	
-	final private ContinuableClassInfoResolver cciResolver;
-	final private byte[] originalBytes;
 
-	private String className;
-	private ContinuableClassInfo classInfo;
-	private boolean skipEnchancing = false;
+    final private ContinuableClassInfoResolver cciResolver;
+    final private byte[] originalBytes;
 
-	public ContinuableClassVisitor(final ClassVisitor cv, final ContinuableClassInfoResolver cciResolver, final byte[] originalBytes) {
-		super(Opcodes.ASM4, cv);
-		this.cciResolver = cciResolver;
-		this.originalBytes = originalBytes;
-	}
+    private String className;
+    private ContinuableClassInfo classInfo;
+    private boolean skipEnchancing = false;
+    private boolean isInterface = false;
 
-	boolean skipEnchancing() {
-		return skipEnchancing;
-	}
+    public ContinuableClassVisitor(final ClassVisitor cv, final ContinuableClassInfoResolver cciResolver, final byte[] originalBytes) {
+        super(Opcodes.ASM4, cv);
+        this.cciResolver = cciResolver;
+        this.originalBytes = originalBytes;
+    }
 
-	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-		className = name;
-		classInfo = cciResolver.resolve(name, originalBytes);
+    boolean skipEnchancing() {
+        return skipEnchancing;
+    }
+    
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
+        
+        className = name;
+        classInfo = cciResolver.resolve(name, originalBytes);
 
-		if (null == classInfo || classInfo.isClassProcessed() || StopException.__dirtyCheckSkipContinuationsOnClass(version, access, name, signature, superName, interfaces)) {
-			skipEnchancing = true;
-			// Must exit by throwing exception, otherwise NPE is possible in nested visitor
-			throw StopException.INSTANCE;
-		}
+        if (null == classInfo || classInfo.isClassProcessed() || StopException.__dirtyCheckSkipContinuationsOnClass(version, access, name, signature, superName, interfaces)) {
+            skipEnchancing = true;
+            // Must exit by throwing exception, otherwise NPE is possible in nested visitor
+            throw StopException.INSTANCE;
+        }
+        cv.visit(version, access, name, signature, superName, interfaces);
+    }
 
-		if (null != interfaces)
-			for (final String interfaceInternalName : interfaces) {
-				if (CONTINUABLE_MARKER_INTERFACE_NAME.equals(interfaceInternalName)) {
-					skipEnchancing = true;
-					break;
-				}
-			}
+    @Override
+    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+        if (MaybeContinuableClassVisitor.MARKER_FIELD_NAME.equals(name) && (access & Opcodes.ACC_STATIC) != 0) {
+            skipEnchancing = true;
+            classInfo.markClassProcessed();
+            throw StopException.INSTANCE;
+        }
+        return super.visitField(access, name, desc, signature, value);
+    }
 
-		final String[] newInterfaces;
-		if (skipEnchancing) {
-			classInfo.markClassProcessed();
-			newInterfaces = interfaces;
-			throw StopException.INSTANCE;
-		} else {
-			final int size = null == interfaces ? 0 : interfaces.length;
-			newInterfaces = new String[size + 1];
-			System.arraycopy(interfaces, 0, newInterfaces, 0, size);
-			newInterfaces[size] = CONTINUABLE_MARKER_INTERFACE_NAME;
-		}
-		cv.visit(version, access, name, signature, superName, newInterfaces);
-	}
+    @Override
+    public void visitEnd() {
+        if (!skipEnchancing) {
+            super.visitField(
+                    (isInterface ? Opcodes.ACC_PUBLIC : Opcodes.ACC_PRIVATE) + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC, 
+                    MaybeContinuableClassVisitor.MARKER_FIELD_NAME, 
+                    "Ljava/lang/String;", 
+                    null, 
+                    "A"
+                    )
+            .visitEnd();
+        }
+        super.visitEnd();
+    }
 
-	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		final MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-		final boolean skip = skipEnchancing || null == classInfo || mv == null
-				|| (access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_NATIVE)) > 0 || "<init>".equals(name)
-				|| !classInfo.isContinuableMethod(access, name, desc, signature);
-		if (skip) {
-			return mv;
-		} else {
-			return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, cciResolver, mv);
-		}
-	}
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        final MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
+        final boolean skip = skipEnchancing || null == classInfo || mv == null
+                || (access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_NATIVE)) > 0 || "<init>".equals(name)
+                || !classInfo.isContinuableMethod(access, name, desc, signature);
+                if (skip) {
+                    return mv;
+                } else {
+                    return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, cciResolver, mv);
+                }
+    }
 
-	private final static String CONTINUABLE_MARKER_INTERFACE_NAME = Type.getInternalName(Continuable.class);
 
 }

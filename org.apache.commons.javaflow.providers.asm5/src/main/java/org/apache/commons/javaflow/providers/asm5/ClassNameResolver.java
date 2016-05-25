@@ -12,21 +12,21 @@ public class ClassNameResolver {
     public static class Result {
         final public String className;
         final public byte[] classfileBuffer;
-        
+
         Result(final String className, final byte[] classfileBuffer) {
             this.className = className;
             this.classfileBuffer = classfileBuffer;
         }
-        
+
         public Map<String, byte[]> asResource() {
             return Collections.singletonMap(className + ".class", classfileBuffer);
         }        
     }
-    
+
     public static Result resolveClassName(final String className, final Class<?> classBeingRedefined, final byte[] classfileBuffer) {
         String resolvedClassName = className != null ? className :
             classBeingRedefined != null ? classBeingRedefined.getName().replace('.', '/') : null;
-        
+
         final String[] classNameFromBytes = {null}; 
         if (null == resolvedClassName) {
             try {
@@ -38,7 +38,7 @@ public class ClassNameResolver {
                     }
                 }, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
             } catch (final StopException exIgnore) {
-                
+
             }
             resolvedClassName = classNameFromBytes[0];
         }

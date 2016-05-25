@@ -99,28 +99,28 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
 
     public boolean isContinuableAnnotation(final String annotationClassDescriptor) {
         switch (getAnnotationProcessingState(annotationClassDescriptor)) {
-        case SUPPORTED:
-            return true;
-        case UNSUPPORTED:
-            return false;
-        case UNKNON:
-            markProcessedAnnotation(annotationClassDescriptor);
-
-            final Type type = Type.getType(annotationClassDescriptor);	
-            try {
-                final InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
+            case SUPPORTED:
+                return true;
+            case UNSUPPORTED:
+                return false;
+            case UNKNON:
+                markProcessedAnnotation(annotationClassDescriptor);
+    
+                final Type type = Type.getType(annotationClassDescriptor);	
                 try {
-                    return resolveContinuableAnnotation(annotationClassDescriptor, new ClassReader(annotationBytes));
-                } finally {
-                    if (null != annotationBytes) {
-                        try { annotationBytes.close(); } catch (final IOException exIgnore) {}
+                    final InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
+                    try {
+                        return resolveContinuableAnnotation(annotationClassDescriptor, new ClassReader(annotationBytes));
+                    } finally {
+                        if (null != annotationBytes) {
+                            try { annotationBytes.close(); } catch (final IOException exIgnore) {}
+                        }
                     }
+                } catch (final IOException ex) {
+                    throw new RuntimeException(ex);
                 }
-            } catch (final IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        default:
-            throw new RuntimeException("Unknown annotation kind");
+            default:
+                throw new RuntimeException("Unknown annotation kind");
         }
     }
 

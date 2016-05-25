@@ -48,9 +48,9 @@ import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
 
 public class ContinuableMethodNode extends MethodNode implements Opcodes {
-	private final ContinuableClassInfoResolver cciResolver;
+    private final ContinuableClassInfoResolver cciResolver;
     private final String className;
-    
+
     protected final MethodVisitor mv;
 
     protected final List<Label>            labels  = new ArrayList<Label>();
@@ -66,21 +66,21 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         this.cciResolver = cciResolver;
         this.mv = mv;
     }
-    
+
     // Bug in rev 1632 (Refactoring to remove redundant code (and for easier subclassing).
     protected LabelNode getLabelNode(final Label l) {
-    	if (!(l.info instanceof LabelNode)) {
-    		l.info = new LabelNode(l); // error was here -- new LabelNode(/* nothing */);
-    	}
-    	return (LabelNode)l.info;
+        if (!(l.info instanceof LabelNode)) {
+            l.info = new LabelNode(l); // error was here -- new LabelNode(/* nothing */);
+        }
+        return (LabelNode)l.info;
     }
 
     Frame getFrameByNode(AbstractInsnNode node) {
-    	final int insIndex = instructions.indexOf(node);
-    	final Frame[] frames = analyzer.getFrames();
-    	return null == frames || insIndex >= frames.length ? null : frames[insIndex];
+        final int insIndex = instructions.indexOf(node);
+        final Frame[] frames = analyzer.getFrames();
+        return null == frames || insIndex >= frames.length ? null : frames[insIndex];
     }
-    
+
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         MethodInsnNode mnode = new MethodInsnNode(opcode, owner, name, desc);
         if (opcode == INVOKESPECIAL || "<init>".equals(name)) {
@@ -96,8 +96,8 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
 
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-    	final InvokeDynamicInsnNode mnode = new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs);
-    	if (needsFrameGuard(INVOKEDYNAMIC, bsm.getOwner(), name, desc)) {
+        final InvokeDynamicInsnNode mnode = new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs);
+        if (needsFrameGuard(INVOKEDYNAMIC, bsm.getOwner(), name, desc)) {
             Label label = new Label();
             super.visitLabel(label);
             labels.add(label);
@@ -105,7 +105,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         }
         instructions.add(mnode);
     }
-    
+
     public void visitEnd() {
         if (instructions.size() == 0 || labels.size() == 0) {
             accept(mv);
@@ -117,12 +117,12 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             moveNew();
 
             analyzer = new Analyzer(new FastClassVerifier()) {
-            	@Override
+                @Override
                 protected Frame newFrame(final int nLocals, final int nStack) {
                     return new MonitoringFrame(nLocals, nStack);
                 }
 
-            	@Override
+                @Override
                 protected Frame newFrame(final Frame src) {
                     return new MonitoringFrame(src);
                 }
@@ -201,7 +201,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             int varOffset = stackRecorderVar + 1;
             Type[] args = Type.getArgumentTypes(mnode.desc);
 
-           
+
             // optimizations for some common cases
             if (args.length == 0) {
                 final InsnList doNew = new InsnList();
@@ -215,7 +215,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
             if (args.length == 1 && args[0].getSize() == 1) {
                 final InsnList doNew = new InsnList();
-            	doNew.add(node1); // NEW
+                doNew.add(node1); // NEW
                 if (requireDup) {
                     doNew.add(new InsnNode(DUP));
                     doNew.add(new InsnNode(DUP2_X1));
@@ -231,9 +231,9 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
             // TODO this one untested!
             if ((args.length == 1 && args[0].getSize() == 2) ||
-                (args.length == 2 && args[0].getSize() == 1 && args[1].getSize() == 1)) {
+                    (args.length == 2 && args[0].getSize() == 1 && args[1].getSize() == 1)) {
                 final InsnList doNew = new InsnList();
-            	doNew.add(node1); // NEW
+                doNew.add(node1); // NEW
                 if (requireDup) {
                     doNew.add(new InsnNode(DUP));
                     doNew.add(new InsnNode(DUP2_X2));
@@ -248,7 +248,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
                 nm = doNew.getLast();    
                 continue;
             }
-            
+
             final InsnList doNew = new InsnList();
             // generic code using temporary locals
             // save stack
@@ -265,7 +265,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             doNew.add(node1); // NEW
 
             if (requireDup)
-            	doNew.add(new InsnNode(DUP));
+                doNew.add(new InsnNode(DUP));
 
             // restore stack
             for (int j = 0; j < args.length; j++) {
@@ -292,35 +292,35 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
     boolean needsFrameGuard(int opcode, String owner, String name, String desc) {
         if (owner.startsWith("java/") || owner.startsWith("javax/")) {
-        	//System.out.println("SKIP:: " + owner + "." + name + desc);
-        	return false;
+            //System.out.println("SKIP:: " + owner + "." + name + desc);
+            return false;
         }
-       
+
         // Always create save-point before Continuation methods (like suspend)
         if (CONTINUATION_CLASS_INTERNAL_NAME.equals(owner)) {
-        	return CONTINUATION_CLASS_CONTINUABLE_METHODS.contains(name);
+            return CONTINUATION_CLASS_CONTINUABLE_METHODS.contains(name);
         }
-        
+
         // No need to create save-point before constructors -- it's forbidden to suspend in constructors anyway
         if (opcode == Opcodes.INVOKESPECIAL && "<init>".equals(name)) {
-        	return false;
+            return false;
         }
-        
+
         if (opcode == Opcodes.INVOKEDYNAMIC) {
-        	// TODO verify CallSite to be continuable?
-        	return true;
+            // TODO verify CallSite to be continuable?
+            return true;
         }
-        
+
         if (opcode == Opcodes.INVOKEINTERFACE ||
-        	opcode == Opcodes.INVOKESPECIAL   ||
-            opcode == Opcodes.INVOKESTATIC    ||
-            opcode == Opcodes.INVOKEVIRTUAL) {
-        	final ContinuableClassInfo classInfo;
-        	try {
-        		 classInfo = cciResolver.resolve(owner);
-        	} catch (final IOException ex) {
-        		throw new RuntimeException(ex);
-        	}
+                opcode == Opcodes.INVOKESPECIAL   ||
+                opcode == Opcodes.INVOKESTATIC    ||
+                opcode == Opcodes.INVOKEVIRTUAL) {
+            final ContinuableClassInfo classInfo;
+            try {
+                classInfo = cciResolver.resolve(owner);
+            } catch (final IOException ex) {
+                throw new RuntimeException(ex);
+            }
             return null != classInfo && classInfo.isContinuableMethod(opcode, name, desc, desc);
         }
         return false;
@@ -328,8 +328,8 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
     final private static String CONTINUATION_CLASS_INTERNAL_NAME = Type.getInternalName(Continuation.class);
     final private static Set<String> CONTINUATION_CLASS_CONTINUABLE_METHODS = new HashSet<String>(Arrays.asList(
-    	"suspend", "again", "cancel" 
-    	// we are suspending here with potential resume later
-    	// "startWith", "continueWith", "exit" are unnecessary
-    ));
+            "suspend", "again", "cancel" 
+            // we are suspending here with potential resume later
+            // "startWith", "continueWith", "exit" are unnecessary
+            ));
 }

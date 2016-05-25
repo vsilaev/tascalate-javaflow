@@ -29,33 +29,33 @@ import org.objectweb.asm.ClassWriter;
  */
 final class Asm5ClassTransformer implements ResourceTransformer {
 
-	final private ContinuableClassInfoResolver cciResolver;
+    final private ContinuableClassInfoResolver cciResolver;
 
-	Asm5ClassTransformer(final ContinuableClassInfoResolver cciResolver) {
-		this.cciResolver = cciResolver;
-	}
+    Asm5ClassTransformer(final ContinuableClassInfoResolver cciResolver) {
+        this.cciResolver = cciResolver;
+    }
 
-	public byte[] transform(final byte[] original) {
-		final ClassWriter cw = new ComputeClassWriter(ClassWriter.COMPUTE_FRAMES, cciResolver.resourceLoader());
-		final ContinuableClassVisitor visitor = new ContinuableClassVisitor(
-			cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
-			cciResolver,
-			original
-			
-		);
-		try {
-			new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
-		} catch (final StopException ex) {
-			// Preliminary stop visiting non-continuable class
-			return null;
-		}
+    public byte[] transform(final byte[] original) {
+        final ClassWriter cw = new ComputeClassWriter(ClassWriter.COMPUTE_FRAMES, cciResolver.resourceLoader());
+        final ContinuableClassVisitor visitor = new ContinuableClassVisitor(
+                cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
+                cciResolver,
+                original
 
-		if (visitor.skipEnchancing()) {
-			return null;
-		}
+                );
+        try {
+            new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
+        } catch (final StopException ex) {
+            // Preliminary stop visiting non-continuable class
+            return null;
+        }
 
-		final byte[] bytecode = cw.toByteArray();
-		// BytecodeDebugUtils.dumpClass(bytecode);
-		return bytecode;
-	}
+        if (visitor.skipEnchancing()) {
+            return null;
+        }
+
+        final byte[] bytecode = cw.toByteArray();
+        // BytecodeDebugUtils.dumpClass(bytecode);
+        return bytecode;
+    }
 }

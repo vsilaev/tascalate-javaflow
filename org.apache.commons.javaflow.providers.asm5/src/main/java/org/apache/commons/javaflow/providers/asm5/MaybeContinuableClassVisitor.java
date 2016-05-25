@@ -25,6 +25,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     Set<String> continuableMethods = new HashSet<String>();
     Set<String> desugaredLambdaBodies = new HashSet<String>();
 
+    //private boolean isInterface = false;
     private boolean isAnnotation = false;
     private boolean isLambda = false;
 
@@ -36,7 +37,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     final private static Pattern LAMBDA_CLASS_NAME = Pattern.compile("^(.*)\\$\\$Lambda\\$\\d+$");
 
     public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
-        //boolean isInterface = (access & Opcodes.ACC_INTERFACE) > 0;
+        //isInterface = (access & Opcodes.ACC_INTERFACE) > 0;
         isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
 
         if ((access & Opcodes.ACC_SUPER) != 0 && (access & Opcodes.ACC_FINAL) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0) {

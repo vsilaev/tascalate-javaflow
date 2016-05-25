@@ -21,14 +21,13 @@ public class FastClassVerifier extends BasicVerifier {
 
     @Override
     public BasicValue copyOperation(final AbstractInsnNode insn, BasicValue value) throws AnalyzerException {
-    	// Fix error with analyzer for try-with-resources (it sees uninitialized values)
-    	if ((insn.getOpcode() == Opcodes.ALOAD || insn.getOpcode() == Opcodes.ASTORE) && !value.isReference()) {
-			value = newValue(Type.getType("Lnull;"));
-		}
-		return super.copyOperation(insn, value);
+        // Fix error with analyzer for try-with-resources (it sees uninitialized values)
+        if ((insn.getOpcode() == Opcodes.ALOAD || insn.getOpcode() == Opcodes.ASTORE) && !value.isReference()) {
+            value = newValue(Type.getType("Lnull;"));
+        }
+        return super.copyOperation(insn, value);
     }
-    
-    
+
     @Override
     public BasicValue newValue(final Type type) {
         if (type == null) {
@@ -57,10 +56,10 @@ public class FastClassVerifier extends BasicVerifier {
         Type expectedType = expected.getType();
         Type type = value.getType();
         switch (expectedType.getSort()) {
-	        case Type.BOOLEAN:
-	        case Type.CHAR:
-	        case Type.BYTE:
-	        case Type.SHORT:
+            case Type.BOOLEAN:
+            case Type.CHAR:
+            case Type.BYTE:
+            case Type.SHORT:
             case Type.INT:
             case Type.FLOAT:
             case Type.LONG:
@@ -72,8 +71,8 @@ public class FastClassVerifier extends BasicVerifier {
                     return true;
                 } else {
                     // We are transforming valid bytecode to (hopefully) valid bytecode
-                	// hence pairs of "value" and "expected" must be compatible
-                	return true;//isAssignableFrom(expectedType, type);
+                    // hence pairs of "value" and "expected" must be compatible
+                    return true;//isAssignableFrom(expectedType, type);
                 }
             default:
                 throw new Error("Internal error");
