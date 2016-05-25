@@ -7,12 +7,12 @@ import org.apache.commons.javaflow.spi.ResourceTransformer;
 
 public class Asm3ResourceTransformationFactory implements ResourceTransformationFactory {
 
-	public ResourceTransformer createTransformer(final ContinuableClassInfoResolver cciResolver) {
-		return new Asm3ClassTransformer(cciResolver);
-	}
+    public ResourceTransformer createTransformer(final ContinuableClassInfoResolver cciResolver) {
+        return new Asm3ClassTransformer(cciResolver);
+    }
 
-	public ContinuableClassInfoResolver createResolver(final ResourceLoader resourceLoader) {
-		return new Asm3ContinuableClassInfoResolver(resourceLoader);
-	}
+    public ContinuableClassInfoResolver createResolver(final ResourceLoader resourceLoader) {
+        return new Asm3ContinuableClassInfoResolver(resourceLoader);
+    }
 
 }

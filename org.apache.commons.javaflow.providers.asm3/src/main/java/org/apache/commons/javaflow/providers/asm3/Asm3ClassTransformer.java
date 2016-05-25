@@ -28,34 +28,34 @@ import org.objectweb.asm.ClassWriter;
  * @author Eugene Kuleshov
  */
 final class Asm3ClassTransformer implements ResourceTransformer {
-	
-	final private ContinuableClassInfoResolver cciResolver;
-	
-	Asm3ClassTransformer(final ContinuableClassInfoResolver cciResolver) {
-		this.cciResolver = cciResolver;
-	}
 
-	public byte[] transform(final byte[] original) {
-		final ClassWriter cw = new ComputeClassWriter(ClassWriter.COMPUTE_FRAMES, cciResolver.resourceLoader());
-		final ContinuableClassVisitor visitor = new ContinuableClassVisitor(
-			cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
-			cciResolver,
-			original
-			
-		);
-		try {
-			new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
-		} catch (final StopException ex) {
-			// Preliminary stop visiting non-continuable class
-			return null;
-		}
+    final private ContinuableClassInfoResolver cciResolver;
 
-		if (visitor.skipEnchancing()) {
-			return null;
-		}
+    Asm3ClassTransformer(final ContinuableClassInfoResolver cciResolver) {
+        this.cciResolver = cciResolver;
+    }
 
-		final byte[] bytecode = cw.toByteArray();
-		// BytecodeDebugUtils.dumpClass(bytecode);
-		return bytecode;
-	}
+    public byte[] transform(final byte[] original) {
+        final ClassWriter cw = new ComputeClassWriter(ClassWriter.COMPUTE_FRAMES, cciResolver.resourceLoader());
+        final ContinuableClassVisitor visitor = new ContinuableClassVisitor(
+                cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
+                cciResolver,
+                original
+
+                );
+        try {
+            new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
+        } catch (final StopException ex) {
+            // Preliminary stop visiting non-continuable class
+            return null;
+        }
+
+        if (visitor.skipEnchancing()) {
+            return null;
+        }
+
+        final byte[] bytecode = cw.toByteArray();
+        // BytecodeDebugUtils.dumpClass(bytecode);
+        return bytecode;
+    }
 }

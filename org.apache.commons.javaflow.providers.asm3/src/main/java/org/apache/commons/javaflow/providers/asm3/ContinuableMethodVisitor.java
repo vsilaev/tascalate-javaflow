@@ -52,23 +52,23 @@ public final class ContinuableMethodVisitor extends MethodAdapter implements Opc
     }
 
     private static Type[] getArgumentTypes(final AbstractInsnNode node) {
-    	if (node instanceof MethodInsnNode) {
-    		final MethodInsnNode mnode = (MethodInsnNode)node;
-    		return Type.getArgumentTypes(mnode.desc);
-    	} else {
-    		throw new RuntimeException("Unexpected node type: " + node);
-    	}
+        if (node instanceof MethodInsnNode) {
+            final MethodInsnNode mnode = (MethodInsnNode)node;
+            return Type.getArgumentTypes(mnode.desc);
+        } else {
+            throw new RuntimeException("Unexpected node type: " + node);
+        }
     }
-    
+
     private static int getOwnerSize(final AbstractInsnNode node) {
-    	if (node instanceof MethodInsnNode) {
-    		return node.getOpcode() == INVOKESTATIC ? 0 : 1;
-    	} else {
-    		// INVOKEDYNAMIC
-    		return 0;
-    	}
+        if (node instanceof MethodInsnNode) {
+            return node.getOpcode() == INVOKESTATIC ? 0 : 1;
+        } else {
+            // INVOKEDYNAMIC
+            return 0;
+        }
     }
-    
+
     public void visitCode() {
         mv.visitCode();
 
@@ -155,7 +155,7 @@ public final class ContinuableMethodVisitor extends MethodAdapter implements Opc
             int ownerSize = getOwnerSize(mnode);
             int initSize = mnode.getOpcode() == INVOKESPECIAL && MethodInsnNode.class.cast(mnode).name.equals("<init>") ? 2 : 0;
             int ssize = frame.getStackSize();
-            
+
             for (int j = 0; j < ssize - argSize - ownerSize - initSize; j++) {
                 BasicValue value = (BasicValue) frame.getStack(j);
                 if (isNull(value)) {
@@ -179,17 +179,17 @@ public final class ContinuableMethodVisitor extends MethodAdapter implements Opc
                 // Load the object whose method we are calling  
                 BasicValue value = ((BasicValue) frame.getStack(ssize - argSize - 1));
                 if (isNull(value)) { 
-                  // If user code causes NPE, then we keep this behavior: load null to get NPE at runtime 
-                  mv.visitInsn(ACONST_NULL);
+                    // If user code causes NPE, then we keep this behavior: load null to get NPE at runtime 
+                    mv.visitInsn(ACONST_NULL);
                 } else {
-                  mv.visitVarInsn(ALOAD, stackRecorderVar);
-                  mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Reference", "()Ljava/lang/Object;");
-                  mv.visitTypeInsn(CHECKCAST, value.getType().getInternalName());
+                    mv.visitVarInsn(ALOAD, stackRecorderVar);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Reference", "()Ljava/lang/Object;");
+                    mv.visitTypeInsn(CHECKCAST, value.getType().getInternalName());
                 }
             }
 
             // Create null types for the parameters of the method invocation
-            
+
             for (int j = 0; j < argSize; j++) {
                 pushDefault(paramTypes[j]);
             }
@@ -211,7 +211,7 @@ public final class ContinuableMethodVisitor extends MethodAdapter implements Opc
         }
         mv.visitLabel(label);
     }
-    
+
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         mv.visitMethodInsn(opcode, owner, name, desc);
 
@@ -291,9 +291,9 @@ public final class ContinuableMethodVisitor extends MethodAdapter implements Opc
 
             mv.visitVarInsn(ALOAD, stackRecorderVar);
             if (currentIndex <= 5)
-				mv.visitInsn(ICONST_0 + currentIndex);
+                mv.visitInsn(ICONST_0 + currentIndex);
             else
-            	mv.visitIntInsn(SIPUSH, currentIndex);
+                mv.visitIntInsn(SIPUSH, currentIndex);
             mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushInt", "(I)V");
 
             if (currentFrame instanceof MonitoringFrame) {
@@ -328,49 +328,49 @@ public final class ContinuableMethodVisitor extends MethodAdapter implements Opc
     }
 
     static boolean isNull(BasicValue value) {
-      if (null == value)
-        return true;
-      if (!value.isReference())
-        return false;
-      final Type type = value.getType();
-      return "Lnull;".equals(type.getDescriptor()); 
+        if (null == value)
+            return true;
+        if (!value.isReference())
+            return false;
+        final Type type = value.getType();
+        return "Lnull;".equals(type.getDescriptor()); 
     }
 
     void pushDefault(Type type) {
         switch (type.getSort()) {
-        case Type.VOID:
-            break;
-        case Type.DOUBLE:
-            mv.visitInsn(DCONST_0);
-            break;
-        case Type.LONG:
-            mv.visitInsn(LCONST_0);
-            break;
-        case Type.FLOAT:
-            mv.visitInsn(FCONST_0);
-            break;
-        case Type.OBJECT:
-        case Type.ARRAY:
-            mv.visitInsn(ACONST_NULL);
-            break;
-        default:
-            mv.visitInsn(ICONST_0);
-            break;
+            case Type.VOID:
+                break;
+            case Type.DOUBLE:
+                mv.visitInsn(DCONST_0);
+                break;
+            case Type.LONG:
+                mv.visitInsn(LCONST_0);
+                break;
+            case Type.FLOAT:
+                mv.visitInsn(FCONST_0);
+                break;
+            case Type.OBJECT:
+            case Type.ARRAY:
+                mv.visitInsn(ACONST_NULL);
+                break;
+            default:
+                mv.visitInsn(ICONST_0);
+                break;
         }
     }
 
     private static String[] SUFFIXES = {
-        "Object",  // 0 void
-        "Int",     // 1 boolean
-        "Int",     // 2 char
-        "Int",     // 3 byte
-        "Int",     // 4 short
-        "Int",     // 5 int
-        "Float",   // 6 float
-        "Long",    // 7 long
-        "Double",  // 8 double
-        "Object",  // 9 array
-        "Object",  // 10 object
+            "Object",  // 0 void
+            "Int",     // 1 boolean
+            "Int",     // 2 char
+            "Int",     // 3 byte
+            "Int",     // 4 short
+            "Int",     // 5 int
+            "Float",   // 6 float
+            "Long",    // 7 long
+            "Double",  // 8 double
+            "Object",  // 9 array
+            "Object",  // 10 object
     };
 
 

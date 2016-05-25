@@ -99,6 +99,4 @@ public class ContinuableClassVisitor extends ClassVisitor {
             return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, cciResolver, mv);
         }
     }
-
-
 }

@@ -22,22 +22,22 @@ public class FastClassVerifier extends BasicVerifier {
 
     @Override
     public Value copyOperation(final AbstractInsnNode insn, Value value) throws AnalyzerException {
-    	// Fix error with analyzer for try-with-resources (it sees uninitialized values)
-		if (insn.getOpcode() == Opcodes.ALOAD && (value instanceof BasicValue && !((BasicValue)value).isReference())) {
-			value = newValue(Type.getType("Lnull;"));
-		}
-		return super.copyOperation(insn, value);
+        // Fix error with analyzer for try-with-resources (it sees uninitialized values)
+        if (insn.getOpcode() == Opcodes.ALOAD && (value instanceof BasicValue && !((BasicValue)value).isReference())) {
+            value = newValue(Type.getType("Lnull;"));
+        }
+        return super.copyOperation(insn, value);
     }
-    
+
     @Override
     public Value unaryOperation(final AbstractInsnNode insn, Value value) throws AnalyzerException {
-    	// Fix error with analyzer for try-with-resources (it sees uninitialized values)
-		if (insn.getOpcode() == Opcodes.ALOAD && (value instanceof BasicValue && !((BasicValue)value).isReference())) {
-			value = newValue(Type.getType("Lnull;"));
-		}
-		return super.unaryOperation(insn, value);    
-	}    
-    
+        // Fix error with analyzer for try-with-resources (it sees uninitialized values)
+        if (insn.getOpcode() == Opcodes.ALOAD && (value instanceof BasicValue && !((BasicValue)value).isReference())) {
+            value = newValue(Type.getType("Lnull;"));
+        }
+        return super.unaryOperation(insn, value);    
+    }    
+
     @Override
     public Value newValue(final Type type) {
         if (type == null) {
@@ -63,17 +63,17 @@ public class FastClassVerifier extends BasicVerifier {
 
     @Override
     protected boolean isSubTypeOf(final Value value, final Value expected) {
-    	if (!(value instanceof BasicValue))
-    	{
-    		return value.equals(expected);
-    	}
+        if (!(value instanceof BasicValue))
+        {
+            return value.equals(expected);
+        }
         Type expectedType = ((BasicValue)expected).getType();
         Type type = ((BasicValue)value).getType();
         switch (expectedType.getSort()) {
-	        case Type.BOOLEAN:
-	        case Type.CHAR:
-	        case Type.BYTE:
-	        case Type.SHORT:
+            case Type.BOOLEAN:
+            case Type.CHAR:
+            case Type.BYTE:
+            case Type.SHORT:
             case Type.INT:
             case Type.FLOAT:
             case Type.LONG:
@@ -85,12 +85,11 @@ public class FastClassVerifier extends BasicVerifier {
                     return true;
                 } else {
                     // We are transforming valid bytecode to (hopefully) valid bytecode
-                	// hence pairs of "value" and "expected" must be compatible
-                	return true;//isAssignableFrom(expectedType, type);
+                    // hence pairs of "value" and "expected" must be compatible
+                    return true;//isAssignableFrom(expectedType, type);
                 }
             default:
                 throw new Error("Internal error");
         }
-
     }
 }

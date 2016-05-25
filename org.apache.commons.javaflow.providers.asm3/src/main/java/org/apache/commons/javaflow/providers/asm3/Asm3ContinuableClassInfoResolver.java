@@ -15,131 +15,131 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 
 public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
-	final private Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();
-	final private Set<String> processedAnnotations = new HashSet<String>();
-	final private Set<String> continuableAnnotations = new HashSet<String>();
-	final private ResourceLoader resourceLoader;
-	
-	Asm3ContinuableClassInfoResolver(final ResourceLoader classLoader) {
-		this.resourceLoader = classLoader;
-		markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE);
-	}
-	
-	public ResourceLoader resourceLoader() {
-		return resourceLoader;
-	}
+    final private Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();
+    final private Set<String> processedAnnotations = new HashSet<String>();
+    final private Set<String> continuableAnnotations = new HashSet<String>();
+    final private ResourceLoader resourceLoader;
 
-	
-	public ContinuableClassInfo forget(String className) {
-		return visitedClasses.remove(className);
-	}
+    Asm3ContinuableClassInfoResolver(final ResourceLoader classLoader) {
+        this.resourceLoader = classLoader;
+        markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE);
+    }
 
-	public ContinuableClassInfo resolve(final String classInternalName, final byte[] classBytes) {
-		return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
-	}
-	
-	public ContinuableClassInfo resolve(final String classInternalName) throws IOException {
-		final InputStream classBytes = resourceLoader.getResourceAsStream(classInternalName + ".class");
-		try {
-			return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
-		} finally {
-			if (null != classBytes)
-				try { classBytes.close(); } catch (final IOException exIgnore) {}
-		}
-	}
-	
-	private ContinuableClassInfo resolveContinuableClassInfo(final String classInternalName, final ClassReader reader) {
-		ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
-		if (classInfo == null) {
+    public ResourceLoader resourceLoader() {
+        return resourceLoader;
+    }
 
-			final MaybeContinuableClassAdapter maybeContinuableClassVisitor = new MaybeContinuableClassAdapter(this); 
-			reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-			
-			if (maybeContinuableClassVisitor.isContinuable()) {
-				classInfo = new ContinuableClassInfoInternal(
-					maybeContinuableClassVisitor.isProcessed(), 
-					maybeContinuableClassVisitor.continuableMethods
-				);
-			} else {
-				classInfo = UNSUPPORTED_CLASS_INFO;
-			}
-			visitedClasses.put(classInternalName, classInfo);
-		}
-		return classInfo == UNSUPPORTED_CLASS_INFO ? null : classInfo;
-	}
-	
-	private boolean resolveContinuableAnnotation(final String annotationClassDescriptor, final ClassReader reader) {
-		final MaybeContinuableAnnotationAdapter maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationAdapter(this); 
-		reader.accept(maybeContinuableAnnotationVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-		
-		if (maybeContinuableAnnotationVisitor.isContinuable()) {
-			markContinuableAnnotation(annotationClassDescriptor);
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	private AnnotationProcessingState getAnnotationProcessingState(final String annotationClassDescriptor) {
-		if (continuableAnnotations.contains(annotationClassDescriptor))
-			return AnnotationProcessingState.SUPPORTED;
-		else if (processedAnnotations.contains(annotationClassDescriptor))
-			return AnnotationProcessingState.UNSUPPORTED;
-		else
-			return AnnotationProcessingState.UNKNON;
-	}
-	
-	private void markProcessedAnnotation(final String annotationClassDescriptor) {
-		processedAnnotations.add(annotationClassDescriptor);
-	}
-	
-	private void markContinuableAnnotation(final String annotationClassDescriptor) {
-		markProcessedAnnotation(annotationClassDescriptor);
-		continuableAnnotations.add(annotationClassDescriptor);
-	}
-	
-	public boolean isContinuableAnnotation(final String annotationClassDescriptor) {
-		switch (getAnnotationProcessingState(annotationClassDescriptor)) {
-			case SUPPORTED:
-				return true;
-			case UNSUPPORTED:
-				return false;
-			case UNKNON:
-				markProcessedAnnotation(annotationClassDescriptor);
 
-				final Type type = Type.getType(annotationClassDescriptor);	
-				try {
-					final InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
-					try {
-						return resolveContinuableAnnotation(annotationClassDescriptor, new ClassReader(annotationBytes));
-					} finally {
-						if (null != annotationBytes) {
-							try { annotationBytes.close(); } catch (final IOException exIgnore) {}
-						}
-					}
-				} catch (final IOException ex) {
-					throw new RuntimeException(ex);
-				}
-			default:
-				throw new RuntimeException("Unknown annotation kind");
-		}
-	}
-	
-	final private static String CONTINUABLE_ANNOTATION_TYPE = Type.getDescriptor(ContinuableAnnotation.class);
-	final private static ContinuableClassInfo UNSUPPORTED_CLASS_INFO = new ContinuableClassInfo() {
-		
-		public void markClassProcessed() {}
-		
-		public boolean isContinuableMethod(int access, String name, String desc, String signature) {
-			return false;
-		}
-		
-		public boolean isClassProcessed() {
-			return true;
-		}
-	};
-	
-	private static enum AnnotationProcessingState {
-		UNKNON, UNSUPPORTED, SUPPORTED;
-	}
+    public ContinuableClassInfo forget(String className) {
+        return visitedClasses.remove(className);
+    }
+
+    public ContinuableClassInfo resolve(final String classInternalName, final byte[] classBytes) {
+        return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
+    }
+
+    public ContinuableClassInfo resolve(final String classInternalName) throws IOException {
+        final InputStream classBytes = resourceLoader.getResourceAsStream(classInternalName + ".class");
+        try {
+            return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
+        } finally {
+            if (null != classBytes)
+                try { classBytes.close(); } catch (final IOException exIgnore) {}
+        }
+    }
+
+    private ContinuableClassInfo resolveContinuableClassInfo(final String classInternalName, final ClassReader reader) {
+        ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
+        if (classInfo == null) {
+
+            final MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
+            reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+
+            if (maybeContinuableClassVisitor.isContinuable()) {
+                classInfo = new ContinuableClassInfoInternal(
+                        maybeContinuableClassVisitor.isProcessed(), 
+                        maybeContinuableClassVisitor.continuableMethods
+                        );
+            } else {
+                classInfo = UNSUPPORTED_CLASS_INFO;
+            }
+            visitedClasses.put(classInternalName, classInfo);
+        }
+        return classInfo == UNSUPPORTED_CLASS_INFO ? null : classInfo;
+    }
+
+    private boolean resolveContinuableAnnotation(final String annotationClassDescriptor, final ClassReader reader) {
+        final MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(this); 
+        reader.accept(maybeContinuableAnnotationVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+
+        if (maybeContinuableAnnotationVisitor.isContinuable()) {
+            markContinuableAnnotation(annotationClassDescriptor);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private AnnotationProcessingState getAnnotationProcessingState(final String annotationClassDescriptor) {
+        if (continuableAnnotations.contains(annotationClassDescriptor))
+            return AnnotationProcessingState.SUPPORTED;
+        else if (processedAnnotations.contains(annotationClassDescriptor))
+            return AnnotationProcessingState.UNSUPPORTED;
+        else
+            return AnnotationProcessingState.UNKNON;
+    }
+
+    private void markProcessedAnnotation(final String annotationClassDescriptor) {
+        processedAnnotations.add(annotationClassDescriptor);
+    }
+
+    private void markContinuableAnnotation(final String annotationClassDescriptor) {
+        markProcessedAnnotation(annotationClassDescriptor);
+        continuableAnnotations.add(annotationClassDescriptor);
+    }
+
+    public boolean isContinuableAnnotation(final String annotationClassDescriptor) {
+        switch (getAnnotationProcessingState(annotationClassDescriptor)) {
+            case SUPPORTED:
+                return true;
+            case UNSUPPORTED:
+                return false;
+            case UNKNON:
+                markProcessedAnnotation(annotationClassDescriptor);
+    
+                final Type type = Type.getType(annotationClassDescriptor);	
+                try {
+                    final InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
+                    try {
+                        return resolveContinuableAnnotation(annotationClassDescriptor, new ClassReader(annotationBytes));
+                    } finally {
+                        if (null != annotationBytes) {
+                            try { annotationBytes.close(); } catch (final IOException exIgnore) {}
+                        }
+                    }
+                } catch (final IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            default:
+                throw new RuntimeException("Unknown annotation kind");
+        }
+    }
+
+    final private static String CONTINUABLE_ANNOTATION_TYPE = Type.getDescriptor(ContinuableAnnotation.class);
+    final private static ContinuableClassInfo UNSUPPORTED_CLASS_INFO = new ContinuableClassInfo() {
+
+        public void markClassProcessed() {}
+
+        public boolean isContinuableMethod(int access, String name, String desc, String signature) {
+            return false;
+        }
+
+        public boolean isClassProcessed() {
+            return true;
+        }
+    };
+
+    private static enum AnnotationProcessingState {
+        UNKNON, UNSUPPORTED, SUPPORTED;
+    }
 }
