@@ -24,7 +24,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     private String outerClassMethodDesc;
     private Map<String, String> normal2synthetic = new HashMap<String, String>();
     private Set<String> desugaredLambdaBodies = new HashSet<String>();
-    
+
     Set<String> continuableMethods = new HashSet<String>();
 
 
@@ -62,39 +62,35 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         if (isAnnotation) {
             return null;
         }
-        
-        if ( 
-        	  (access & Opcodes.ACC_SYNTHETIC) != 0 &&
-        	  ((
-        		(access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0 && // Package protected
-           	 	(access & Opcodes.ACC_STATIC) != 0 && name.startsWith("access$")  // access methods to private members of outer class
-           	  ) ||
-           	  (
-           		(access & Opcodes.ACC_BRIDGE) != 0 // bridge methods for generics erasure
-           	  ))
-           ) {
-       	
-        	return new MethodVisitor(Opcodes.ASM5) {
-        		@Override
-        		public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc, boolean intf) {
-        			if (selfclass.equals(owner)) {
-        				normal2synthetic.put(targetName + targetDesc, name + desc);
-        			}
-        		}
-        		
-        		@Override
-        		public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-        			this.visitMethodInsn(opcode, owner, name, desc);
-        		}
-        	};
+
+        boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0 ;
+        if (isSynthetic) {
+            boolean isPackagePrivate =  (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0 ;
+            boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
+            boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
+            if (isAccessor || isBridge) {
+                return new MethodVisitor(Opcodes.ASM5) {
+                    @Override
+                    public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc, boolean intf) {
+                        if (selfclass.equals(owner)) {
+                            normal2synthetic.put(targetName + targetDesc, name + desc);
+                        }
+                    }
+
+                    @Override
+                    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+                        this.visitMethodInsn(opcode, owner, name, desc);
+                    }
+                };
+            }
         }
 
         // If this method is desugared lambda body
-        if ( (access & Opcodes.ACC_PRIVATE) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("lambda$") ) {
+        if ( isSynthetic && (access & Opcodes.ACC_PRIVATE) != 0 && name.startsWith("lambda$") ) {
             desugaredLambdaBodies.add(name + desc);
             return null;
         }
-        
+
         return new MethodVisitor(Opcodes.ASM5) {
 
             private boolean methodContinuableAnnotationFound = false;
@@ -119,11 +115,11 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
-    	for (final Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
-    		if (continuableMethods.contains(n2s.getKey())) {
-    			continuableMethods.add(n2s.getValue());
-    		}
-    	}
+        for (final Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
+            if (continuableMethods.contains(n2s.getKey())) {
+                continuableMethods.add(n2s.getValue());
+            }
+        }
         visitInheritanceChain();
         checkOuterClass();
         //Take desugared lambda bodies in consideration always 

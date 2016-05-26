@@ -52,7 +52,7 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         if (classInfo == null) {
 
             final MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
-            reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 
             if (maybeContinuableClassVisitor.isContinuable()) {
                 classInfo = new ContinuableClassInfoInternal(

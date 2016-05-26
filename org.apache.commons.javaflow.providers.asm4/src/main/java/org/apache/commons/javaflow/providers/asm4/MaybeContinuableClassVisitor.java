@@ -1,7 +1,9 @@
 package org.apache.commons.javaflow.providers.asm4;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -14,11 +16,13 @@ import org.objectweb.asm.Type;
 class MaybeContinuableClassVisitor extends ClassVisitor {
     private final Asm4ContinuableClassInfoResolver environment; 
     private boolean classContinuatedMarkerFound = false;
+    private String selfclass;
     private String superclass;
     private String[] superinterfaces;
     private String outerClassName;
     private String outerClassMethodName;
     private String outerClassMethodDesc;
+    private Map<String, String> normal2synthetic = new HashMap<String, String>();
 
     Set<String> continuableMethods = new HashSet<String>();
 
@@ -31,7 +35,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
         isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
-
+        selfclass = name;
         superclass = superName;
         superinterfaces = interfaces;
     }
@@ -57,6 +61,23 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             return null;
         }
 
+        boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0 ;
+        if (isSynthetic) {
+            boolean isPackagePrivate =  (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0 ;
+            boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
+            boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
+            if (isAccessor || isBridge) {
+                return new MethodVisitor(Opcodes.ASM4) {
+                    @Override
+                    public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc) {
+                        if (selfclass.equals(owner)) {
+                            normal2synthetic.put(targetName + targetDesc, name + desc);
+                        }
+                    }
+                };
+            }
+        }
+        
         return new MethodVisitor(Opcodes.ASM4) {
 
             private boolean methodContinuableAnnotationFound = false;
@@ -81,6 +102,11 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
+        for (final Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
+            if (continuableMethods.contains(n2s.getKey())) {
+                continuableMethods.add(n2s.getValue());
+            }
+        }
         visitInheritanceChain();
         checkOuterClass();
     }

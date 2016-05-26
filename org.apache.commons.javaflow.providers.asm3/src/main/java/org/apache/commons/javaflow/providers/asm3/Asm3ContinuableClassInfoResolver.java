@@ -29,7 +29,6 @@ public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoRes
         return resourceLoader;
     }
 
-
     public ContinuableClassInfo forget(String className) {
         return visitedClasses.remove(className);
     }
@@ -53,7 +52,7 @@ public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoRes
         if (classInfo == null) {
 
             final MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
-            reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+            reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 
             if (maybeContinuableClassVisitor.isContinuable()) {
                 classInfo = new ContinuableClassInfoInternal(
