@@ -1,8 +1,8 @@
-package org.apache.commons.javaflow.examples.lambdas;
+package org.apache.commons.javaflow.extras;
 
 import org.apache.commons.javaflow.api.continuable;
 
-interface ContinuableRunnable extends Runnable {
+public interface ContinuableRunnable extends Runnable {
 	//Re-declare to mark as continuable
 	@continuable void run();
 }

@@ -1,10 +1,10 @@
 package org.apache.commons.javaflow.providers.asm5;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
@@ -16,40 +16,28 @@ import org.objectweb.asm.Type;
 class MaybeContinuableClassVisitor extends ClassVisitor {
     private final Asm5ContinuableClassInfoResolver environment; 
     private boolean classContinuatedMarkerFound = false;
+    private String selfclass;
     private String superclass;
     private String[] superinterfaces;
     private String outerClassName;
     private String outerClassMethodName;
     private String outerClassMethodDesc;
-
+    private Map<String, String> normal2synthetic = new HashMap<String, String>();
+    private Set<String> desugaredLambdaBodies = new HashSet<String>();
+    
     Set<String> continuableMethods = new HashSet<String>();
-    Set<String> desugaredLambdaBodies = new HashSet<String>();
+
 
     private boolean isAnnotation = false;
-    private boolean isLambda = false;
 
     public MaybeContinuableClassVisitor(final Asm5ContinuableClassInfoResolver environment) {
         super(Opcodes.ASM5);
         this.environment = environment;
     }
 
-    final private static Pattern LAMBDA_CLASS_NAME = Pattern.compile("^(.*)\\$\\$Lambda\\$\\d+$");
-
     public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
         isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
-
-        if ((access & Opcodes.ACC_SUPER) != 0 && (access & Opcodes.ACC_FINAL) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0) {
-            final Matcher matcher = LAMBDA_CLASS_NAME.matcher(name);
-            if (matcher.matches()) {
-                try {
-                    final boolean isOwnerContinuable = environment.resolve(matcher.group(1)) != null; 
-                    isLambda = isOwnerContinuable;
-                } catch (final IOException exIgnore) {
-                    // Should never happen here -- when lambda is being defined 
-                    // the declaring class is already loaded
-                }
-            }
-        }
+        selfclass = name;
         superclass = superName;
         superinterfaces = interfaces;
     }
@@ -74,19 +62,39 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         if (isAnnotation) {
             return null;
         }
+        
+        if ( 
+        	  (access & Opcodes.ACC_SYNTHETIC) != 0 &&
+        	  ((
+        		(access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0 && // Package protected
+           	 	(access & Opcodes.ACC_STATIC) != 0 && name.startsWith("access$")  // access methods to private members of outer class
+           	  ) ||
+           	  (
+           		(access & Opcodes.ACC_BRIDGE) != 0 // bridge methods for generics erasure
+           	  ))
+           ) {
+       	
+        	return new MethodVisitor(Opcodes.ASM5) {
+        		@Override
+        		public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc, boolean intf) {
+        			if (selfclass.equals(owner)) {
+        				normal2synthetic.put(targetName + targetDesc, name + desc);
+        			}
+        		}
+        		
+        		@Override
+        		public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+        			this.visitMethodInsn(opcode, owner, name, desc);
+        		}
+        	};
+        }
 
-        // If desugared lambda method in outer class
-        if ( (access & Opcodes.ACC_PRIVATE) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("lambda$") ){
+        // If this method is desugared lambda body
+        if ( (access & Opcodes.ACC_PRIVATE) != 0 && (access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("lambda$") ) {
             desugaredLambdaBodies.add(name + desc);
             return null;
         }
-        if (isLambda && (access & Opcodes.ACC_PRIVATE) == 0 && (access & Opcodes.ACC_STATIC) == 0) {
-            // Non-private non-static methods in lambda are SAM implementation + additional bridges
-            continuableMethods.add(name + desc);
-            return null;
-        }
-
-        // Otherwise check annotations
+        
         return new MethodVisitor(Opcodes.ASM5) {
 
             private boolean methodContinuableAnnotationFound = false;
@@ -111,13 +119,17 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
+    	for (final Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
+    		if (continuableMethods.contains(n2s.getKey())) {
+    			continuableMethods.add(n2s.getValue());
+    		}
+    	}
         visitInheritanceChain();
         checkOuterClass();
-        if (!continuableMethods.isEmpty()) {
-            // Take desugared lambda bodies in consideration 
-            // only when we have at least one continuable method
-            continuableMethods.addAll(desugaredLambdaBodies);
-        }
+        //Take desugared lambda bodies in consideration always 
+        // If there is no calls to continuable inside then
+        // there are will be no run-time penalty anyway
+        continuableMethods.addAll(desugaredLambdaBodies);
     }
 
     private boolean inheritanceChainVisited = false;

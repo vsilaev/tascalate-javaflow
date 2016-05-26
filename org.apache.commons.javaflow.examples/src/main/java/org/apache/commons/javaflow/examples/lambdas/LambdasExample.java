@@ -1,6 +1,7 @@
 package org.apache.commons.javaflow.examples.lambdas;
 
-import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.apply;
+import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.accept;
+import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.exec;
 import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.from;
 
 import java.util.Arrays;
@@ -9,12 +10,14 @@ import java.util.List;
 import org.apache.commons.javaflow.api.ccs;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
+import org.apache.commons.javaflow.extras.ContinuableRunnable;
+import org.apache.commons.javaflow.extras.Continuations;
 
 public class LambdasExample {
 	public static void main(final String[] argv) throws Exception {
 		LambdasExample example = new LambdasExample();
 		
-		for (Continuation cc = Continuation.startWith(example::run); null != cc; cc = cc.resume()) {
+		for (Continuation cc = Continuations.start(example::run); null != cc; cc = cc.resume()) {
 			System.out.println("Interrupted " + cc.value());
 		}
 		
@@ -38,25 +41,21 @@ public class LambdasExample {
 		r2.run();
 
 		// Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
-		@ccs Runnable closure = () -> {
-			System.out.println("Lambda by arrow function -- before");
-			Continuation.suspend(" ** Lambda by arrow function" + ref);
-			System.out.println("Lambda by arrow function -- after");
-		};
+		// Notice that we still MUST create right interface (ContinuableRunnable in this case)
+		@ccs Runnable closure = exec( () -> {
+			System.out.println("Plain Runnable Lambda by arrow function -- before");
+			Continuation.suspend(" ** Plain Runnable Lambda by arrow function" + ref);
+			System.out.println("Plain Runnable Lambda by arrow function -- after");
+		} );
 		closure.run();
-		
-		// Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
-		// Arrays are supported as well
-		@ccs Runnable[] exe = {this::lambdaDemo};
-		exe[0].run();
-
 
 		// Unfortunately, any default methods should be re-wrapped like below
 		// See org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters
 		List<String> listOfStrings = Arrays.asList("A", "B", "C"); 
 		
 		from(listOfStrings).forEach( 
-			apply(this::yieldString1).andThen(apply(this::yieldString2)) 
+
+			accept(this::yieldString1).andThen(accept(this::yieldString2)) 
 		);
 		
 	}
