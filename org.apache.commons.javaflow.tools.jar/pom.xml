@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.apache.commons</groupId>
 		<artifactId>org.apache.commons.javaflow.parent</artifactId>
-		<version>2.0-SNAPSHOT</version>
+		<version>${project.version}</version>
 		<relativePath>../</relativePath>
 	</parent>
 
@@ -15,10 +15,6 @@
 	<name>JavaFlow / Tools / Command-line JAR Rewriter</name>
 	<url>http://maven.apache.org</url>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -27,17 +23,17 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>org.apache.commons.javaflow.api</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>org.apache.commons.javaflow.spi</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>org.apache.commons.javaflow.providers.asm5</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
