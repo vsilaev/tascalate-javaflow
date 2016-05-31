@@ -1,0 +1,91 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.tascalate.javaflow</groupId>
+		<artifactId>net.tascalate.javaflow.parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+		<relativePath>../</relativePath>
+	</parent>
+
+	<artifactId>net.tascalate.javaflow.tools.javaagent</artifactId>
+	<packaging>jar</packaging>
+
+	<name>Tascalate JavaFlow / Tools / Continuations Instrumentation Agent</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.tascalate.javaflow</groupId>
+			<artifactId>net.tascalate.javaflow.api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.tascalate.javaflow</groupId>
+			<artifactId>net.tascalate.javaflow.spi</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.tascalate.javaflow</groupId>
+			<artifactId>net.tascalate.javaflow.providers.asm5</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<finalName>javaflow.instrument-continuations</finalName>
+					<archive>
+						<index>true</index>
+						<compress>true</compress>
+						<manifest>
+							<!-- 
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							 -->
+						</manifest>
+						<manifestEntries>
+							<Premain-Class>org.apache.commons.javaflow.instrumentation.JavaFlowInstrumentationAgent</Premain-Class>
+							<Agent-Class>org.apache.commons.javaflow.instrumentation.JavaFlowInstrumentationAgent</Agent-Class>
+							<Can-Redefine-Classes>true</Can-Redefine-Classes>
+							<Can-Retransform-Classes>true</Can-Retransform-Classes>
+						</manifestEntries>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<configuration>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>						
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

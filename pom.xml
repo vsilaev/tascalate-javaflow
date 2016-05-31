@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.apache.commons</groupId>
-	<artifactId>org.apache.commons.javaflow.parent</artifactId>
-	<version>${project.version}</version>
+	<groupId>net.tascalate.javaflow</groupId>
+	<artifactId>net.tascalate.javaflow.parent</artifactId>
+	<version>2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>JavFlow</name>
@@ -36,22 +36,22 @@
 
 
 	<modules>
-		<module>org.apache.commons.javaflow.api</module>
-		<module>org.apache.commons.javaflow.spi</module>
-		<module>org.apache.commons.javaflow.extras</module>
-		<module>org.apache.commons.javaflow.utils</module>
-		<module>org.apache.commons.javaflow.providers.asm3</module>
-		<module>org.apache.commons.javaflow.providers.asm4</module>
-		<module>org.apache.commons.javaflow.providers.asm5</module>
-		<module>org.apache.commons.javaflow.tools.jar</module>
-		<module>org.apache.commons.javaflow.tools.javaagent</module>
-		<module>org.apache.commons.javaflow.tools.maven</module>
-		<module>org.apache.commons.javaflow.tools.ant</module>
-		<module>org.apache.commons.javaflow.tools.cdi-javaagent</module>
-		<module>org.apache.commons.javaflow.examples</module>
-		<module>org.apache.commons.javaflow.examples-dyninvoke</module>
-		<module>org.apache.commons.javaflow.examples-cdi-weld</module>
-		<module>org.apache.commons.javaflow.examples-cdi-owb</module>
+		<module>net.tascalate.javaflow.api</module>
+		<module>net.tascalate.javaflow.spi</module>
+		<module>net.tascalate.javaflow.providers.asm3</module>
+		<module>net.tascalate.javaflow.providers.asm4</module>
+		<module>net.tascalate.javaflow.providers.asm5</module>
+		<module>net.tascalate.javaflow.tools.jar</module>
+		<module>net.tascalate.javaflow.tools.javaagent</module>
+		<module>net.tascalate.javaflow.tools.maven</module>
+		<module>net.tascalate.javaflow.tools.ant</module>
+		<module>net.tascalate.javaflow.tools.cdi-javaagent</module>
+		<module>net.tascalate.javaflow.extras</module>
+		<module>net.tascalate.javaflow.utils</module>
+		<module>net.tascalate.javaflow.examples</module>
+		<module>net.tascalate.javaflow.examples-dyninvoke</module>
+		<module>net.tascalate.javaflow.examples-cdi-weld</module>
+		<module>net.tascalate.javaflow.examples-cdi-owb</module>
 	</modules>
 
 

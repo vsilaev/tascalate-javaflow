@@ -1,0 +1,1 @@
+-javaagent:../net.tascalate.javaflow.tools.javaagent/target/javaflow.instrument-continuations.jar  -javaagent:../net.tascalate.javaflow.tools.cdi-javaagent/target/javaflow.instrument-cdi-proxy.jar

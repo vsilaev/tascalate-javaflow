@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="net.tascalate.javaflow.examples" basedir="." default="all">
+    <property name="src.dir"       value="src/main/java"/>
+    <property name="build.dir"     value="target"/>
+    <property name="classes.dir"   value="${build.dir}/classes"/>
+    <property name="i-classes.dir" value="${build.dir}/instrument/classes"/>
+    <property name="jar.dir"       value="${build.dir}/jar"/>
+    <property name="i-jar.dir"     value="${build.dir}/instrument/jar"/>
+    <property name="lib.dir"       value="lib"/>
+    <property name="ant-lib.dir"   value="ant-lib"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+
+    <path id="ant-lib-classpath">
+        <fileset dir="${ant-lib.dir}" includes="**/*.jar"/>
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+    </target>
+
+    <!-- USE 3 taskdef below to instrument classes before packaging or when packaging is unnecessary --> 
+    <target name="instrument-classes" description="JavaFlow Instrumentation" depends="compile">
+        <taskdef name="javaflow" classname="org.apache.commons.javaflow.ant.AntRewriteTask" classpathref="ant-lib-classpath"/>
+	<echo message="JavaFlow instrumentation of compiled classes in ${classes.dir}" />
+        <javaflow srcdir="${classes.dir}" destdir="${i-classes.dir}" classpathref="classpath"/>
+    </target>
+
+    <target name="jar" depends="instrument-classes">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${i-classes.dir}"/>
+    </target>
+
+    <target name="all" depends="clean,jar"/>
+
+    <!-- USE 3 taskdef below to instrument classes in resulting jar -->
+    <!--
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}"/>
+    </target>
+
+    <target name="instrument-jar" description="JavaFlow Instrumentation" depends="jar">
+        <taskdef name="javaflow" classname="org.apache.commons.javaflow.ant.AntRewriteTask" classpathref="ant-lib-classpath"/>
+	<echo message="JavaFlow instrumentation of compiled classes in ${jar.dir}/${ant.project.name}.jar" />
+        <javaflow srcdir="${jar.dir}" destdir="${i-jar.dir}" classpathref="classpath"/>
+    </target>
+
+
+    <target name="all" depends="clean,instrument-jar"/>
+    -->
+</project>

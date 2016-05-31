@@ -1,0 +1,6 @@
+To run example correctly you MUST use the following Java agent:
+
+-javaagent:../net.tascalate.javaflow.tools.cdi-javaagent/target/javaflow.instrument-cdi-proxy.jar
+
+It instruments OpenWebBeans generated proxies to work correctly with continuations!
+First (by order) agent (-javaagent:../net.tascalate.javaflow.tools.javaagent/target/javaflow.instrument-continuations.jar) is only necessary if you are using Java 8 lambdas, or instrument classes at run-time
