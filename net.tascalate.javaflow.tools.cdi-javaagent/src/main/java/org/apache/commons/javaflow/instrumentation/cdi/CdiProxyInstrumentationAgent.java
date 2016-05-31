@@ -11,7 +11,7 @@ public class CdiProxyInstrumentationAgent {
      * will be called. Then the real application main method will be called.
      * 
      * @param args
-     * @param inst
+     * @param instrumentation
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
@@ -25,7 +25,7 @@ public class CdiProxyInstrumentationAgent {
      * started after VM startup.
      * 
      * @param args
-     * @param inst
+     * @param instrumentation
      * @throws Exception
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {

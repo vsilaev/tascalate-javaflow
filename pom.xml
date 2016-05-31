@@ -7,10 +7,30 @@
 	<version>2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>JavFlow</name>
-	<url>http://maven.apache.org</url>
+	<name>Tascalate JavFlow</name>
+	<url>https://github.com/vsilaev/tascalate-javaflow</url>
+	<description>Continuations / CoRoutines library for Java 1.5 - 1.8, incl. build tools &amp; CDI support. 
+        This project is based on completely re-worked Apache Jakarta Commons JavaFlow library</description>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:git:git@github.com:vsilaev/tascalate-javaflow.git</connection>
+		<developerConnection>scm:git:git@github.com:vsilaev/tascalate-javaflow.git</developerConnection>
+		<url>scm:git:git@github.com:vsilaev/tascalate-javaflow.git</url>
+	</scm>
+
 
 	<developers>
+		<developer>
+			<name>Valery Silaev</name>
+			<email>vsilaev at java.net</email>
+		</developer>
+		<!-- Developers of original Apache Commons JavaFlow -->
 		<developer>
 			<id>tcurdt</id>
 			<name>Torsten Curdt</name>
@@ -24,6 +44,7 @@
 	</developers>
 
 	<contributors>
+		<!-- Contributors to original Apache Commons JavaFlow -->
 		<contributor>
 			<name>Eugene Kuleshov</name>
 			<email>eu at javatx.org</email>
@@ -82,12 +103,38 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
+				<version>3.5.1</version>
 				<configuration>
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin><!--
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -96,7 +143,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19</version>
+				<version>2.19.1</version>
 				<configuration>
 					<includes>
 						<include>**/*TestSuite.java</include>

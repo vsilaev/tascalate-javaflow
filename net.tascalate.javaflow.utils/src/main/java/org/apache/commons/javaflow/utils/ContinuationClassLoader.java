@@ -129,8 +129,8 @@ public class ContinuationClassLoader extends URLClassLoader {
      *      attempts are delegated. May be <code>null</code>,
      *      in which case the {@link ClassLoader#getSystemClassLoader() system classloader}
      *      is used as the parent.
-     * @param transformer
-     *      This transformer is used to perform the byte-code enhancement.
+     * @param transformationFactory
+     *      This factory is used to create necessary resolver/transformer to perform the byte-code enhancement.
      *      May not be null.
      */
     public ContinuationClassLoader(URL[] urls, ClassLoader parent, ResourceTransformationFactory transformationFactory) {

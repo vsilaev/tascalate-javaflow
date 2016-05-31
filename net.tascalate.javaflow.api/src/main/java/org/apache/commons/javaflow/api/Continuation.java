@@ -86,16 +86,19 @@ public final class Continuation implements Serializable {
      * <p>
      * Unlike the {@link #startWith(Runnable)} method, this method doesn't actually
      * execute the <tt>Runnable</tt> object. It will be executed when
-     * it's {@link #resume() continued}.
+     * it's {@link #resume() resumed}.</p>
+     * 
+     * @param target
+     *      The object whose <tt>run</tt> method will be executed. 
      * 
      * @return
      *      always return a non-null valid object.
      */
-    public static Continuation startSuspendedWith( final Runnable pTarget ) {
-        if(pTarget == null) {
+    public static Continuation startSuspendedWith( final Runnable target ) {
+        if(target == null) {
             throw new IllegalArgumentException("target is null");
         }
-        return new Continuation( new StackRecorder(pTarget), null );
+        return new Continuation( new StackRecorder(target), null );
     }
 
     /**
@@ -104,11 +107,15 @@ public final class Continuation implements Serializable {
      *
      * <p>
      * This is a short hand for <tt>startWith(target,null)</tt>.
-     *
+     * 
+     * @param target
+     *      The object whose <tt>run</tt> method will be executed.  
+     * @return
+     *      Continuation object if runnable supplied is supended, otherwise <code>null</code>
      * @see #startWith(Runnable, Object)
      */
-    public static Continuation startWith( final Runnable pTarget ) {
-        return startWith(pTarget, null);
+    public static Continuation startWith( final Runnable target ) {
+        return startWith(target, null);
     }
 
     /**
@@ -117,7 +124,7 @@ public final class Continuation implements Serializable {
      *
      * This method blocks until the continuation suspends or completes.
      *
-     * @param pTarget
+     * @param target
      *      The object whose <tt>run</tt> method will be executed.
      * @param pContext
      *      This value can be obtained from {@link #getContext()} until this method returns.
@@ -128,12 +135,12 @@ public final class Continuation implements Serializable {
      *      a new non-null continuation is returned.
      * @see #getContext()
      */
-    public static Continuation startWith( final Runnable pTarget, final Object pContext ) {
+    public static Continuation startWith( final Runnable target, final Object pContext ) {
         if (log.isDebugEnabled()) {
-        	log.debug("starting new flow from " + ReflectionUtils.getClassName(pTarget) + "/" + ReflectionUtils.getClassLoaderName(pTarget));
+        	log.debug("starting new flow from " + ReflectionUtils.getClassName(target) + "/" + ReflectionUtils.getClassLoaderName(target));
         }
 
-        return startSuspendedWith(pTarget).resume(pContext);
+        return startSuspendedWith(target).resume(pContext);
     }
 
     /**
@@ -143,13 +150,21 @@ public final class Continuation implements Serializable {
      *
      * <p>
      * This is a short hand for <tt>continueWith(resumed,null)</tt>.
+     * 
+     * @param continuation
+     *      The suspended continuation to be resumed. Must not be null.
+     * 
+     * @return
+     *      If the execution completes and there's nothing more to continue, return null.
+     *      Otherwise, the execution has been {@link #suspend() suspended}, in which case
+     *      a new non-null continuation is returned.
      *
      * @see #continueWith(Continuation, Object)
      * 
      * @deprecated
      */
-    public static Continuation continueWith(final Continuation pOldContinuation) {
-        return continueWith(pOldContinuation, (Object)null);
+    public static Continuation continueWith(final Continuation continuation) {
+        return continueWith(continuation, (Object)null);
     }
 
     /**
@@ -160,25 +175,27 @@ public final class Continuation implements Serializable {
      *
      * This method blocks until the continuation suspends or completes.
      *
-     * @param pOldContinuation
-     *      The resumed continuation to be executed. Must not be null.
-     * @param pContext
-     *      This value can be obtained from {@link #getContext()} until this method returns.
-     *      Can be null.
+     * @param continuation
+     *      The suspended continuation to be resumed. Must not be null.
+     *      
+     * @param value
+     *      The value to be returned as a result form {@link #suspend() Continuation.suspend()} call or 
+     *      from {@link #getContext()} until this method returns. Can be null.
      * @return
      *      If the execution completes and there's nothing more to continue, return null.
      *      Otherwise, the execution has been {@link #suspend() suspended}, in which case
      *      a new non-null continuation is returned.
-     * @see #resume(Object) #getContext()
+     * @see #getContext() 
+     * @see #suspend()
      * 
      * @deprecated
      */
-    public static Continuation continueWith(final Continuation pOldContinuation, final Object pContext) {
-        if (pOldContinuation == null) {
+    public static Continuation continueWith(final Continuation continuation, final Object value) {
+        if (continuation == null) {
             throw new IllegalArgumentException("continuation parameter must not be null.");
         }
 
-        return pOldContinuation.resume(pContext);
+        return continuation.resume(value);
     }
     
     /**
@@ -186,6 +203,11 @@ public final class Continuation implements Serializable {
      *
      * <p>
      * This is a short hand for <tt>resume(null)</tt>.
+     * 
+     * @return
+     *      If the execution completes and there's nothing more to continue, return null.
+     *      Otherwise, the execution has been {@link #suspend() suspended}, in which case
+     *      a new non-null continuation is returned.
      *
      * @see #resume(Object)
      * 
@@ -202,20 +224,26 @@ public final class Continuation implements Serializable {
      * This method blocks until the continuation suspends or completes.
      *
      * @param value
-     *      This value can be obtained from {@link #getContext()} until this method returns.
-     *      Can be null.
+     *      The value to be returned as a result form {@link #suspend() Continuation.suspend()} call or 
+     *      from {@link #getContext()} until this method returns. Can be null.
      * @return
      *      If the execution completes and there's nothing more to continue, return null.
      *      Otherwise, the execution has been {@link #suspend() suspended}, in which case
      *      a new non-null continuation is returned.
      * @see #getContext()
+     * @see #suspend()
      * 
      */    
     public Continuation resume(final Object value) {
     	return resumeWith(ResumeParameter.value(value));
     }
     
-    public void destroy() {
+    /**
+     * Abnormally terminates the suspended call chain represented by this continuation.
+     * <p>Use this method to execute any clean-up code of suspended methods (<code>finally</code> blocks)
+     * when there is no need to {@link #resume()} the continuation.</p>
+     */
+    public void terminate() {
     	resumeWith(ResumeParameter.exit());
     }
     
@@ -242,6 +270,11 @@ public final class Continuation implements Serializable {
         }    	
     }
 
+    /**
+     * Check if captured continuation is serializable
+     * @return
+     *      true if all variables on captured stack and runnable supplied are serializeble, false otherwise.  
+     */
     public boolean isSerializable() {
         return stackRecorder.isSerializable();
     }
@@ -283,11 +316,11 @@ public final class Continuation implements Serializable {
      * <p>
      * This method can be only called inside {@link #continueWith} or {@link #startWith} methods.
      * When called, the thread returns from the above methods with a new {@link Continuation}
-     * object that captures the thread state and with {@link #result} equals to parameter passed.
+     * object that captures the thread state and with {@link #value()} equals to parameter passed.
      *
      * @param value 
      *      The intermediate result yielded by suspended continuations
-     *      The value may be accessed via {@link #result} method of continuation returned
+     *      The value may be accessed via {@link #value()} method of continuation returned
      *
      * @return
      *      The value to be returned to suspended code after continuation is resumed.

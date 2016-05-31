@@ -20,12 +20,10 @@ package org.apache.commons.javaflow.spi;
  * Byte-code transformer that enhances the class files for javaflow.
  *
  * <p>
- * When {@link Continuation#suspend()} is called, all the methods
+ * When Continuation.suspend is called, all the methods
  * in the stack frame needs to be enhanced.
  *
  * @author tcurdt
- * @see BcelClassTransformer
- * @see AsmClassTransformer
  */
 public interface ResourceTransformer {
     abstract public byte[] transform( byte[] original );

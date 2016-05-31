@@ -11,7 +11,7 @@ public class JavaFlowInstrumentationAgent {
      * will be called. Then the real application main method will be called.
      * 
      * @param args
-     * @param inst
+     * @param instrumentation
      * @throws Exception
      */
     public static void premain(final String args,
@@ -26,7 +26,7 @@ public class JavaFlowInstrumentationAgent {
      * started after VM startup.
      * 
      * @param args
-     * @param inst
+     * @param instrumentation
      * @throws Exception
      */
     public static void agentmain(final String args,

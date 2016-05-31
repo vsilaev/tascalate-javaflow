@@ -14,7 +14,7 @@ public class CancelExample {
 			System.out.println("In main after #" + i + " suspend (cc.value = " + cc.value() + ") ");
 		}
 		// This will gracefully complete continuation -- finally blocks will be executed
-		cc.destroy();
+		cc.terminate();
 		System.out.println("In main after destroy");
 		System.out.println("===");
 	}

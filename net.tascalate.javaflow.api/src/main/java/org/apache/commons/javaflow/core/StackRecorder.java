@@ -58,16 +58,21 @@ public final class StackRecorder extends Stack {
 
     /**
      * Creates a new empty {@link StackRecorder} that runs the given target.
+     * @param target
+     *       a target to run
      */
-    public StackRecorder( final Runnable pTarget ) {
-        super(pTarget);
+    public StackRecorder( final Runnable target ) {
+        super(target);
     }
 
     /**
      * Creates a clone of the given {@link StackRecorder}.
+     * @param parent
+     *       a StackRecorder to clone
+     * 
      */
-    public StackRecorder(final Stack pParent) {
-        super(pParent);
+    public StackRecorder(final Stack parent) {
+        super(parent);
     }
 
     public static Object suspend(final SuspendResult value) {
@@ -162,6 +167,12 @@ public final class StackRecorder extends Stack {
     	throw ContinuationDeath.INSTANCE;
     }
     
+    /**
+     * Access value supplied to resumed method
+     * 
+     * @return value passed to the resumed method (may be <code>null</code>)
+     * 
+     */
     public Object getContext() {
         return null == parameter ? null : parameter.value();
     }
@@ -184,6 +195,8 @@ public final class StackRecorder extends Stack {
 
     /**
      * Return the continuation, which is associated to the current thread.
+     * @return currently associated continuation stack, or <code>null</code> if invoked outside
+     * of continuation context
      */
     public static StackRecorder get() {
         return threadMap.get();

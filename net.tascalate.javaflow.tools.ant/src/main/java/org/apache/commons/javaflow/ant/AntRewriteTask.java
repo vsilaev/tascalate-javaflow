@@ -37,6 +37,8 @@ public class AntRewriteTask extends MatchingTask {
     /**
      * Directory to which the transformed files will be written.
      * This can be the same as the source directory.
+     * 
+     * @param pFile destination directory
      */
     public void setDestdir(final File pFile) {
         dstDir = pFile;
@@ -44,8 +46,10 @@ public class AntRewriteTask extends MatchingTask {
 	
     /**
      * Directory from which the input files are read.
-     * This and the inherited {@link MatchingTask} forms an implicit
-     * {@link FileSet}.
+     * This and the inherited MatchingTask forms an implicit
+     * FileSet.
+     * 
+     * @param pFile source directory
      */
     public void setSrcDir(final File pFile) {
         srcDir = pFile;

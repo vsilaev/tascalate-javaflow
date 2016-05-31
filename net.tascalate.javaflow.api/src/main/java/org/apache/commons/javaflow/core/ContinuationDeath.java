@@ -5,8 +5,7 @@ package org.apache.commons.javaflow.core;
  * a control flow change that needs
  * the cooperation inside {@link StackRecorder}.
  *
- * <p>
- * This class is only for javaflow internal code.
+ * <p>This class is only for javaflow internal code.</p>
  *
  * @author Kohsuke Kawaguchi
  */
