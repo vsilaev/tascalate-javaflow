@@ -1,10 +1,6 @@
 package org.apache.commons.javaflow.examples.lambdas;
 
-import java.util.Iterator;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import org.apache.commons.javaflow.api.continuable;
+import org.apache.commons.javaflow.extras.ContinuableConsumer;
 import org.apache.commons.javaflow.extras.ContinuableRunnable;
 
 public class ContinuableAdapters {
@@ -17,21 +13,7 @@ public class ContinuableAdapters {
         return o;
     }
 
-    public @continuable static <T> void forEach(Stream<T> o, ContinuableConsumer<? super T> action) {
-        forEach(o.iterator(), action);
-    }
-
-    public @continuable static <T> void forEach(Iterable<T> o, ContinuableConsumer<? super T> action) {
-        forEach(o.iterator(), action);
-    }
-
-    public @continuable static <T> void forEach(Iterator<T> it, ContinuableConsumer<? super T> action) {
-        while (it.hasNext()) {
-            T v = it.next();
-            action.accept(v);
-        }
-    }
-
+    /*
     interface ContinuableConsumer<T> extends Consumer<T> {
         @continuable void accept(T t);
 
@@ -47,4 +29,5 @@ public class ContinuableAdapters {
             return andThen((ContinuableConsumer<? super T>)after);
         }
     }
+    */
 }

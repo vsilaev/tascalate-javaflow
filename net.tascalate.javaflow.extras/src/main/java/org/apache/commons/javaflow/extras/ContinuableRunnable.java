@@ -2,7 +2,13 @@ package org.apache.commons.javaflow.extras;
 
 import org.apache.commons.javaflow.api.continuable;
 
+/**
+ * Continuable version of Runnable 
+ */
+@FunctionalInterface
 public interface ContinuableRunnable extends Runnable {
-	//Re-declare to mark as continuable
+	/**
+	 * Run method re-declared as continuable
+	 */
 	@continuable void run();
 }

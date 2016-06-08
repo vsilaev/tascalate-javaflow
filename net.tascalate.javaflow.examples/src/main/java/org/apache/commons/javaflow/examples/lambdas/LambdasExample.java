@@ -2,7 +2,6 @@ package org.apache.commons.javaflow.examples.lambdas;
 
 import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.accept;
 import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.exec;
-import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.forEach;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,10 +15,9 @@ import org.apache.commons.javaflow.extras.Continuations;
 public class LambdasExample {
     public static void main(final String[] argv) throws Exception {
         LambdasExample example = new LambdasExample();
-
-        for (Continuation cc = Continuations.start(example::executeAll); null != cc; cc = cc.resume()) {
-            System.out.println("Interrupted " + cc.value());
-        }
+        Continuations.<String>forEach(example::executeAll, s -> {
+            System.out.println("Interrupted " + s);
+        });
 
         System.out.println("===");
 
@@ -53,7 +51,7 @@ public class LambdasExample {
         // See org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters for
         // definition of "accept" & "forEach"
         List<String> listOfStrings = Arrays.asList("A", null, "B", null, "C"); 
-        forEach( 
+        Continuations.forEach( 
                 listOfStrings.stream().filter(s -> s != null).map(s -> s + s), 
                 accept(this::yieldString1).andThen(this::yieldString2) 
         );
