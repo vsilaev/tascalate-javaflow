@@ -27,6 +27,15 @@ public class FastClassVerifier extends BasicVerifier {
         }
         return super.copyOperation(insn, value);
     }
+    
+    @Override
+    public BasicValue unaryOperation(final AbstractInsnNode insn, BasicValue value) throws AnalyzerException {
+        // Fix error with analyzer for try-with-resources (it sees uninitialized values)
+        if ((insn.getOpcode() == Opcodes.ARETURN) && !value.isReference()) {
+        	value = newValue(Type.getType("Lnull;"));
+        }
+       	return super.unaryOperation(insn, value);
+    } 
 
     @Override
     public BasicValue newValue(final Type type) {
@@ -67,13 +76,9 @@ public class FastClassVerifier extends BasicVerifier {
                 return type.equals(expectedType);
             case Type.ARRAY:
             case Type.OBJECT:
-                if ("Lnull;".equals(type.getDescriptor())) {
-                    return true;
-                } else {
-                    // We are transforming valid bytecode to (hopefully) valid bytecode
-                    // hence pairs of "value" and "expected" must be compatible
-                    return true;//isAssignableFrom(expectedType, type);
-                }
+                // We are transforming valid bytecode to (hopefully) valid bytecode
+                // hence pairs of "value" and "expected" must be compatible
+                return true;//isAssignableFrom(expectedType, type);
             default:
                 throw new Error("Internal error");
         }
