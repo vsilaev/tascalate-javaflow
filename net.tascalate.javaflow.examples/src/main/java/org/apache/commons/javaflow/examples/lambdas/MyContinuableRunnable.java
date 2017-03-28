@@ -13,19 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.examples.interceptor;
+package org.apache.commons.javaflow.examples.lambdas;
 
 import org.apache.commons.javaflow.api.continuable;
-import org.apache.commons.javaflow.api.Continuation;
 
-public class TargetClass implements TargetInterface {
-
-	@Override
-	public @continuable void execute(final String prefix) {
-		System.out.println("In target BEFORE suspend");
-		final Object value = Continuation.suspend("Target @ " + prefix);
-		System.out.println("In target AFTER suspend: " + value);
-	}
-
-	
+interface MyContinuableRunnable extends Runnable {
+    @continuable void run();
 }

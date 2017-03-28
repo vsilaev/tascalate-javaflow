@@ -16,10 +16,10 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-plugin-api.version>3.2.1</maven-plugin-api.version>
 		<maven-plugin-annotations.version>3.3</maven-plugin-annotations.version>
 		<maven-core.version>3.2.1</maven-core.version>
+		<license.header>../HEADER-ORIGINAL.txt</license.header>
 	</properties>
 
 	<dependencies>

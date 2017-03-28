@@ -24,26 +24,24 @@
 		<url>scm:git:git@github.com:vsilaev/tascalate-javaflow.git</url>
 	</scm>
 
-
 	<developers>
 		<developer>
+			<id>vsilaev</id>
 			<name>Valery Silaev</name>
 			<email>vsilaev at java.net</email>
-		</developer>
-		<!-- Developers of original Apache Commons JavaFlow -->
-		<developer>
-			<id>tcurdt</id>
-			<name>Torsten Curdt</name>
-			<email>tcurdt at apache.org</email>
-		</developer>
-		<developer>
-			<id>kohsuke</id>
-			<name>Kohsuke Kawaguchi</name>
-			<email>kohsuke at apache.org</email>
 		</developer>
 	</developers>
 
 	<contributors>
+		<!-- Developers of the original Apache Commons JavaFlow -->
+		<contributor>
+			<name>Torsten Curdt</name>
+			<email>tcurdt at apache.org</email>
+		</contributor>
+		<contributor>
+			<name>Kohsuke Kawaguchi</name>
+			<email>kohsuke at apache.org</email>
+		</contributor>
 		<!-- Contributors to original Apache Commons JavaFlow -->
 		<contributor>
 			<name>Eugene Kuleshov</name>
@@ -98,17 +96,39 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<build>
-		<plugins>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+       <profiles>
+           <profile>
+               <id>release-sign-artifacts</id>
+               <activation>
+                   <property>
+                       <name>performRelease</name>
+                       <value>true</value>
+                   </property>
+               </activation>
+               <build>
+                   <plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>false</autoReleaseAfterClose>
 				</configuration>
-			</plugin>
+			</plugin> 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -121,7 +141,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin><!--
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -134,7 +154,58 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin> -->
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+                   </plugins>
+               </build>
+           </profile>
+       </profiles>
+
+
+	<build>
+		<plugins>
+			<!--
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<includes>
+						<include>**/*.java</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>

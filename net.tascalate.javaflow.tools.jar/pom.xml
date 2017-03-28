@@ -15,6 +15,10 @@
 	<name>Tascalate JavaFlow / Tools / Command-line JAR Rewriter</name>
 	<url>http://maven.apache.org</url>
 
+	<properties>
+		<license.header>../HEADER-DERRIVED.txt</license.header>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>commons-logging</groupId>

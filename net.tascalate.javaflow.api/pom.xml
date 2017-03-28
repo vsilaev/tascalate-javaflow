@@ -16,7 +16,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<license.header>../HEADER-DERRIVED.txt</license.header>
 	</properties>
 
 	<dependencies>

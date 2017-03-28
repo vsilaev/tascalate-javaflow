@@ -15,6 +15,10 @@
 	<name>Tascalate JavaFlow / Examples / CDI OpenWebBeans</name> 
 	<url>http://maven.apache.org</url>
 
+	<properties>
+		<license.header>../HEADER-ORIGINAL.txt</license.header>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>

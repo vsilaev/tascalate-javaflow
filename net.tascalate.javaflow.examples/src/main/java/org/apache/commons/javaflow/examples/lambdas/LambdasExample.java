@@ -1,7 +1,22 @@
+/**
+ * ﻿Copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.commons.javaflow.examples.lambdas;
 
-import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.accept;
-import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.exec;
+import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.consumer;
+import static org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters.runnable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +24,6 @@ import java.util.List;
 import org.apache.commons.javaflow.api.ccs;
 import org.apache.commons.javaflow.api.continuable;
 import org.apache.commons.javaflow.api.Continuation;
-import org.apache.commons.javaflow.extras.ContinuableRunnable;
 import org.apache.commons.javaflow.extras.Continuations;
 
 public class LambdasExample {
@@ -28,10 +42,10 @@ public class LambdasExample {
     private @continuable void executeAll() {
 
         //  @Continuable method references and @Continuable SAM interfaces are supported
-        ContinuableRunnable r1 = this::lambdaDemo;
+        MyContinuableRunnable r1 = this::lambdaDemo;
         r1.run();
 
-        ContinuableRunnable r2 = () -> {
+        MyContinuableRunnable r2 = () -> {
             System.out.println("ContinuableRunnable by arrow function -- before");
             Continuation.suspend(" ** ContinuableRunnable by arrow function");
             System.out.println("ContinuableRunnable by arrow function -- after");
@@ -40,7 +54,7 @@ public class LambdasExample {
 
         // Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
         // Notice that we still MUST create right interface (ContinuableRunnable in this case)
-        @ccs Runnable closure = exec( () -> {
+        @ccs Runnable closure = runnable( () -> {
             System.out.println("Plain Runnable Lambda by arrow function -- before");
             Continuation.suspend(" ** Plain Runnable Lambda by arrow function" + ref);
             System.out.println("Plain Runnable Lambda by arrow function -- after");
@@ -53,7 +67,7 @@ public class LambdasExample {
         List<String> listOfStrings = Arrays.asList("A", null, "B", null, "C"); 
         Continuations.forEach( 
                 listOfStrings.stream().filter(s -> s != null).map(s -> s + s), 
-                accept(this::yieldString1).andThen(this::yieldString2) 
+                consumer(this::yieldString1).andThen(this::yieldString2) 
         );
 
     }
