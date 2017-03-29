@@ -71,7 +71,7 @@ It's possibe to instrument compiled Java classes as below:
 ```
 ... as well as re-write packaged JAR file:
 ```xml
-<target name="instrument-jar" description="JavaFlow Instrumentation" depends="jar">
+    <target name="instrument-jar" description="JavaFlow Instrumentation" depends="jar">
         <taskdef name="javaflow" classname="org.apache.commons.javaflow.ant.AntRewriteTask" 
         classpathref="ant-lib-classpath"/>
         <echo message="JavaFlow instrumentation of compiled classes in ${jar.dir}/${ant.project.name}.jar" />
