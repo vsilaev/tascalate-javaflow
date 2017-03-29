@@ -85,13 +85,12 @@ public class ContinuableClassVisitor extends ClassAdapter {
     public void visitEnd() {
         if (!skipEnchancing) {
             super.visitField(
-                    (isInterface ? Opcodes.ACC_PUBLIC : Opcodes.ACC_PRIVATE) + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC, 
-                    MaybeContinuableClassVisitor.MARKER_FIELD_NAME, 
-                    "Ljava/lang/String;", 
-                    null, 
-                    "A"
-                    )
-            .visitEnd();
+                (isInterface ? Opcodes.ACC_PUBLIC : Opcodes.ACC_PRIVATE) + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC, 
+                MaybeContinuableClassVisitor.MARKER_FIELD_NAME, 
+                "Ljava/lang/String;", 
+                null, 
+                "A"
+            ).visitEnd();
         }
         super.visitEnd();
     }

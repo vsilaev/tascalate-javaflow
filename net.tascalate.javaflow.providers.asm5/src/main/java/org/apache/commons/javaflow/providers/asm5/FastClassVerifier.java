@@ -37,8 +37,7 @@ public class FastClassVerifier extends BasicVerifier {
      * class will not be loaded into the JVM since it may be incorrect.
      *
      */
-    public FastClassVerifier()
-    {
+    public FastClassVerifier() {
         super(ASM5);
     }
 
@@ -58,8 +57,7 @@ public class FastClassVerifier extends BasicVerifier {
         	value = newValue(Type.getType("Lnull;"));
         }
        	return super.unaryOperation(insn, value);
-    }  
-
+    }
 
     @Override
     public BasicValue newValue(final Type type) {

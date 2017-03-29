@@ -40,8 +40,7 @@ public class MonitoringFrame extends Frame {
         monitored = new LinkedList<Integer>();
     }
 
-    public void execute(AbstractInsnNode insn, Interpreter interpreter)
-            throws AnalyzerException {
+    public void execute(AbstractInsnNode insn, Interpreter interpreter) throws AnalyzerException {
 
         boolean never = false;
         if (never) {

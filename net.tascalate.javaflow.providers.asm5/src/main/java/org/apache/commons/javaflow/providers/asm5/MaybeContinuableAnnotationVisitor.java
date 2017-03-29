@@ -45,4 +45,3 @@ public class MaybeContinuableAnnotationVisitor extends ClassVisitor {
         return classContinuableAnnotationFound && isAnnotation; 
     }
 }
-

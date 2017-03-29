@@ -45,11 +45,10 @@ final class Asm3ClassTransformer implements ResourceTransformer {
     public byte[] transform(final byte[] original) {
         final ClassWriter cw = new ComputeClassWriter(ClassWriter.COMPUTE_FRAMES, cciResolver.resourceLoader());
         final ContinuableClassVisitor visitor = new ContinuableClassVisitor(
-                cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
-                cciResolver,
-                original
-
-                );
+            cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
+            cciResolver,
+            original
+        );
         try {
             new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
         } catch (final StopException ex) {

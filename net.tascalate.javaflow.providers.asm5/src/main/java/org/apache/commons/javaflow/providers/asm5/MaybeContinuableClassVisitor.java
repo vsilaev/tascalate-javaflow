@@ -42,7 +42,6 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     Set<String> continuableMethods = new HashSet<String>();
 
-
     private boolean isAnnotation = false;
 
     public MaybeContinuableClassVisitor(final Asm5ContinuableClassInfoResolver environment) {
@@ -137,7 +136,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         }
         visitInheritanceChain();
         checkOuterClass();
-        //Take desugared lambda bodies in consideration always 
+        // Take desugared lambda bodies in consideration always 
         // If there is no calls to continuable inside then
         // there are will be no run-time penalty anyway
         continuableMethods.addAll(desugaredLambdaBodies);

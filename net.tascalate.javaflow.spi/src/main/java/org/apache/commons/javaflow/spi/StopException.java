@@ -44,8 +44,8 @@ public class StopException extends RuntimeException {
     }
     
     private static final Set<String> PROXY_MARKER_INTERFACES = new HashSet<String>(Arrays.asList(
-            "org/apache/webbeans/proxy/OwbInterceptorProxy", 
-            "org/apache/webbeans/proxy/OwbNormalScopeProxy",
-            "org/jboss/weld/bean/proxy/ProxyObject"
+        "org/apache/webbeans/proxy/OwbInterceptorProxy", 
+        "org/apache/webbeans/proxy/OwbNormalScopeProxy",
+        "org/jboss/weld/bean/proxy/ProxyObject"
     )); 
 }

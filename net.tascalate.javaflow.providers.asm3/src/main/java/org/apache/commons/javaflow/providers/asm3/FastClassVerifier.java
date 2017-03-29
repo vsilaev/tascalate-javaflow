@@ -38,8 +38,7 @@ public class FastClassVerifier extends BasicVerifier {
      * class will not be loaded into the JVM since it may be incorrect.
      *
      */
-    public FastClassVerifier()
-    {
+    public FastClassVerifier() {
         super();
     }
 

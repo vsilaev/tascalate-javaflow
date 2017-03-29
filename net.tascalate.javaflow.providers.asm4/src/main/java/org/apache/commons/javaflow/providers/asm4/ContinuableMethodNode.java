@@ -319,9 +319,9 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         }
 
         if (opcode == Opcodes.INVOKEINTERFACE ||
-                opcode == Opcodes.INVOKESPECIAL   ||
-                opcode == Opcodes.INVOKESTATIC    ||
-                opcode == Opcodes.INVOKEVIRTUAL) {
+            opcode == Opcodes.INVOKESPECIAL   ||
+            opcode == Opcodes.INVOKESTATIC    ||
+            opcode == Opcodes.INVOKEVIRTUAL) {
             final ContinuableClassInfo classInfo;
             try {
                 classInfo = cciResolver.resolve(owner);
