@@ -13,7 +13,6 @@
 	<packaging>maven-plugin</packaging>
 
 	<name>Tascalate JavaFlow / Tools / Apache Maven</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<maven-plugin-api.version>3.3.9</maven-plugin-api.version>

@@ -13,7 +13,6 @@
 	<packaging>jar</packaging>
 
 	<name>Tascalate JavaFlow / Tools / CDI Proxy Instrumentation JavaAgent</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<license.header>../HEADER-ORIGINAL.txt</license.header>

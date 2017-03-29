@@ -13,7 +13,6 @@
 	<packaging>jar</packaging>
 
 	<name>Tascalate JavaFlow / Bytecode ClassLoader &amp; Co</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<license.header>../HEADER-DERRIVED.txt</license.header>

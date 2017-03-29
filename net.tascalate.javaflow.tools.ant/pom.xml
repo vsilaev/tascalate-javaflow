@@ -13,7 +13,6 @@
 	<packaging>jar</packaging>
 
 	<name>Tascalate JavaFlow / Tools / Apache Ant</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<license.header>../HEADER-DERRIVED.txt</license.header>

@@ -13,7 +13,6 @@
 	<packaging>jar</packaging>
 
 	<name>Tascalate JavaFlow / Bytecode Enhancers / ASM3</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<license.header>../HEADER-DERRIVED.txt</license.header>
