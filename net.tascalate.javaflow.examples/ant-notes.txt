@@ -1,6 +1,6 @@
-You should use the following set of libs:
+You should use the following set of libs for ant:
 
-1) All individual dependencies:
+1) All individual dependencies (as in ant-lib-alt folder):
 asm-5.2.jar
 asm-analysis-5.2.jar
 asm-tree-5.2.jar
@@ -11,7 +11,7 @@ net.tascalate.javaflow.spi-2.0-SNAPSHOT.jar
 net.tascalate.javaflow.tools.ant-2.0-SNAPSHOT.jar
 net.tascalate.javaflow.tools.jar-2.0-SNAPSHOT.jar
 
-2) TaskDef + FatJar only
+2) TaskDef + FatJar only  (as in ant-lib folder)
 net.tascalate.javaflow.tools.ant-2.0-SNAPSHOT.jar
 JavaFlowRewriteJar.jar (from net.tascalate.javaflow.tools.jar)
 
