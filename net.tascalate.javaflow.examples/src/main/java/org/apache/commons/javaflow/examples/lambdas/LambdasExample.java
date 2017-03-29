@@ -28,10 +28,10 @@ import org.apache.commons.javaflow.extras.Continuations;
 
 public class LambdasExample {
     public static void main(final String[] argv) throws Exception {
-        LambdasExample example = new LambdasExample();
-        Continuations.<String>forEach(example::executeAll, s -> {
-            System.out.println("Interrupted " + s);
-        });
+        LambdasExample demo = new LambdasExample();
+        Continuations.execute(
+            demo::runExamples, s -> System.out.println("Interrupted " + s)
+        );
 
         System.out.println("===");
 
@@ -39,7 +39,7 @@ public class LambdasExample {
 
     String ref = " ** ";
 
-    private @continuable void executeAll() {
+    private @continuable void runExamples() {
 
         //  @Continuable method references and @Continuable SAM interfaces are supported
         MyContinuableRunnable r1 = this::lambdaDemo;
@@ -53,7 +53,7 @@ public class LambdasExample {
         r2.run();
 
         // Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
-        // Notice that we still MUST create right interface (ContinuableRunnable in this case)
+        // Notice that we still MUST create right interface (MyContinuableRunnable in this case)
         @ccs Runnable closure = runnable( () -> {
             System.out.println("Plain Runnable Lambda by arrow function -- before");
             Continuation.suspend(" ** Plain Runnable Lambda by arrow function" + ref);
@@ -63,7 +63,7 @@ public class LambdasExample {
 
         // We can't use stream.forEach as is, but we can provide good enough helpers
         // See org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters for
-        // definition of "accept" & "forEach"
+        // definition of "consumer" & "forEach"
         List<String> listOfStrings = Arrays.asList("A", null, "B", null, "C"); 
         Continuations.forEach( 
                 listOfStrings.stream().filter(s -> s != null).map(s -> s + s), 

@@ -1,0 +1,17 @@
+You should use the following set of libs:
+
+1) All individual dependencies:
+asm-5.2.jar
+asm-analysis-5.2.jar
+asm-tree-5.2.jar
+commons-logging-1.2.jar
+net.tascalate.javaflow.api-2.0-SNAPSHOT.jar
+net.tascalate.javaflow.providers.asm5-2.0-SNAPSHOT.jar
+net.tascalate.javaflow.spi-2.0-SNAPSHOT.jar
+net.tascalate.javaflow.tools.ant-2.0-SNAPSHOT.jar
+net.tascalate.javaflow.tools.jar-2.0-SNAPSHOT.jar
+
+2) TaskDef + FatJar only
+net.tascalate.javaflow.tools.ant-2.0-SNAPSHOT.jar
+JavaFlowRewriteJar.jar (from net.tascalate.javaflow.tools.jar)
+

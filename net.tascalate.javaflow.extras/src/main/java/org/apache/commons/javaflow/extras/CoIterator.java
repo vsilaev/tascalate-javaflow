@@ -44,10 +44,10 @@ import org.apache.commons.javaflow.api.Continuation;
  * @param <T>
  * Type of objects returned by the iterator
  */
-public class CoIterator<T> implements Iterator<T>, Serializable {
+public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
     private static final long serialVersionUID = 1L;
     
-    private boolean advance = true;
+    private boolean advance;
     private Continuation cc;
 
     /**
@@ -59,12 +59,33 @@ public class CoIterator<T> implements Iterator<T>, Serializable {
      */
     public CoIterator(final Runnable code) {
         cc = Continuation.startSuspendedWith(code);
+        advance = true;
     }
 
+    /**
+     * Iterator constructor
+     * 
+     * @param code
+     * {@link ContinuableRunnable} code that yields multiple results via call to
+     * {@link Continuation#suspend(Object)}
+     */
     public CoIterator(final ContinuableRunnable code) {
-        cc = Continuations.create(code);
+        this(ContinuationSupport.toRunnable(code));
     }
 
+    /**
+     * Iterator constructor
+     * 
+     * @param cc
+     * Current {@link Continuation} to start iteration from. 
+     * Valued returned by this iterator will be results these are yielded via call to 
+     * {@link Continuation#suspend(Object)}, i.e. cc.value() is not included
+     */
+    public CoIterator(final Continuation cc) {
+        this.cc = cc;
+        advance = true;
+    }
+    
     public boolean hasNext() {
         advanceIfNecessary();
         return cc != null;
@@ -87,6 +108,19 @@ public class CoIterator<T> implements Iterator<T>, Serializable {
         throw new UnsupportedOperationException();
     }
 
+    public void close() {
+        if (null != cc) {
+            try {
+                cc.terminate();
+            } finally {
+                cc = null;
+                advance = false;
+            }
+        } else {
+            advance = false;
+        }
+    }
+    
     protected void advanceIfNecessary() {
         if (advance)
             cc = cc.resume();
