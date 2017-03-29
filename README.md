@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/#artifactdetails%7Cnet.tascalate.javaflow%7Cnet.tascalate.javaflow.parent%7C2.0%7Cpom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.0)
+[![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/#artifactdetails%7Cnet.tascalate.javaflow%7Cnet.tascalate.javaflow.parent%7C2.0%7Cpom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.0) [![license](https://img.shields.io/github/license/vsilaev/tascalate-javaflow.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 # Continuation support for Java
 This project contains libary, tools and examples to develop Java applications using continuations. 
 
