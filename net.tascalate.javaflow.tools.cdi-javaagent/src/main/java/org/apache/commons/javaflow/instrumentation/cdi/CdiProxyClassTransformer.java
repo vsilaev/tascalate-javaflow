@@ -54,16 +54,16 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
                 // Execute with current class as extra resource (in-memory)
                 // Mandatory for Java8 lambdas and alike
                 return ExtendedClasspathResourceLoader.runWithInMemoryResources(
-                        new Callable<byte[]>() {
-                            public byte[] call() {
-                                ClassReader reader = new ClassReader(classfileBuffer);
-                                ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
-                                reader.accept(new CdiProxyClassAdapter(writer, resolver), ClassReader.EXPAND_FRAMES);
-                                return writer.toByteArray();
-                            }
-                        }, 
-                        currentTarget.asResource()
-                        );
+                    new Callable<byte[]>() {
+                        public byte[] call() {
+                            ClassReader reader = new ClassReader(classfileBuffer);
+                            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
+                            reader.accept(new CdiProxyClassAdapter(writer, resolver), ClassReader.EXPAND_FRAMES);
+                            return writer.toByteArray();
+                        }
+                    }, 
+                    currentTarget.asResource()
+                );
             } catch (StopException ex) {
                 return null;
             } catch (RuntimeException ex) {
@@ -86,7 +86,7 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
             ContinuableClassInfoResolver cachedResolver = classLoader2resolver.get(classLoader);
             if (null == cachedResolver) {
                 ContinuableClassInfoResolver newResolver = resourceTransformationFactory
-                        .createResolver(new ExtendedClasspathResourceLoader(classLoader));
+                    .createResolver(new ExtendedClasspathResourceLoader(classLoader));
                 classLoader2resolver.put(classLoader, newResolver);
                 return newResolver;
             } else {

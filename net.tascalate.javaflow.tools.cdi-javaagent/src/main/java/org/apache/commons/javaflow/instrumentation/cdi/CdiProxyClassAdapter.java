@@ -120,6 +120,6 @@ class CdiProxyClassAdapter extends ClassVisitor {
     private static final String WELD_PROXY_OBJECT      = "org/jboss/weld/bean/proxy/ProxyObject";
 
     private static final Set<String> MARKER_INTERFACES = new HashSet<String>(Arrays.asList(
-            OWB_INTERCEPTOR_PROXY, OWB_NORMAL_SCOPE_PROXY, WELD_PROXY_OBJECT
-            )); 
+        OWB_INTERCEPTOR_PROXY, OWB_NORMAL_SCOPE_PROXY, WELD_PROXY_OBJECT
+    )); 
 }
