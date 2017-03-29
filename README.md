@@ -1,3 +1,4 @@
+[![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/#artifactdetails%7Cnet.tascalate.javaflow%7Cnet.tascalate.javaflow.parent%7C2.0%7Cpom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.0)
 # Continuation support for Java
 This project contains libary, tools and examples to develop Java applications using continuations. 
 
@@ -20,7 +21,7 @@ You have to add the following configuration to enable build-time instrumentation
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
 			<artifactId>net.tascalate.javaflow.api</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>2.0</version>
 		</dependency>
 		...
 	</dependencies>
@@ -38,7 +39,7 @@ You have to add the following configuration to enable build-time instrumentation
 			<plugin>
 				<groupId>net.tascalate.javaflow</groupId>
 				<artifactId>net.tascalate.javaflow.tools.maven</artifactId>
-				<version>2.0-SNAPSHOT</version>
+				<version>2.0</version>
 				<executions>
 					<execution>
 						<phase>process-classes</phase>
