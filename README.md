@@ -79,3 +79,12 @@ It's possibe to instrument compiled Java classes as below:
     </target>
 ```
 You may download a complete [examples project setup](https://github.com/vsilaev/tascalate-javaflow/releases/download/2.0/tascalate-javaflow-ant-project-setup1.zip) from [the latest release](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.0) for complete configuration template. Please pay attention to <code>ant-lib</code> folder with Ant TaskDef and <code>lib</code> folders with compile-/runtime-dependencies.
+
+# Java Instrumentation Agent (Runt-time Instrumentation)
+As an alternative to compile-time bytecode instrumentation, you MAY use [Tascalate JavaFlow Instrumentation Agent](https://github.com/vsilaev/tascalate-javaflow/releases/download/2.0/javaflow.instrument-continuations.jar) from [the latest release](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.0) to enable continuations support at class-loading time. Please note, that if you are using Java 8 and creating continuable lambda functions (either anonymous or/and as method references) you SHOULD use this instrumentation agent always: as long as Java run-time generates implementation of functional interfaces on the fly there is no other option to instrument them. To enable Tascalate JavaFlow Instrumentation Agent please add the following arguments to Java command line:
+```bash
+    java -javaagent:<path-to-jar>/javaflow.instrument-continuations.jar <rest-of arguments>
+```
+The agent JAR file includes all necessary dependencies and requires no additional CLASSPATH settings. It's recommended to use this agent in conjunction with either Maven or Ant build tools supplied to minimize the associated overhead of the instrumentation during class-loading process at run-time.
+
+Another useful application of the instrumentation agent is to apply it for debugging code within your IDE of choice. Just specify the "-javaagent" option listed above in your IDE debug/run configuration and you will be able to perform quick "debug-fix" loops without executing full project rebuild. 
