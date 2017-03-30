@@ -88,3 +88,27 @@ As an alternative to compile-time bytecode instrumentation, you MAY use [Tascala
 The agent JAR file includes all necessary dependencies and requires no additional CLASSPATH settings. It's recommended to use this agent in conjunction with either Maven or Ant build tools supplied to minimize the associated overhead of the instrumentation during class-loading process at run-time.
 
 Another useful application of the instrumentation agent is to apply it for debugging code within your IDE of choice. Just specify the "-javaagent" option listed above in your IDE debug/run configuration and you will be able to perform quick "debug-fix" loops without executing full project rebuild. 
+
+# Command-line tools
+It's possible to use a stand-alone command-line utility [JavaFlowRewriteJar.jar](https://github.com/vsilaev/tascalate-javaflow/releases/download/2.0/JavaFlowRewriteJar.jar) to instrument JAR archives containing continuable classes. Please use the following command:
+
+```bash
+    java -jar JavaFlowRewriteJar.jar src1.jar dst1.jar src2.jar dst2.jar...
+```
+Note, that the source and the destination should be different files.
+
+# CDI Support
+To work correctly in CDI environment continuable methods should be advised only by continuation-aware CDI proxies (interceptors, scope proxies, etc). Obviously, generation of these proxies is out of our control. Plus, major CDI containers (JBoss Weld and Apache OpenWebBeans) generates such proxies dynamically at run-time. Therefore if you plan to use Tascalate JavaFlow continuations with managed beans' methods then it's necessary to instrument CDI-specific proxies with [javaflow.instrument-cdi-proxy.jar](https://github.com/vsilaev/tascalate-javaflow/releases/download/2.0/javaflow.instrument-cdi-proxy.jar) Java Agent:
+```bash
+    java -javaagent:<path-to-jar>/javaflow.instrument-cdi-proxy.jar <rest-of arguments>
+```
+Please note, that CDI-specific agent neither requires javaflow.instrument-continuations.jar to operate correctly nor provides class file transformers for continuable methods. So if your project runs with CDI environment AND uses Java 8 lambdas then you have to add 2 Java agents, every serving different purpose:
+```bash
+    java -javaagent:<path-to-jar>/javaflow.instrument-continuations.jar \
+         -javaagent:<path-to-jar>/javaflow.instrument-cdi-proxy.jar \
+	 <rest-of arguments>
+```
+CDI functionality is tested with JBoss Weld 2.x (up to 2.4.2) and Apache OpenWebBeans 1.6.x / 1.7.x (up to 1.7.2). Contribution for other CDI/CDI-like containers (Spring, Google Guice, etc) is welcome.
+
+# More documentation
+For additional documentation, tutorials and guidelines please visit my [blog](http://vsilaev.com)
