@@ -273,6 +273,11 @@ public class Stack implements Serializable {
     public boolean isEmpty() {
         return iTop==0 && lTop==0 && dTop==0 && fTop==0 && oTop==0 && rTop==0;
     }
+    
+    public Runnable getRunnable() {
+        return runnable;
+    }
+    
 
     private String getStats() {
         final StringBuffer sb = new StringBuffer();
