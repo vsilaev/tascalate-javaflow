@@ -25,16 +25,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
-			<artifactId>net.tascalate.javaflow.api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.tascalate.javaflow</groupId>
-			<artifactId>net.tascalate.javaflow.spi</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.tascalate.javaflow</groupId>
 			<artifactId>net.tascalate.javaflow.providers.asm5</artifactId>
 			<version>${project.version}</version>
 		</dependency>

@@ -15,13 +15,11 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
-import org.apache.commons.javaflow.core.StackRecorder;
-
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
-import org.objectweb.asm.commons.Method;
 
 abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     final protected String className;
@@ -45,7 +43,7 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
         Label startDelegated = new Label();
 
         // PC: StackRecorder stackRecorder = StackRecorder.get();
-        invokeStatic(STACK_RECORDER_TYPE, STACK_RECORDER_GET);
+        stackRecorderGet();
         dup();
         storeLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         // PC: if (stackRecorder != null && stackRecorder.isRestoring) {
@@ -55,12 +53,12 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
         visitJumpInsn(IFEQ, startDelegated);
 
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_POP_REF);
+        stackRecorderPopRef();
         pop();
 
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         loadProxiedInstance();
-        invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_PUSH_REF);
+        stackRecorderPushRef();
 
         visitLabel(startDelegated);
 
@@ -100,30 +98,46 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
         visitJumpInsn(IFEQ, done);
 
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_POP_REF);
+        stackRecorderPopRef();
         pop();
         loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
         loadThis();
-        invokeVirtual(STACK_RECORDER_TYPE, STACK_RECORDER_PUSH_REF);
+        stackRecorderPushRef();
         visitLabel(done);
 
     }
-
-    private static final Type STACK_RECORDER_TYPE = Type.getType(StackRecorder.class);
-    private static final Method STACK_RECORDER_GET;
-    private static final Method STACK_RECORDER_POP_REF;
-    private static final Method STACK_RECORDER_PUSH_REF;
-
-    static {
-        try {
-            STACK_RECORDER_GET = Method.getMethod(StackRecorder.class.getMethod("get"));
-            STACK_RECORDER_POP_REF = Method.getMethod(StackRecorder.class.getMethod("popReference"));
-            STACK_RECORDER_PUSH_REF = Method.getMethod(StackRecorder.class.getMethod("pushReference", Object.class));
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        }
+    
+    private void stackRecorderGet() {
+        mv.visitMethodInsn(
+            Opcodes.INVOKESTATIC, 
+            STACK_RECORDER_TYPE.getInternalName(), 
+            "get", 
+            Type.getMethodDescriptor(STACK_RECORDER_TYPE), 
+            false
+        );
     }
+    
+    private void stackRecorderPopRef() {
+        mv.visitMethodInsn(
+            Opcodes.INVOKEVIRTUAL, 
+            STACK_RECORDER_TYPE.getInternalName(), 
+            "popReference", 
+            Type.getMethodDescriptor(OBJECT_TYPE), 
+            false
+        );
+    }
+    
+    private void stackRecorderPushRef() {
+        mv.visitMethodInsn(
+            Opcodes.INVOKEVIRTUAL, 
+            STACK_RECORDER_TYPE.getInternalName(), 
+            "pushReference", 
+            Type.getMethodDescriptor(Type.VOID_TYPE, OBJECT_TYPE), 
+            false
+        );
+    }
+
+    private static final Type OBJECT_TYPE = Type.getObjectType("java/lang/Object");
+    private static final Type STACK_RECORDER_TYPE = Type.getObjectType("org/apache/commons/javaflow/core/StackRecorder");
 
 }

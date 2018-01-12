@@ -25,7 +25,6 @@ package org.apache.commons.javaflow.providers.asm3;
 
 import java.util.List;
 
-import org.apache.commons.javaflow.core.StackRecorder;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.Opcodes;
@@ -36,7 +35,7 @@ import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 public final class ContinuableMethodVisitor extends MethodAdapter implements Opcodes {
-    private static final String STACK_RECORDER = Type.getInternalName(StackRecorder.class);
+    private static final String STACK_RECORDER = "org/apache/commons/javaflow/core/StackRecorder";
     private static final String POP_METHOD = "pop";
     private static final String PUSH_METHOD = "push";
 

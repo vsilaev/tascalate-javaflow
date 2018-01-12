@@ -25,7 +25,6 @@ package org.apache.commons.javaflow.providers.asm4;
 
 import java.util.List;
 
-import org.apache.commons.javaflow.core.StackRecorder;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -40,7 +39,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 import static org.objectweb.asm.Opcodes.*;
 
 public final class ContinuableMethodVisitor extends MethodVisitor {
-    private static final String STACK_RECORDER = Type.getInternalName(StackRecorder.class);
+    private static final String STACK_RECORDER = "org/apache/commons/javaflow/core/StackRecorder";
     private static final String POP_METHOD = "pop";
     private static final String PUSH_METHOD = "push";
 

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.javaflow.api.Continuation;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.objectweb.asm.Handle;
@@ -333,7 +332,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         return false;
     }
 
-    final private static String CONTINUATION_CLASS_INTERNAL_NAME = Type.getInternalName(Continuation.class);
+    final private static String CONTINUATION_CLASS_INTERNAL_NAME = "org/apache/commons/javaflow/api/Continuation";
     final private static Set<String> CONTINUATION_CLASS_CONTINUABLE_METHODS = new HashSet<String>(Arrays.asList(
             "suspend", "again", "cancel" 
             // we are suspending here with potential resume later

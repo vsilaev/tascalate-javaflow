@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.javaflow.api.ContinuableAnnotation;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
@@ -37,7 +36,7 @@ public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoRes
 
     Asm3ContinuableClassInfoResolver(final ResourceLoader classLoader) {
         this.resourceLoader = classLoader;
-        markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE);
+        markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE.getDescriptor());
     }
 
     public ResourceLoader resourceLoader() {
@@ -139,7 +138,7 @@ public class Asm3ContinuableClassInfoResolver implements ContinuableClassInfoRes
         }
     }
 
-    final private static String CONTINUABLE_ANNOTATION_TYPE = Type.getDescriptor(ContinuableAnnotation.class);
+    final private static Type CONTINUABLE_ANNOTATION_TYPE = Type.getObjectType("org/apache/commons/javaflow/api/ContinuableAnnotation");
     final private static ContinuableClassInfo UNSUPPORTED_CLASS_INFO = new ContinuableClassInfo() {
 
         public void markClassProcessed() {}
