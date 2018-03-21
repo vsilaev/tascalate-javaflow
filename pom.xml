@@ -75,7 +75,7 @@
 
 
 	<properties>
-                <project.version>2.0-SNAPSHOT</project.version>
+                <project.version>2.3-SNAPSHOT</project.version>
                 <asm.version>5.2</asm.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

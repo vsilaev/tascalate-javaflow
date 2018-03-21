@@ -38,6 +38,7 @@ import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * A ClassWriter that computes the common super class of two classes without
@@ -54,6 +55,10 @@ class ComputeClassWriter extends ClassWriter {
         this.l = l;
     }
 
+    protected Type getCommonSuperType(final Type type1, final Type type2) {
+        return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
+    }
+    
     @Override
     protected String getCommonSuperClass(final String type1, final String type2) {
         try {

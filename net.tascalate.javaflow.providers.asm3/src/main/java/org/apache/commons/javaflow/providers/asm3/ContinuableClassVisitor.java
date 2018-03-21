@@ -27,7 +27,6 @@ import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
 import org.objectweb.asm.ClassAdapter;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -47,7 +46,7 @@ public class ContinuableClassVisitor extends ClassAdapter {
     private boolean skipEnchancing = false;
     private boolean isInterface = false;
 
-    public ContinuableClassVisitor(final ClassVisitor cv, final ContinuableClassInfoResolver cciResolver, final byte[] originalBytes) {
+    public ContinuableClassVisitor(ComputeClassWriter cv, ContinuableClassInfoResolver cciResolver, byte[] originalBytes) {
         super(cv);
         this.cciResolver = cciResolver;
         this.originalBytes = originalBytes;
@@ -103,7 +102,7 @@ public class ContinuableClassVisitor extends ClassAdapter {
         if (skip) {
             return mv;
         } else {
-            return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, cciResolver, mv);
+            return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, (ComputeClassWriter)cv, cciResolver, mv);
         }
     }
 }

@@ -46,7 +46,7 @@ public class ContinuableClassVisitor extends ClassVisitor {
     private boolean skipEnchancing = false;
     private boolean isInterface = false;
 
-    public ContinuableClassVisitor(final ClassVisitor cv, final ContinuableClassInfoResolver cciResolver, final byte[] originalBytes) {
+    public ContinuableClassVisitor(final ComputeClassWriter cv, final ContinuableClassInfoResolver cciResolver, final byte[] originalBytes) {
         super(Opcodes.ASM4, cv);
         this.cciResolver = cciResolver;
         this.originalBytes = originalBytes;
@@ -102,7 +102,7 @@ public class ContinuableClassVisitor extends ClassVisitor {
         if (skip) {
             return mv;
         } else {
-            return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, cciResolver, mv);
+            return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, (ComputeClassWriter)cv, cciResolver, mv);
         }
     }
 }

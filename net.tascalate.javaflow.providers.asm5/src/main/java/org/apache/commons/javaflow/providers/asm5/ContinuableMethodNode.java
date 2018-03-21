@@ -57,6 +57,7 @@ import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
 
 public class ContinuableMethodNode extends MethodNode implements Opcodes {
+    private final ComputeClassWriter verifierHelper;
     private final ContinuableClassInfoResolver cciResolver;
     private final String className;
 
@@ -69,9 +70,15 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     protected Analyzer analyzer;
     public int stackRecorderVar;
 
-    public ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, String className, ContinuableClassInfoResolver cciResolver, MethodVisitor mv) {
+    public ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
+                                 String className, 
+                                 ComputeClassWriter verifierHelper, 
+                                 ContinuableClassInfoResolver cciResolver, 
+                                 MethodVisitor mv) {
+        
         super(Opcodes.ASM5, access, name, desc, signature, exceptions);
         this.className = className;
+        this.verifierHelper = verifierHelper;
         this.cciResolver = cciResolver;
         this.mv = mv;
     }
@@ -132,7 +139,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         try {
             moveNew();
 
-            analyzer = new Analyzer(new FastClassVerifier()) {
+            analyzer = new Analyzer(new FastClassVerifier(verifierHelper)) {
                 @Override
                 protected Frame newFrame(final int nLocals, final int nStack) {
                     return new MonitoringFrame(nLocals, nStack);
