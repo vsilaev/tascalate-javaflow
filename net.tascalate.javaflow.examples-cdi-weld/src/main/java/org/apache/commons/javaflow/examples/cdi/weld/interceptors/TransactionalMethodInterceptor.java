@@ -24,7 +24,7 @@ import org.apache.commons.javaflow.examples.cdi.weld.annotations.TransactionalMe
 
 @TransactionalMethod @Interceptor
 @Priority(Interceptor.Priority.PLATFORM_BEFORE + 1)
-public class TransactionalMethodInterceptor  {
+public class TransactionalMethodInterceptor {
 
     @AroundInvoke
     public Object manageTransaction(InvocationContext ctx) throws Throwable {
@@ -32,7 +32,7 @@ public class TransactionalMethodInterceptor  {
         boolean success = true;
         try {
             return ctx.proceed();
-        } catch (final Throwable ex) {
+        } catch (Throwable ex) {
             System.out.println("...Rollback transaction");
             success = false;
             throw ex;

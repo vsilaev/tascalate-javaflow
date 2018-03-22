@@ -19,20 +19,18 @@ import org.apache.commons.javaflow.api.Continuation;
 
 public class SimpleExample {
 
+    public static void main(String[] argv) throws Exception {
 
-    public static void main(final String[] argv) throws Exception {
-
-        final String[] strings = {"A", "B", "C"};
-        for (Continuation cc = Continuation.startWith(new Execution()); null != cc; ) {
-            final int valueFromContinuation = (Integer)cc.value();
+        String[] strings = {"A", "B", "C"};
+        for (Continuation cc = Continuation.startWith(new Execution()); null != cc;) {
+            final int valueFromContinuation = Number.class.cast(cc.value()).intValue();
             System.out.println("Interrupted " + valueFromContinuation);
             // Let's continuation resume
-            cc = cc.resume( strings[valueFromContinuation % strings.length] );
+            cc = cc.resume(strings[valueFromContinuation % strings.length]);
         }
 
         System.out.println("ALL DONE");
 
     }
-
 
 }

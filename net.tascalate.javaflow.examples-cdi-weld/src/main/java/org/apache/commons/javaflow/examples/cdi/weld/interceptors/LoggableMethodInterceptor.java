@@ -24,7 +24,7 @@ import org.apache.commons.javaflow.examples.cdi.weld.annotations.LoggableMethod;
 
 @LoggableMethod @Interceptor
 @Priority(Interceptor.Priority.PLATFORM_BEFORE + 3)
-public class LoggableMethodInterceptor  {
+public class LoggableMethodInterceptor {
 
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {

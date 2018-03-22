@@ -16,5 +16,5 @@
 package org.apache.commons.javaflow.examples.interceptor;
 
 interface InterceptorInterface {
-	void decorateCall(String param);
+    void decorateCall(String param);
 }

@@ -22,7 +22,7 @@ import javax.interceptor.InvocationContext;
 import org.apache.commons.javaflow.examples.cdi.owb.annotations.LoggableMethod;
 
 @LoggableMethod @Interceptor
-public class LoggableMethodInterceptor  {
+public class LoggableMethodInterceptor {
 
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {

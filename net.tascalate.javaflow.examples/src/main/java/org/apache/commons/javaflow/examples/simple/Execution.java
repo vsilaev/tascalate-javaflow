@@ -22,10 +22,10 @@ public class Execution implements Runnable {
 
     @Override
     public @continuable void run() {
-        for (int i = 1; i <= 5; i++) {
+        for (long i = 1; i <= 5; i++) {
             System.out.println("Exe before suspend");
             Object fromCaller = Continuation.suspend(i);
-            System.out.println("Exe after suspend: " + fromCaller);	        
+            System.out.println("Exe after suspend: " + fromCaller);
         }
     }
 }

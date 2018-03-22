@@ -27,14 +27,14 @@ public class Execution implements Runnable {
             inner.innerMethod(i);
         }
     }
-    
+
     // Private, to show that accessor$### methods are instrumented
     private @continuable void outerMethod(int i) {
         System.out.println("Exe before suspend");
         Object fromCaller = Continuation.suspend(i);
-        System.out.println("Exe after suspend: " + fromCaller);   
+        System.out.println("Exe after suspend: " + fromCaller);
     }
-    
+
     class Inner {
         // Private, to show that accessor$### methods are instrumented
         private @continuable void innerMethod(int i) {

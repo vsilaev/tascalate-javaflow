@@ -20,13 +20,13 @@ import org.apache.commons.javaflow.extras.Continuations;
 
 public class LambdasExampleMinimal {
 
-    public static void main(final String[] argv) throws Exception {
+    public static void main(String[] argv) throws Exception {
 
         Continuation cc = Continuations.start(() -> {
             for (int i = 1; i <= 5; i++) {
                 System.out.println("Exe before suspend");
                 Continuation.suspend(i);
-                System.out.println("Exe after suspend");	        
+                System.out.println("Exe after suspend");
             }
         });
 
@@ -36,6 +36,5 @@ public class LambdasExampleMinimal {
 
         System.out.println("===");
     }
-
 
 }

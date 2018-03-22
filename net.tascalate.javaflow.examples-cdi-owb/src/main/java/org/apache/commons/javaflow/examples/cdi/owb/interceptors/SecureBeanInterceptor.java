@@ -22,7 +22,7 @@ import javax.interceptor.InvocationContext;
 import org.apache.commons.javaflow.examples.cdi.owb.annotations.SecureBean;
 
 @SecureBean @Interceptor
-public class SecureBeanInterceptor  {
+public class SecureBeanInterceptor {
 
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {

@@ -27,5 +27,4 @@ import org.apache.commons.javaflow.api.ContinuableAnnotation;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 @ContinuableAnnotation
-public @interface MyContinuable {
-}
+public @interface MyContinuable {}

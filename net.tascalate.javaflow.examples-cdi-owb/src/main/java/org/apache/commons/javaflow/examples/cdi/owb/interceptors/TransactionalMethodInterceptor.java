@@ -22,7 +22,7 @@ import javax.interceptor.InvocationContext;
 import org.apache.commons.javaflow.examples.cdi.owb.annotations.TransactionalMethod;
 
 @TransactionalMethod @Interceptor
-public class TransactionalMethodInterceptor  {
+public class TransactionalMethodInterceptor {
 
     @AroundInvoke
     public Object manageTransaction(InvocationContext ctx) throws Throwable {
@@ -30,7 +30,7 @@ public class TransactionalMethodInterceptor  {
         boolean success = true;
         try {
             return ctx.proceed();
-        } catch (final Throwable ex) {
+        } catch (Throwable ex) {
             System.out.println("...Rollback transaction");
             success = false;
             throw ex;

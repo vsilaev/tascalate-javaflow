@@ -24,7 +24,7 @@ import org.apache.commons.javaflow.examples.cdi.weld.annotations.SecureBean;
 
 @SecureBean @Interceptor
 @Priority(Interceptor.Priority.PLATFORM_BEFORE + 2)
-public class SecureBeanInterceptor  {
+public class SecureBeanInterceptor {
 
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {

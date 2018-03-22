@@ -29,15 +29,15 @@ public class TargetClass implements TargetInterface {
 
     @Override
     @TransactionalMethod
-    public @continuable void execute(final String prefix) {
+    public @continuable void execute(String prefix) {
         executeNested(prefix);
     }
 
     @LoggableMethod
-    protected @continuable void executeNested(final String prefix) {
+    protected @continuable void executeNested(String prefix) {
         System.out.println("In target BEFORE suspend");
-        final Object value = Continuation.suspend(this + " @ " + prefix);
+        Object value = Continuation.suspend(this + " @ " + prefix);
         System.out.println("In target AFTER suspend: " + value);
     }
-    
+
 }

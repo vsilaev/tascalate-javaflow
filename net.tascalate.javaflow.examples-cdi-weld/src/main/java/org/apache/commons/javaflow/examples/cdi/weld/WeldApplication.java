@@ -22,20 +22,20 @@ import org.apache.commons.javaflow.api.Continuation;
 import org.jboss.weld.bean.proxy.ProxyObject;
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 
+// Run with main class org.jboss.weld.environment.se.StartMain
 public class WeldApplication {
 
-    @Inject 
+    @Inject
     Execution execution;
 
     public void run(@Observes ContainerInitialized event) {
-    	System.out.println("Execution is proxy? " + (execution instanceof ProxyObject));
+        System.out.println("Execution is proxy? " + (execution instanceof ProxyObject));
         int i = 0;
         for (Continuation cc = Continuation.startWith(execution); null != cc; cc = cc.resume(i += 100)) {
             System.out.println("SUSPENDED " + cc.value());
         }
 
         System.out.println("===");
-
 
     }
 }

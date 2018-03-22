@@ -27,11 +27,9 @@ import org.apache.commons.javaflow.api.Continuation;
 import org.apache.commons.javaflow.extras.Continuations;
 
 public class LambdasExample {
-    public static void main(final String[] argv) throws Exception {
+    public static void main(String[] argv) throws Exception {
         LambdasExample demo = new LambdasExample();
-        Continuations.execute(
-            demo::runExamples, s -> System.out.println("Interrupted " + s)
-        );
+        Continuations.execute(demo::runExamples, s -> System.out.println("Interrupted " + s));
 
         System.out.println("===");
 
@@ -41,7 +39,8 @@ public class LambdasExample {
 
     private @continuable void runExamples() {
 
-        //  @Continuable method references and @Continuable SAM interfaces are supported
+        // @Continuable method references and @Continuable SAM interfaces are
+        // supported
         MyContinuableRunnable r1 = this::lambdaDemo;
         r1.run();
 
@@ -52,23 +51,26 @@ public class LambdasExample {
         };
         r2.run();
 
-        // Lambda reference MUST have annotated CallSite if SAM interface is not @continuable
-        // Notice that we still MUST create right interface (MyContinuableRunnable in this case)
-        @ccs Runnable closure = runnable( () -> {
+        // Lambda reference MUST have annotated CallSite if SAM interface is not
+        // @continuable
+        // Notice that we still MUST create right interface
+        // (MyContinuableRunnable in this case)
+        @ccs
+        Runnable closure = runnable(() -> {
             System.out.println("Plain Runnable Lambda by arrow function -- before");
             Continuation.suspend(" ** Plain Runnable Lambda by arrow function" + ref);
             System.out.println("Plain Runnable Lambda by arrow function -- after");
-        } );
+        });
         closure.run();
 
-        // We can't use stream.forEach as is, but we can provide good enough helpers
-        // See org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters for
+        // We can't use stream.forEach as is, but we can provide good enough
+        // helpers
+        // See org.apache.commons.javaflow.examples.lambdas.ContinuableAdapters
+        // for
         // definition of "consumer" & "forEach"
-        List<String> listOfStrings = Arrays.asList("A", null, "B", null, "C"); 
-        Continuations.forEach( 
-                listOfStrings.stream().filter(s -> s != null).map(s -> s + s), 
-                consumer(this::yieldString1).andThen(this::yieldString2) 
-        );
+        List<String> listOfStrings = Arrays.asList("A", null, "B", null, "C");
+        Continuations.forEach(listOfStrings.stream().filter(s -> s != null).map(s -> s + s),
+                consumer(this::yieldString1).andThen(this::yieldString2));
 
     }
 
@@ -90,6 +92,5 @@ public class LambdasExample {
         Continuation.suspend("yield II " + s);
         System.out.println("After yield II");
     }
-
 
 }

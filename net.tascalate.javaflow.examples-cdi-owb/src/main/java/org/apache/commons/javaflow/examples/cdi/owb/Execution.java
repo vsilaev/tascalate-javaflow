@@ -29,14 +29,14 @@ public class Execution implements Runnable {
 
     @LoggableMethod
     public @continuable void run() {
-        String[] array = new String[]{"A", "B", "C"};
+        String[] array = new String[] {"A", "B", "C"};
         for (int i = 0; i < array.length; i++) {
             System.out.println("Execution " + i);
             invokeDependent(array[i]);
         }
     }
-    
-    protected @continuable void invokeDependent(final String value) {
-        target.execute(value);        
+
+    protected @continuable void invokeDependent(String value) {
+        target.execute(value);
     }
 }
