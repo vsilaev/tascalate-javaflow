@@ -25,6 +25,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.LOCAL_VARIABLE, ElementType.PARAMETER, ElementType.TYPE_USE})
 @ContinuableAnnotation
-public @interface ccs {
-
-}
+public @interface ccs {}

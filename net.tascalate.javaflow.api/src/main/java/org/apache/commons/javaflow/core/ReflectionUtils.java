@@ -35,61 +35,52 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class ReflectionUtils {
     
-    private final static Log log = LogFactory.getLog(ReflectionUtils.class);
+    private static final Log log = LogFactory.getLog(ReflectionUtils.class);
     
 	public interface Matcher {
-        boolean matches(final String pName);
+        boolean matches(String pName);
     }
 	    
     public interface Indexer {
-        void put(final Map<String, Object> pMap, final String pKey, final Object pObject);
+        void put(Map<String, Object> pMap, String pKey, Object pObject);
     }
 	    
     private static Indexer defaultIndexer = new DefaultIndexer();
     private static Matcher defaultMatcher = new DefaultMatcher();
 	    
     public static class DefaultMatcher implements Matcher {
-        public boolean matches(final String pName) {
+        public boolean matches(String pName) {
             return true;
         }
     }
 
     public static class DefaultIndexer implements Indexer {
-        public void put(final Map<String, Object> pMap, final String pKey, final Object pObject) {
+        public void put(Map<String, Object> pMap, String pKey, Object pObject) {
             pMap.put(pKey, pObject);
         }
     }
-	    
-    public static Map<String, Object> discoverFields(
-            final Class<?> pClazz,
-            final Matcher pMatcher
-            ) {
-        
-        return discoverFields(pClazz, pMatcher, defaultIndexer);
-    }
 
-    public static Map<String, Object> discoverFields(
-            final Class<?> pClazz
-            ) {
-        
+    public static Map<String, Object> discoverFields(Class<?> pClazz) {
         return discoverFields(pClazz, defaultMatcher, defaultIndexer);
     }
     
-    public static Map<String, Object> discoverFields(
-            final Class<?> pClazz,
-            final Matcher pMatcher,
-            final Indexer pIndexer
-            ) {
-        
+    public static Map<String, Object> discoverFields(Class<?> pClazz,
+                                                     Matcher pMatcher) {
+        return discoverFields(pClazz, pMatcher, defaultIndexer);
+    }
+    
+    public static Map<String, Object> discoverFields(Class<?> pClazz,
+                                                     Matcher pMatcher,
+                                                     Indexer pIndexer) {
         log.debug("discovering fields on " + pClazz.getName());
         
-        final Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<String, Object>();
 
         Class<?> current = pClazz;
         do {
-            final Field[] fields = current.getDeclaredFields();
+            Field[] fields = current.getDeclaredFields();
             for (int i = 0; i < fields.length; i++) {
-                final String fname = fields[i].getName();
+                String fname = fields[i].getName();
                 if (pMatcher.matches(fname)) {
                     pIndexer.put(result, fname, fields[i]);
                     
@@ -102,37 +93,29 @@ public final class ReflectionUtils {
         return result;
     }    
 
-    
-    public static Map<String, Object> discoverMethods(
-            final Class<?> pClazz,
-            final Matcher pMatcher
-            ) {
-        
-        return discoverMethods(pClazz, pMatcher, defaultIndexer);
-    }
-
-    public static Map<String, Object> discoverMethods(
-            final Class<?> pClazz
-            ) {
+    public static Map<String, Object> discoverMethods(Class<?> pClazz) {
         
         return discoverMethods(pClazz, defaultMatcher, defaultIndexer);
     }
     
-    public static Map<String, Object> discoverMethods(
-            final Class<?> pClazz,
-            final Matcher pMatcher,
-            final Indexer pIndexer
-            ) {
+    public static Map<String, Object> discoverMethods(Class<?> pClazz,
+                                                      Matcher pMatcher) {
+        return discoverMethods(pClazz, pMatcher, defaultIndexer);
+    }
+    
+    public static Map<String, Object> discoverMethods(Class<?> pClazz,
+                                                      Matcher pMatcher,
+                                                      Indexer pIndexer) {
         
         log.debug("discovering methods on " + pClazz.getName());
         
-        final Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<String, Object>();
 
         Class<?> current = pClazz;
         do {
-            final Method[] methods = current.getDeclaredMethods();
+            Method[] methods = current.getDeclaredMethods();
             for (int i = 0; i < methods.length; i++) {
-                final String mname = methods[i].getName();
+                String mname = methods[i].getName();
                 if (pMatcher.matches(mname)) {
                     pIndexer.put(result, mname, methods[i]);
 
@@ -145,59 +128,72 @@ public final class ReflectionUtils {
         return result;
     }    
 
-    public static Object cast(Object o) throws IOException, ClassNotFoundException {
-        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        final ObjectOutputStream oos = new ObjectOutputStream(buffer);
-        oos.writeObject(o);
-        oos.flush();
-        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
-        return ois.readObject();
+    public static Object clone(Object o) throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(buffer);
+        try {
+            oos.writeObject(o);
+            oos.flush();
+        } finally {
+            oos.close();
+        }
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
+        try {
+            return ois.readObject();
+        } finally {
+            ois.close();
+        }
       }
     
     public static String getClassName(final Object o) {
         if (o == null) {
             return "unknown";
+        } else {
+            return o.getClass().getName() + "@" + o.hashCode();
         }
-        
-        return o.getClass().getName() + "@" + o.hashCode();
     }
 
     public static String getClassLoaderName(final Object o) {
         if (o == null) {
             return "unknown";
+        } else {
+            return getClassName(o.getClass().getClassLoader());
         }
-        
-        return getClassName(o.getClass().getClassLoader());
     }
     
+    public static final String descriptionOfObject(Object o) {
+        return getClassName(o) + "/" + getClassLoaderName(o) + " [" + o + "]";
+    }
+    
+    public static final String descriptionOfClass(Object o) {
+        return getClassName(o) + "/" + getClassLoaderName(o);
+    }
+
 
 	public static Class<?> defineClass(ClassLoader cl, byte[] b) {
 		try {
 			return (Class<?>) defineClassMethod.invoke(cl, null, b, 0, b.length);
-		} catch (final InvocationTargetException ex) {
+		} catch (InvocationTargetException ex) {
 			log.fatal("Could not define class", ex.getTargetException());
 			throw new RuntimeException(ex.getTargetException());
-		} catch (final Exception ex) {
+		} catch (Exception ex) {
 			log.fatal("Could not invoke method \"defineClass\"", ex);
 			throw new RuntimeException(ex);
 		}
 	}
 
-	final private static Method defineClassMethod;
+	private static final Method defineClassMethod;
 	
 	static {
-		Method found = null;
-		for (final Method m : ClassLoader.class.getDeclaredMethods()) {
-			if ("defineClass".equals(m.getName()) && m.getParameterTypes().length == 4) {
-				m.setAccessible(true);
-				found = m;
-				break;
-			}
+		// defineClass(String name, byte[] b, int off, int len)
+		try {
+		    defineClassMethod = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+		    defineClassMethod.setAccessible(true);
+		} catch (NoSuchMethodException ex) {
+		    throw new IllegalStateException("Could not find method \"defineClass\"", ex);
+		} catch (SecurityException ex) {
+		    throw new IllegalStateException("Could not find method \"defineClass\"", ex);
 		}
-		if (null == found)
-			throw new IllegalStateException("Could not find method \"defineClass\"");
-		else
-			defineClassMethod = found;
 	}
 
 }

@@ -114,7 +114,7 @@ public final class StackRecorder extends Stack {
             
             if (isRestoring) {
             	if (log.isDebugEnabled()) {
-            		log.debug("Restoring state of " + descriptionOf(runnable));
+            		log.debug("Restoring state of " + ReflectionUtils.descriptionOfObject(runnable));
             	}
             }
             
@@ -127,9 +127,9 @@ public final class StackRecorder extends Stack {
                     // one object in the reference stack. Otherwise, it usually means
                     // that the application wasn't instrumented correctly.
                     throw new IllegalStateException(
-                            "Stack corruption on suspend (empty stack). "
-                            + "Is " + descriptionOf(runnable) 
-                            + " instrumented for javaflow?"
+                            "Stack corruption on suspend (empty stack). " +
+                            "Is " + ReflectionUtils.descriptionOfClass(runnable) +
+                            " instrumented for javaflow?"
                    );
                 }
                 // top of the reference stack is the object that we'll call into
@@ -138,17 +138,17 @@ public final class StackRecorder extends Stack {
                 final Object ref = popReference(); 
                 if (runnable != ref) {
                 	throw new IllegalStateException(
-                	        "Stack corruption on suspend (invalid reference). "
-                	        + "Is " + descriptionOf(runnable.getClass()) 
-                	        + " instrumented for javaflow?"
+                	        "Stack corruption on suspend (invalid reference). " +
+                	        "Is " + ReflectionUtils.descriptionOfClass(runnable) +
+                	        " instrumented for javaflow?"
                 	);
                 }
                 return this.result;
             } else {
             	if (!isEmpty()) {
             		throw new IllegalStateException(
-            		        "Stack corruption on exit (non-empty stack). "
-            		        + "Is " + descriptionOf(runnable) +
+            		        "Stack corruption on exit (non-empty stack). " +
+            		        "Is " + ReflectionUtils.descriptionOfClass(runnable) +
             		        " instrumented for javaflow?"
             		);
             	}
@@ -207,9 +207,5 @@ public final class StackRecorder extends Stack {
      */
     public static StackRecorder get() {
         return threadMap.get();
-    }
-    
-    private final String descriptionOf(Object object) {
-        return ReflectionUtils.getClassName(runnable) + "/" + ReflectionUtils.getClassLoaderName(runnable);
     }
 }

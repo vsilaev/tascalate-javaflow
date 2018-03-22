@@ -58,7 +58,7 @@ public final class Continuation implements Serializable {
     /**
      * Create a new continuation, which continue a previous continuation.
      */
-    private Continuation( final StackRecorder stackRecorder, final Object value ) {
+    private Continuation(StackRecorder stackRecorder, Object value ) {
         this.stackRecorder = stackRecorder;
         this.value = value;
         
@@ -101,7 +101,7 @@ public final class Continuation implements Serializable {
      * @return
      *      always return a non-null valid object.
      */
-    public static Continuation startSuspendedWith( final Runnable target ) {
+    public static Continuation startSuspendedWith(Runnable target) {
         if(target == null) {
             throw new IllegalArgumentException("target is null");
         }
@@ -121,7 +121,7 @@ public final class Continuation implements Serializable {
      *      Continuation object if runnable supplied is supended, otherwise <code>null</code>
      * @see #startWith(Runnable, Object)
      */
-    public static Continuation startWith( final Runnable target ) {
+    public static Continuation startWith(Runnable target) {
         return startWith(target, null);
     }
 
@@ -142,9 +142,9 @@ public final class Continuation implements Serializable {
      *      a new non-null continuation is returned.
      * @see #getContext()
      */
-    public static Continuation startWith( final Runnable target, final Object pContext ) {
+    public static Continuation startWith(Runnable target, Object pContext) {
         if (log.isDebugEnabled()) {
-        	log.debug("starting new flow from " + ReflectionUtils.getClassName(target) + "/" + ReflectionUtils.getClassLoaderName(target));
+        	log.debug("starting new flow from " + ReflectionUtils.descriptionOfObject(target));
         }
 
         return startSuspendedWith(target).resume(pContext);
@@ -170,7 +170,7 @@ public final class Continuation implements Serializable {
      * 
      * @deprecated
      */
-    public static Continuation continueWith(final Continuation continuation) {
+    public static Continuation continueWith(Continuation continuation) {
         return continueWith(continuation, (Object)null);
     }
 
@@ -197,7 +197,7 @@ public final class Continuation implements Serializable {
      * 
      * @deprecated
      */
-    public static Continuation continueWith(final Continuation continuation, final Object value) {
+    public static Continuation continueWith(Continuation continuation, Object value) {
         if (continuation == null) {
             throw new IllegalArgumentException("continuation parameter must not be null.");
         }
@@ -241,7 +241,7 @@ public final class Continuation implements Serializable {
      * @see #suspend()
      * 
      */    
-    public Continuation resume(final Object value) {
+    public Continuation resume(Object value) {
     	return resumeWith(ResumeParameter.value(value));
     }
     
@@ -254,14 +254,14 @@ public final class Continuation implements Serializable {
     	resumeWith(ResumeParameter.exit());
     }
     
-    protected Continuation resumeWith(final ResumeParameter param) {
+    protected Continuation resumeWith(ResumeParameter param) {
         if (log.isDebugEnabled()) {
-        	log.debug("continueing with continuation " + ReflectionUtils.getClassName(this) + "/" + ReflectionUtils.getClassLoaderName(this));
+        	log.debug("continueing with continuation " + ReflectionUtils.descriptionOfObject(this));
         }
 
         while(true) {
-            final StackRecorder nextStackRecorder = new StackRecorder(stackRecorder);
-            final SuspendResult result = nextStackRecorder.execute(param);
+            StackRecorder nextStackRecorder = new StackRecorder(stackRecorder);
+            SuspendResult result = nextStackRecorder.execute(param);
             if (SuspendResult.EXIT == result) {
             	// no more thing to continue
             	return null;
@@ -337,7 +337,7 @@ public final class Continuation implements Serializable {
      * @throws IllegalStateException
      *      if this method is called outside the {@link #continueWith} or {@link #startWith} methods.
      */    
-    public static Object suspend(final Object value) {
+    public static Object suspend(Object value) {
         return StackRecorder.suspend(SuspendResult.valueOf(value));
     }
 

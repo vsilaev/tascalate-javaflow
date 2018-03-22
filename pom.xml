@@ -3,7 +3,7 @@
 
 	<groupId>net.tascalate.javaflow</groupId>
 	<artifactId>net.tascalate.javaflow.parent</artifactId>
-	<version>2.2.1</version>
+	<version>2.2.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tascalate JavFlow</name>
@@ -74,7 +74,7 @@
 
 
 	<properties>
-                <project.version>2.2.1</project.version>
+                <project.version>2.2.2-SNAPSHOT</project.version>
                 <asm.version>5.2</asm.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

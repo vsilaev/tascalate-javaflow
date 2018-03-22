@@ -23,11 +23,12 @@ import java.lang.annotation.Target;
 
 /**
  *
- * Meta-annotation that is used to annotate other continuation-related annotations.
- * It provides an option to declare and use own annotations instead of supplied 
- * {@link continuable} and {@link ccs} annotations, for ex:
+ * Meta-annotation that is used to annotate other continuation-related
+ * annotations. It provides an option to declare and use own annotations instead
+ * of supplied {@link continuable} and {@link ccs} annotations, for ex:
  * 
- * <pre><code>
+ * <pre>
+ * <code>
  * import java.lang.annotation.Documented;
  * import java.lang.annotation.ElementType;
  * import java.lang.annotation.Retention;
@@ -42,7 +43,8 @@ import java.lang.annotation.Target;
  *   // The annotation to mark continuable methods
  * }
  * 
- * </code></pre>
+ * </code>
+ * </pre>
  * 
  * @author Valery Silaev
  *
