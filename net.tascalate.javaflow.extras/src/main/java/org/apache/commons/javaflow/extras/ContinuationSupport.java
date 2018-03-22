@@ -5,10 +5,10 @@ import java.io.Serializable;
 import org.apache.commons.javaflow.api.continuable;
 
 final class ContinuationSupport {
-    private ContinuationSupport() {}
-    
+    private ContinuationSupport() {
+    }
 
-    static Runnable toRunnable(final ContinuableRunnable code) {
+    static Runnable toRunnable(ContinuableRunnable code) {
         @SuppressWarnings("serial")
         abstract class ContinuableRunnableAdapter implements Runnable, Serializable {
         }

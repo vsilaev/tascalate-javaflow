@@ -57,7 +57,7 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
      * Continuable code that yields multiple results via call to
      * {@link Continuation#suspend(Object)}
      */
-    public CoIterator(final Runnable code) {
+    public CoIterator(Runnable code) {
         cc = Continuation.startSuspendedWith(code);
         advance = true;
     }
@@ -69,7 +69,7 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
      * {@link ContinuableRunnable} code that yields multiple results via call to
      * {@link Continuation#suspend(Object)}
      */
-    public CoIterator(final ContinuableRunnable code) {
+    public CoIterator(ContinuableRunnable code) {
         this(ContinuationSupport.toRunnable(code));
     }
 
@@ -81,7 +81,7 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
      * Valued returned by this iterator will be results these are yielded via call to 
      * {@link Continuation#suspend(Object)}, i.e. cc.value() is not included
      */
-    public CoIterator(final Continuation cc) {
+    public CoIterator(Continuation cc) {
         this.cc = cc;
         advance = true;
     }
@@ -98,7 +98,7 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
             throw new NoSuchElementException();
 
         @SuppressWarnings("unchecked")
-        final T result = (T) cc.value();
+        T result = (T) cc.value();
         advance = true;
 
         return result;

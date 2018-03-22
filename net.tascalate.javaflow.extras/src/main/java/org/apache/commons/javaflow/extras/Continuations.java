@@ -26,8 +26,7 @@ import org.apache.commons.javaflow.api.continuable;
 
 final public class Continuations {
     
-    private Continuations() {
-    }
+    private Continuations() {}
 
     /**
      * Creates a suspended continuation, {@link ContinuableRunnable} is not started
