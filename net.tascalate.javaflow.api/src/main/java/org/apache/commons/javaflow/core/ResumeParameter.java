@@ -38,9 +38,9 @@ public class ResumeParameter {
 
     }
 
-    private final static ResumeParameter NULL_VALUE = new ResumeParameter(null);
+    private static final ResumeParameter NULL_VALUE = new ResumeParameter(null);
 
-    private final static ResumeParameter EXIT = new ResumeParameter(null) {
+    private static final ResumeParameter EXIT = new ResumeParameter(null) {
         void checkExit() {
             throw ContinuationDeath.INSTANCE;
         }

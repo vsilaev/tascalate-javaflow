@@ -20,10 +20,10 @@ import java.lang.reflect.Modifier;
 
 import org.apache.commons.javaflow.core.StackRecorder;
 
-final public class InterceptorSupport {
+public final class InterceptorSupport {
     private InterceptorSupport() {}
     
-    public static boolean isInstrumented(final Object target) {
+    public static boolean isInstrumented(Object target) {
         if (null == target) {
             return false;
         }
@@ -49,7 +49,7 @@ final public class InterceptorSupport {
         }
     }
     
-    public static void afterExecution(final Object interceptor) {
+    public static void afterExecution(Object interceptor) {
         StackRecorder stackRecorder = StackRecorder.get();
         
         // When capturing we should place self-reference on the stack

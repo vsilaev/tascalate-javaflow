@@ -68,7 +68,7 @@ public final class StackRecorder extends Stack {
      * @param target
      *       a target to run
      */
-    public StackRecorder( final Runnable target ) {
+    public StackRecorder(Runnable target) {
         super(target);
     }
 
@@ -78,18 +78,18 @@ public final class StackRecorder extends Stack {
      *       a StackRecorder to clone
      * 
      */
-    public StackRecorder(final Stack parent) {
+    public StackRecorder(Stack parent) {
         super(parent);
     }
 
-    public static Object suspend(final SuspendResult value) {
+    public static Object suspend(SuspendResult value) {
         log.debug("suspend()");
 
-        final StackRecorder stackRecorder = get();
-        if(stackRecorder == null) {
+        StackRecorder stackRecorder = get();
+        if (stackRecorder == null) {
             throw new IllegalStateException("No continuation is running");
         }
-        final boolean needCheckExit = stackRecorder.isRestoring;
+        boolean needCheckExit = stackRecorder.isRestoring;
         
         stackRecorder.isCapturing = !stackRecorder.isRestoring;
         stackRecorder.isRestoring = false;
@@ -103,11 +103,11 @@ public final class StackRecorder extends Stack {
         return stackRecorder.parameter.value();
     }
 
-    public SuspendResult execute(final ResumeParameter parameter) {
+    public SuspendResult execute(ResumeParameter parameter) {
     	if (null == parameter) {
     		throw new IllegalArgumentException("ResumeContext parameter may not be null");
     	}
-        final StackRecorder old = registerThread();
+        StackRecorder old = registerThread();
         try {
             isRestoring = !isEmpty(); // start restoring if we have a filled stack
             this.parameter = parameter;
@@ -122,7 +122,7 @@ public final class StackRecorder extends Stack {
             runnable.run();
 
             if (isCapturing) {
-                if ( isEmpty() ) {
+                if (isEmpty()) {
                     // if we were really capturing the stack, at least we should have
                     // one object in the reference stack. Otherwise, it usually means
                     // that the application wasn't instrumented correctly.
@@ -154,13 +154,13 @@ public final class StackRecorder extends Stack {
             	}
                 return SuspendResult.EXIT;    // nothing more to continue
             }
-        } catch(final ContinuationDeath cd) {
+        } catch(ContinuationDeath cd) {
             // this isn't an error, so no need to log
         	return SuspendResult.EXIT;
-        } catch(final Error e) {
+        } catch(Error e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch(final RuntimeException e) {
+        } catch(RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
@@ -188,7 +188,7 @@ public final class StackRecorder extends Stack {
      * Bind this stack recorder to running thread.
      */
     private StackRecorder registerThread() {
-        final StackRecorder old = get();
+        StackRecorder old = get();
         threadMap.set(this);
         return old;
     }
@@ -196,7 +196,7 @@ public final class StackRecorder extends Stack {
     /**
      * Unbind the current stack recorder to running thread.
      */
-    private void deregisterThread(final StackRecorder old) {
+    private void deregisterThread(StackRecorder old) {
         threadMap.set(old);
     }
 

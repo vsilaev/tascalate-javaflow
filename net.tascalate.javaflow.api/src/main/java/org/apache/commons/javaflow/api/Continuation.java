@@ -144,7 +144,7 @@ public final class Continuation implements Serializable {
      */
     public static Continuation startWith(Runnable target, Object pContext) {
         if (log.isDebugEnabled()) {
-        	log.debug("starting new flow from " + ReflectionUtils.descriptionOfObject(target));
+            log.debug("starting new flow from " + ReflectionUtils.descriptionOfObject(target));
         }
 
         return startSuspendedWith(target).resume(pContext);
@@ -220,7 +220,7 @@ public final class Continuation implements Serializable {
      * 
      */    
     public Continuation resume() {
-    	return resume(null);
+        return resume(null);
     }
     
     /**
@@ -242,7 +242,7 @@ public final class Continuation implements Serializable {
      * 
      */    
     public Continuation resume(Object value) {
-    	return resumeWith(ResumeParameter.value(value));
+        return resumeWith(ResumeParameter.value(value));
     }
     
     /**
@@ -251,30 +251,30 @@ public final class Continuation implements Serializable {
      * when there is no need to {@link #resume()} the continuation.</p>
      */
     public void terminate() {
-    	resumeWith(ResumeParameter.exit());
+        resumeWith(ResumeParameter.exit());
     }
     
     protected Continuation resumeWith(ResumeParameter param) {
         if (log.isDebugEnabled()) {
-        	log.debug("continueing with continuation " + ReflectionUtils.descriptionOfObject(this));
+            log.debug("continueing with continuation " + ReflectionUtils.descriptionOfObject(this));
         }
 
         while(true) {
             StackRecorder nextStackRecorder = new StackRecorder(stackRecorder);
             SuspendResult result = nextStackRecorder.execute(param);
             if (SuspendResult.EXIT == result) {
-            	// no more thing to continue
-            	return null;
+                // no more thing to continue
+                return null;
             } else if (SuspendResult.CANCEL == result) {
-        		// return immediately with itself
-        		return this;
-        	} else if (SuspendResult.AGAIN == result) {
-        		// re-execute immediately
-        		continue;
-        	}
+                // return immediately with itself
+                return this;
+            } else if (SuspendResult.AGAIN == result) {
+                // re-execute immediately
+                continue;
+            }
             
             return new Continuation(nextStackRecorder, result.value());
-        }    	
+        }
     }
 
     /**
@@ -294,7 +294,7 @@ public final class Continuation implements Serializable {
      *      The value is passed from the continuation to the client code via {@link #suspend(Object)}
      */
     public Object value() {
-    	return value;
+        return value;
     }
     
     /**
@@ -314,7 +314,7 @@ public final class Continuation implements Serializable {
      *      if this method is called outside the {@link #resume} or {@link #startWith} methods.
      */
     public static Object suspend() {
-    	return suspend(null);
+        return suspend(null);
     }
     
     /**
@@ -403,7 +403,7 @@ public final class Continuation implements Serializable {
      * return when a program running inside uses this method.
      */
     public static void again() {
-    	StackRecorder.suspend(SuspendResult.AGAIN);
+        StackRecorder.suspend(SuspendResult.AGAIN);
     }
 
     /**
@@ -420,7 +420,7 @@ public final class Continuation implements Serializable {
      * return when a program running inside uses this method.
      */
     public static void cancel() {
-    	StackRecorder.suspend(SuspendResult.CANCEL);
+        StackRecorder.suspend(SuspendResult.CANCEL);
     }
 
     public String toString() {
