@@ -36,22 +36,30 @@ import org.objectweb.asm.ClassWriter;
  */
 final class Asm3ClassTransformer implements ResourceTransformer {
 
-    final private ContinuableClassInfoResolver cciResolver;
+    private final InheritanceLookup inheritanceLookup;
+    private final ContinuableClassInfoResolver cciResolver;
 
-    Asm3ClassTransformer(final ContinuableClassInfoResolver cciResolver) {
+    Asm3ClassTransformer(InheritanceLookup inheritanceLookup, ContinuableClassInfoResolver cciResolver) {
+        this.inheritanceLookup = inheritanceLookup;
         this.cciResolver = cciResolver;
     }
 
-    public byte[] transform(final byte[] original) {
-        final ComputeClassWriter cw = new ComputeClassWriter(ClassWriter.COMPUTE_FRAMES, cciResolver.resourceLoader());
-        final ContinuableClassVisitor visitor = new ContinuableClassVisitor(
+    public byte[] transform(byte[] original) {
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES) {
+            @Override
+            protected String getCommonSuperClass(final String type1, final String type2) {
+                return inheritanceLookup.getCommonSuperClass(type1, type2);
+            }
+        };
+        ContinuableClassVisitor visitor = new ContinuableClassVisitor(
             cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
+            inheritanceLookup,
             cciResolver,
             original
         );
         try {
             new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
-        } catch (final StopException ex) {
+        } catch (StopException ex) {
             // Preliminary stop visiting non-continuable class
             return null;
         }
@@ -60,7 +68,7 @@ final class Asm3ClassTransformer implements ResourceTransformer {
             return null;
         }
 
-        final byte[] bytecode = cw.toByteArray();
+        byte[] bytecode = cw.toByteArray();
         // BytecodeDebugUtils.dumpClass(bytecode);
         return bytecode;
     }

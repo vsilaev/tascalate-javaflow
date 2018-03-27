@@ -25,10 +25,10 @@ import org.objectweb.asm.Opcodes;
 
 public class ClassNameResolver {
     public static class Result {
-        final public String className;
-        final public byte[] classfileBuffer;
+        public final String className;
+        public final byte[] classfileBuffer;
 
-        Result(final String className, final byte[] classfileBuffer) {
+        Result(String className, byte[] classfileBuffer) {
             this.className = className;
             this.classfileBuffer = classfileBuffer;
         }
@@ -38,21 +38,21 @@ public class ClassNameResolver {
         }        
     }
 
-    public static Result resolveClassName(final String className, final Class<?> classBeingRedefined, final byte[] classfileBuffer) {
+    public static Result resolveClassName(String className, Class<?> classBeingRedefined, byte[] classfileBuffer) {
         String resolvedClassName = className != null ? className :
             classBeingRedefined != null ? classBeingRedefined.getName().replace('.', '/') : null;
 
-        final String[] classNameFromBytes = {null}; 
+        String[] classNameFromBytes = {null}; 
         if (null == resolvedClassName) {
             try {
-                final ClassReader cv = new ClassReader(classfileBuffer);
+                ClassReader cv = new ClassReader(classfileBuffer);
                 cv.accept(new ClassVisitor(Opcodes.ASM5) {
                     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                         classNameFromBytes[0] = name;
                         throw StopException.INSTANCE;
                     }
                 }, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-            } catch (final StopException exIgnore) {
+            } catch (StopException exIgnore) {
 
             }
             resolvedClassName = classNameFromBytes[0];

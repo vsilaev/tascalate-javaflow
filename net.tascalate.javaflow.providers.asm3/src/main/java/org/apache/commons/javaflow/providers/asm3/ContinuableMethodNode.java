@@ -52,7 +52,7 @@ import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
 
 public class ContinuableMethodNode extends MethodNode implements Opcodes {
-    private final ComputeClassWriter verifierHelper;
+    private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;
     private final String className;
 
@@ -67,12 +67,12 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
     public ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
                                  String className, 
-                                 ComputeClassWriter verifierHelper,
+                                 InheritanceLookup inheritanceLookup, 
                                  ContinuableClassInfoResolver cciResolver, 
                                  MethodVisitor mv) {
         super(access, name, desc, signature, exceptions);
         this.className = className;
-        this.verifierHelper = verifierHelper;
+        this.inheritanceLookup = inheritanceLookup;
         this.cciResolver = cciResolver;
         this.mv = mv;
     }
@@ -115,7 +115,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         try {
             moveNew();
 
-            analyzer = new Analyzer(new FastClassVerifier(verifierHelper)) {
+            analyzer = new Analyzer(new FastClassVerifier(inheritanceLookup)) {
                 @Override
                 protected Frame newFrame(final int nLocals, final int nStack) {
                     return new MonitoringFrame(nLocals, nStack);

@@ -15,6 +15,9 @@
  */
 package org.apache.commons.javaflow.providers.asm4;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
@@ -22,12 +25,27 @@ import org.apache.commons.javaflow.spi.ResourceTransformer;
 
 public class Asm4ResourceTransformationFactory implements ResourceTransformationFactory {
 
-    public ResourceTransformer createTransformer(final ContinuableClassInfoResolver cciResolver) {
-        return new Asm4ClassTransformer(cciResolver);
+    public ResourceTransformer createTransformer(ContinuableClassInfoResolver cciResolver) {
+        return new Asm4ClassTransformer(getOrCreateInheritanceLookup(cciResolver), cciResolver);
     }
 
-    public ContinuableClassInfoResolver createResolver(final ResourceLoader resourceLoader) {
+    public ContinuableClassInfoResolver createResolver(ResourceLoader resourceLoader) {
         return new Asm4ContinuableClassInfoResolver(resourceLoader);
     }
+    
+    private static InheritanceLookup getOrCreateInheritanceLookup(ContinuableClassInfoResolver cciResolver) {
+        InheritanceLookup result;
+        synchronized (CACHED_INHERITANCE_LOOKUP) {
+            result = CACHED_INHERITANCE_LOOKUP.get(cciResolver);
+            if (null == result) {
+                result = new InheritanceLookup(cciResolver.resourceLoader());
+                CACHED_INHERITANCE_LOOKUP.put(cciResolver, result);
+            }
+        }
+        return result;
+    }
+    
+    private static final Map<ContinuableClassInfoResolver, InheritanceLookup> CACHED_INHERITANCE_LOOKUP = 
+        new WeakHashMap<ContinuableClassInfoResolver, InheritanceLookup>();
 
 }

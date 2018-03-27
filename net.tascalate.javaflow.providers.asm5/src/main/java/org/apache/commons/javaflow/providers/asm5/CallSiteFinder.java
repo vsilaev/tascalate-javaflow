@@ -42,11 +42,11 @@ import org.objectweb.asm.tree.VarInsnNode;
 class CallSiteFinder {
 
     public static class Result {
-        final public AbstractInsnNode callSite;
-        final public MethodInsnNode methodCall;
-        final public Set<String> annotations;
+        public final AbstractInsnNode callSite;
+        public final MethodInsnNode methodCall;
+        public final Set<String> annotations;
 
-        Result(final AbstractInsnNode callSite, final MethodInsnNode methodCall, final Set<String> annotations) {
+        Result(AbstractInsnNode callSite, MethodInsnNode methodCall, Set<String> annotations) {
             this.callSite = callSite;
             this.methodCall = methodCall;
             this.annotations = annotations;
@@ -54,7 +54,7 @@ class CallSiteFinder {
 
         @Override
         public String toString() {
-            final String caller;
+            String caller;
             if (callSite instanceof VarInsnNode) {
                 caller = "Var #" + VarInsnNode.class.cast(callSite).var;
             } else {
@@ -64,13 +64,13 @@ class CallSiteFinder {
         }
     }
 
-    List<Result> findMatchingCallSites(final InsnList instructions, final List<LocalVariableAnnotationNode> varAnnotations, final Map<Integer, List<AnnotationNode>> paramAnnotations) {
-        final List<Result> result = new ArrayList<>();
+    List<Result> findMatchingCallSites(InsnList instructions, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
+        List<Result> result = new ArrayList<>();
         for (@SuppressWarnings("unchecked") Iterator<AbstractInsnNode> i = instructions.iterator(); i.hasNext(); ) {
-            final AbstractInsnNode ins = i.next();
+            AbstractInsnNode ins = i.next();
             if (ins instanceof MethodInsnNode) {
-                final MethodInsnNode mins = (MethodInsnNode)ins;
-                final Result entry = findMatchingCallSite(mins, varAnnotations, paramAnnotations);
+                MethodInsnNode mins = (MethodInsnNode)ins;
+                Result entry = findMatchingCallSite(mins, varAnnotations, paramAnnotations);
                 if (entry != null) {
                     result.add(entry);
                 }
@@ -81,27 +81,27 @@ class CallSiteFinder {
 
 
     @SuppressWarnings("unchecked")
-    static List<LocalVariableAnnotationNode> annotationsList(final List<?> v) {
+    static List<LocalVariableAnnotationNode> annotationsList(List<?> v) {
         return null == v ? Collections.emptyList() : (List<LocalVariableAnnotationNode>)v;
     }
 
-    static Map<Integer, List<AnnotationNode>> annotationsList(final List<?>[] v) {
+    static Map<Integer, List<AnnotationNode>> annotationsList(List<?>[] v) {
         if (v == null) {
             return Collections.emptyMap();
         }
-        final Map<Integer, List<AnnotationNode>> result = new HashMap<>();
+        Map<Integer, List<AnnotationNode>> result = new HashMap<>();
         int i = 0;
-        for (final List<?> list : v) {
+        for (List<?> list : v) {
             @SuppressWarnings("unchecked")
-            final List<AnnotationNode> typedList = (List<AnnotationNode>)list;
+            List<AnnotationNode> typedList = (List<AnnotationNode>)list;
             if (null != typedList)
                 result.put(i++, typedList);
         }
         return result;
     }
 
-    protected Result findMatchingCallSite(final MethodInsnNode m, final List<LocalVariableAnnotationNode> varAnnotations, final Map<Integer, List<AnnotationNode>> paramAnnotations) {
-        final int opcode = m.getOpcode(); 
+    protected Result findMatchingCallSite(MethodInsnNode m, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
+        int opcode = m.getOpcode(); 
 
         if (INVOKEVIRTUAL != opcode && INVOKEINTERFACE != opcode ) {
             return null;
@@ -116,8 +116,8 @@ class CallSiteFinder {
             if (size == 0) {
                 if (n instanceof VarInsnNode) {
                     // Local variable (incl. this) or parameter
-                    final VarInsnNode v = (VarInsnNode)n;
-                    final Set<String> annotations;
+                    VarInsnNode v = (VarInsnNode)n;
+                    Set<String> annotations;
                     if (v.var > argCount) { // 0 -- this, 1..argCount-1 -- params
                         annotations = getVarAnnotations(varAnnotations, v);
                     } else {
@@ -138,15 +138,15 @@ class CallSiteFinder {
         return null;
     }
 
-    protected Set<String> getVarAnnotations(final List<LocalVariableAnnotationNode> varAnnotations, final VarInsnNode v) {
-        final Set<String> result = new TreeSet<>();
-        for (final LocalVariableAnnotationNode n : varAnnotations) {
-            final int idx = n.index.indexOf(v.var);
+    protected Set<String> getVarAnnotations(List<LocalVariableAnnotationNode> varAnnotations, VarInsnNode v) {
+        Set<String> result = new TreeSet<>();
+        for (LocalVariableAnnotationNode n : varAnnotations) {
+            int idx = n.index.indexOf(v.var);
             if (idx < 0) {
                 continue;
             }
-            final LabelNode start = (LabelNode) n.start.get(idx);
-            final LabelNode end = (LabelNode) n.end.get(idx);
+            LabelNode start = (LabelNode) n.start.get(idx);
+            LabelNode end = (LabelNode) n.end.get(idx);
             if (isVarBetweenBounds(v, start, end)) {
                 result.add(n.desc);
             }
@@ -154,7 +154,7 @@ class CallSiteFinder {
         return result;
     }
 
-    protected boolean isVarBetweenBounds(final AbstractInsnNode var, final LabelNode lo, final LabelNode hi) {
+    protected boolean isVarBetweenBounds(AbstractInsnNode var, LabelNode lo, LabelNode hi) {
         AbstractInsnNode x;
         boolean loFound = false;
         for (x = var; !(x == null || loFound); x = x.getPrevious()) {
@@ -172,11 +172,11 @@ class CallSiteFinder {
 
     }
 
-    protected Set<String> getParamAnnotations(Map<Integer, List<AnnotationNode>> paramAnnotations, final int varIdx) {
-        final Set<String> result = new TreeSet<>();
-        final List<AnnotationNode> annos = paramAnnotations.get(varIdx);
+    protected Set<String> getParamAnnotations(Map<Integer, List<AnnotationNode>> paramAnnotations, int varIdx) {
+        Set<String> result = new TreeSet<>();
+        List<AnnotationNode> annos = paramAnnotations.get(varIdx);
         if (null != annos) {
-            for (final AnnotationNode n : annos) {
+            for (AnnotationNode n : annos) {
                 result.add(n.desc);
             }
         }
@@ -184,13 +184,13 @@ class CallSiteFinder {
 
     }
 
-    protected static int getStackSizeChange(final AbstractInsnNode ins) {
+    protected static int getStackSizeChange(AbstractInsnNode ins) {
         /**
          * See http://cs.au.dk/~mis/dOvs/jvmspec/ref-Java.html
          */
 
-        final int s;
-        final int o = ins.getOpcode();
+        int s;
+        int o = ins.getOpcode();
 
         if (o < 0) {
             return 0;
@@ -223,7 +223,7 @@ class CallSiteFinder {
             case SIPUSH: return 1;
     
             case LDC: 
-                final LdcInsnNode l = (LdcInsnNode)ins;
+                LdcInsnNode l = (LdcInsnNode)ins;
                 if (l.cst instanceof Long || l.cst instanceof Double)
                     return 2;
                 else
@@ -367,26 +367,26 @@ class CallSiteFinder {
     
             case GETSTATIC:
             case PUTSTATIC:
-                final FieldInsnNode fs = (FieldInsnNode)ins;
+                FieldInsnNode fs = (FieldInsnNode)ins;
                 return Type.getType(fs.desc).getSize() * (o == PUTSTATIC ? -1 : +1); 
     
             case GETFIELD:
-                final FieldInsnNode fg = (FieldInsnNode)ins;
+                FieldInsnNode fg = (FieldInsnNode)ins;
                 return -1 + Type.getType(fg.desc).getSize(); // POP this PUSH current field value 
     
             case PUTFIELD:
-                final FieldInsnNode fp = (FieldInsnNode)ins;
+                FieldInsnNode fp = (FieldInsnNode)ins;
                 return -1 - Type.getType(fp.desc).getSize(); // POP this and POP field value to assign
     
             case INVOKEVIRTUAL:
             case INVOKESPECIAL:
             case INVOKESTATIC:
             case INVOKEINTERFACE:
-                final MethodInsnNode m = (MethodInsnNode)ins;
+                MethodInsnNode m = (MethodInsnNode)ins;
                 s = Type.getArgumentsAndReturnSizes(m.desc);
                 return - (s / 2) + (s % 2); 
             case INVOKEDYNAMIC:
-                final InvokeDynamicInsnNode d = (InvokeDynamicInsnNode)ins;
+                InvokeDynamicInsnNode d = (InvokeDynamicInsnNode)ins;
                 s = Type.getArgumentsAndReturnSizes(d.desc);
                 return - (s / 2) + (s % 2); 
     
@@ -409,7 +409,7 @@ class CallSiteFinder {
                 return -1; // POP synchronized object from stack
     
             case MULTIANEWARRAY:
-                final MultiANewArrayInsnNode ma = (MultiANewArrayInsnNode)ins;
+                MultiANewArrayInsnNode ma = (MultiANewArrayInsnNode)ins;
                 return -ma.dims + 1;
             case IFNULL:
             case IFNONNULL:

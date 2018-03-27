@@ -38,16 +38,21 @@ import org.objectweb.asm.Opcodes;
  */
 public class ContinuableClassVisitor extends ClassVisitor {
 
-    final private ContinuableClassInfoResolver cciResolver;
-    final private byte[] originalBytes;
+    private final InheritanceLookup inheritanceLookup;
+    private final ContinuableClassInfoResolver cciResolver;
+    private final byte[] originalBytes;
 
     private String className;
     private ContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
     private boolean isInterface = false;
 
-    public ContinuableClassVisitor(final ComputeClassWriter cv, final ContinuableClassInfoResolver cciResolver, final byte[] originalBytes) {
+    public ContinuableClassVisitor(ClassVisitor cv, 
+                                   InheritanceLookup inheritanceLookup, 
+                                   ContinuableClassInfoResolver cciResolver, 
+                                   byte[] originalBytes) {
         super(Opcodes.ASM4, cv);
+        this.inheritanceLookup = inheritanceLookup;
         this.cciResolver = cciResolver;
         this.originalBytes = originalBytes;
     }
@@ -62,7 +67,9 @@ public class ContinuableClassVisitor extends ClassVisitor {
         className = name;
         classInfo = cciResolver.resolve(name, originalBytes);
 
-        if (null == classInfo || classInfo.isClassProcessed() || StopException.__dirtyCheckSkipContinuationsOnClass(version, access, name, signature, superName, interfaces)) {
+        if (null == classInfo || 
+            classInfo.isClassProcessed() || 
+            StopException.__dirtyCheckSkipContinuationsOnClass(version, access, name, signature, superName, interfaces)) {
             skipEnchancing = true;
             // Must exit by throwing exception, otherwise NPE is possible in nested visitor
             throw StopException.INSTANCE;
@@ -95,14 +102,17 @@ public class ContinuableClassVisitor extends ClassVisitor {
     }
 
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        final MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-        final boolean skip = skipEnchancing || null == classInfo || mv == null
+        MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
+        boolean skip = skipEnchancing || null == classInfo || mv == null
                 || (access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_NATIVE)) > 0 || "<init>".equals(name)
                 || !classInfo.isContinuableMethod(access, name, desc, signature);
         if (skip) {
             return mv;
         } else {
-            return new ContinuableMethodNode(access, name, desc, signature, exceptions, className, (ComputeClassWriter)cv, cciResolver, mv);
+            return new ContinuableMethodNode(
+                access, name, desc, signature, exceptions, 
+                className, inheritanceLookup, cciResolver, mv
+            );
         }
     }
 }

@@ -33,34 +33,48 @@ package org.apache.commons.javaflow.providers.asm4;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 /**
- * A ClassWriter that computes the common super class of two classes without
+ * A class that computes the common super class of two classes without
  * actually loading them with a ClassLoader.
  * 
  * @author Eric Bruneton
+ * @author vsilaev
  */
-class ComputeClassWriter extends ClassWriter {
-
-    final private ResourceLoader l;
-
-    public ComputeClassWriter(final int flags, final ResourceLoader l) {
-        super(flags);
-        this.l = l;
+public class InheritanceLookup {
+    
+    private final ResourceLoader loader;
+    private final Map<Key, String> lookupCache = new HashMap<Key, String>();
+    
+    public InheritanceLookup(ResourceLoader loader) {
+        this.loader = loader;
     }
-
-    protected Type getCommonSuperType(final Type type1, final Type type2) {
+    
+    public Type getCommonSuperType(Type type1, Type type2) {
         return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
     }
     
-    @Override
-    protected String getCommonSuperClass(final String type1, final String type2) {
+    public String getCommonSuperClass(String type1, String type2) {
+        Key key = new Key(type1, type2);
+        String result;
+        synchronized (lookupCache) {
+            result = lookupCache.get(key);
+            if (null == result) {
+                result = calculateCommonSuperClass(type1, type2);
+                lookupCache.put(key, result);
+            }
+        }
+        return result;
+    }
+
+    protected String calculateCommonSuperClass(final String type1, final String type2) {
         try {
             ClassReader info1 = typeInfo(type1);
             ClassReader info2 = typeInfo(type2);
@@ -126,8 +140,7 @@ class ComputeClassWriter extends ClassWriter {
      *             if the bytecode of 'type' or of some of its ancestor class
      *             cannot be loaded.
      */
-    private StringBuilder typeAncestors(String type, ClassReader info)
-            throws IOException {
+    protected StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
         StringBuilder b = new StringBuilder();
         while (!"java/lang/Object".equals(type)) {
             b.append(';').append(type);
@@ -151,8 +164,7 @@ class ComputeClassWriter extends ClassWriter {
      *             if the bytecode of 'type' or of some of its ancestor class
      *             cannot be loaded.
      */
-    private boolean typeImplements(String type, ClassReader info, String itf)
-            throws IOException {
+    protected boolean typeImplements(String type, ClassReader info, String itf) throws IOException {
         while (!"java/lang/Object".equals(type)) {
             String[] itfs = info.getInterfaces();
             for (int i = 0; i < itfs.length; ++i) {
@@ -180,12 +192,52 @@ class ComputeClassWriter extends ClassWriter {
      * @throws IOException
      *             if the bytecode of 'type' cannot be loaded.
      */
-    private ClassReader typeInfo(final String type) throws IOException {
-        InputStream is = l.getResourceAsStream(type + ".class");
+    protected ClassReader typeInfo(String type) throws IOException {
+        InputStream is = loader.getResourceAsStream(type + ".class");
         try {
             return new ClassReader(is);
         } finally {
             is.close();
+        }
+    }
+    
+    static class Key extends AmbivalentDuoKey<String> {
+        Key(String a, String b) {
+            super(a, b);
+        }
+    }
+    
+    static class AmbivalentDuoKey<T> {
+        private final T a;
+        private final T b;
+        AmbivalentDuoKey(T a, T b) {
+            this.a = a;
+            this.b = b;
+        }
+        
+        @Override 
+        public int hashCode() {
+            int hA = null == a ? 0 : a.hashCode();
+            int hB = null == b ? 0 : b.hashCode();
+            return Math.min(hA, hB) * 37 + Math.max(hA, hB);
+        }
+        
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+            if (other.getClass() != this.getClass()) {
+                return false;
+            }
+            @SuppressWarnings("unchecked")
+            AmbivalentDuoKey<T> that = (AmbivalentDuoKey<T>)other;
+            return same(this.a, that.a) && same(this.b, that.b) ||
+                   same(this.a, that.b) && same(this.b, that.a);  
+        }
+        
+        private static <T> boolean same(T a, T b) {
+            return a == null ? b == null : a.equals(b);
         }
     }
 }

@@ -28,10 +28,10 @@ import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
 
 public class FastClassVerifier extends SimpleVerifier {
-    private ComputeClassWriter verifierHelper;
+    private final InheritanceLookup inheritanceLookup;
     
-    public FastClassVerifier(ComputeClassWriter verifierHelper) {
-        this.verifierHelper = verifierHelper;
+    public FastClassVerifier(InheritanceLookup inheritanceLookup) {
+        this.inheritanceLookup = inheritanceLookup;
     }
     
     @Override
@@ -45,7 +45,6 @@ public class FastClassVerifier extends SimpleVerifier {
         }
         Type et, eu;
         if (t.getSort() == Type.ARRAY) {
-            // u must be an array of bigger or equals dimension
             if (u.getSort() != Type.ARRAY ) {
                 return false;
             }
@@ -54,6 +53,7 @@ public class FastClassVerifier extends SimpleVerifier {
             int dt = t.getDimensions();
             int du = u.getDimensions();
             boolean isObject = et.equals(BasicValue.REFERENCE_VALUE.getType());
+            // u must be an array of equals dimension or bigger dimension if t is Object
             if (dt == du || dt < du && isObject) {
                 // Ok
             } else {
@@ -63,13 +63,13 @@ public class FastClassVerifier extends SimpleVerifier {
             et = t; 
             eu = u;
         }
-        Type commonType = verifierHelper.getCommonSuperType(et, eu);
+        Type commonType = inheritanceLookup.getCommonSuperType(et, eu);
         return commonType.equals(et);
 
     }
     
     @Override
-    public BasicValue merge(final BasicValue v, final BasicValue w) {
+    public BasicValue merge(BasicValue v, BasicValue w) {
         if (!v.equals(w)) {
             Type t = v.getType();
             Type u = w.getType();
@@ -89,7 +89,7 @@ public class FastClassVerifier extends SimpleVerifier {
                     if (isAssignableFrom(u, t)) {
                         return w;
                     }
-                    return new BasicValue(verifierHelper.getCommonSuperType(t, u));
+                    return new BasicValue(inheritanceLookup.getCommonSuperType(t, u));
                 }
             }
             return BasicValue.UNINITIALIZED_VALUE;
@@ -98,17 +98,17 @@ public class FastClassVerifier extends SimpleVerifier {
     }
 
     @Override
-    protected Class<?> getClass(final Type t) { 
+    protected Class<?> getClass(Type t) { 
         throw new UnsupportedOperationException();
     }
     
     @Override
-    protected boolean isInterface(final Type t) {
+    protected boolean isInterface(Type t) {
         throw new UnsupportedOperationException();
     }
     
     @Override
-    protected Type getSuperClass(final Type t) {
+    protected Type getSuperClass(Type t) {
         throw new UnsupportedOperationException();
     }
 
