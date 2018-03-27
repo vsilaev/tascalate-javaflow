@@ -37,18 +37,19 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     private String outerClassName;
     private String outerClassMethodName;
     private String outerClassMethodDesc;
-    private Map<String, String> normal2synthetic = new HashMap<String, String>();
-
-    Set<String> continuableMethods = new HashSet<String>();
+    
+    private 
+    final Map<String, String> normal2synthetic = new HashMap<String, String>();
+    final Set<String> continuableMethods = new HashSet<String>();
 
     private boolean isAnnotation = false;
 
-    public MaybeContinuableClassVisitor(final Asm4ContinuableClassInfoResolver environment) {
+    public MaybeContinuableClassVisitor(Asm4ContinuableClassInfoResolver environment) {
         super(Opcodes.ASM4);
         this.environment = environment;
     }
 
-    public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
         selfclass = name;
         superclass = superName;
@@ -71,7 +72,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
+    public MethodVisitor visitMethod(int access, final String name, final String desc, String signature, String[] exceptions) {
         if (isAnnotation) {
             return null;
         }
@@ -98,7 +99,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             private boolean methodContinuableAnnotationFound = false;
 
             @Override
-            public AnnotationVisitor visitAnnotation(final String description, boolean visible) {
+            public AnnotationVisitor visitAnnotation(String description, boolean visible) {
                 if (!methodContinuableAnnotationFound) {
                     methodContinuableAnnotationFound = environment.isContinuableAnnotation(description);
                 }
@@ -117,7 +118,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
-        for (final Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
+        for (Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
             if (continuableMethods.contains(n2s.getKey())) {
                 continuableMethods.add(n2s.getValue());
             }
@@ -133,15 +134,15 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             if (!isAnnotation) {
                 if (null != superclass && !OBJECT_CLASS_INTERNAL_NAME.equals(superclass)) 
                     visitParentClass(superclass);
-                if (null != superinterfaces) for (final String superinterface : superinterfaces)
+                if (null != superinterfaces) for (String superinterface : superinterfaces)
                     visitParentClass(superinterface);
 
             }
         }
     }
 
-    private void visitParentClass(final String classInternalName) {
-        final ContinuableClassInfoInternal parent = resolve(classInternalName);
+    private void visitParentClass(String classInternalName) {
+        ContinuableClassInfoInternal parent = resolve(classInternalName);
         if (null != parent) {
             continuableMethods.addAll(parent.continuableMethods());
         }
@@ -150,7 +151,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     private void checkOuterClass() {
         if (!isAnnotation && (outerClassName != null && outerClassMethodName != null)) {
             if (!continuableMethods.isEmpty()) {
-                final ContinuableClassInfoInternal outer = resolve(outerClassName);
+                ContinuableClassInfoInternal outer = resolve(outerClassName);
                 if (null != outer && outer.isContinuableMethod(0, outerClassMethodName, outerClassMethodDesc, null)) {
                     // Reserved;
                 }
@@ -158,10 +159,10 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         }
     }
 
-    private ContinuableClassInfoInternal resolve(final String classInternalName) {
+    private ContinuableClassInfoInternal resolve(String classInternalName) {
         try {
             return (ContinuableClassInfoInternal)environment.resolve(classInternalName);
-        } catch (final IOException ex) {
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -175,7 +176,8 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         return classContinuatedMarkerFound;
     }
 
-    final static String MARKER_FIELD_NAME = "___$$$CONT$$$___";
+    static final String MARKER_FIELD_NAME = "___$$$CONT$$$___";
 
-    private final static String OBJECT_CLASS_INTERNAL_NAME = Type.getInternalName(Object.class);
+    private 
+    static final String OBJECT_CLASS_INTERNAL_NAME = Type.getInternalName(Object.class);
 }

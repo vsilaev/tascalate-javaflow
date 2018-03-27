@@ -61,17 +61,17 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
         this.stackRecorderVar = a.stackRecorderVar;
     }
 
-    private static Type[] getArgumentTypes(final AbstractInsnNode node) {
+    private static Type[] getArgumentTypes(AbstractInsnNode node) {
         if (node instanceof MethodInsnNode) {
-            final MethodInsnNode mnode = (MethodInsnNode)node;
+            MethodInsnNode mnode = (MethodInsnNode)node;
             return Type.getArgumentTypes(mnode.desc);
         } else {
-            final InvokeDynamicInsnNode mnode = (InvokeDynamicInsnNode)node; 
+            InvokeDynamicInsnNode mnode = (InvokeDynamicInsnNode)node; 
             return Type.getArgumentTypes(mnode.desc);
         }
     }
 
-    private static int getOwnerSize(final AbstractInsnNode node) {
+    private static int getOwnerSize(AbstractInsnNode node) {
         if (node instanceof MethodInsnNode) {
             return node.getOpcode() == INVOKESTATIC ? 0 : 1;
         } else {
@@ -161,7 +161,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
             }
 
             // stack
-            final Type[] paramTypes = getArgumentTypes(mnode);
+            Type[] paramTypes = getArgumentTypes(mnode);
             int argSize = paramTypes.length;
             int ownerSize = getOwnerSize(mnode);
             int initSize = mnode.getOpcode() == INVOKESPECIAL && MethodInsnNode.class.cast(mnode).name.equals("<init>") ? 2 : 0;
@@ -244,8 +244,8 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
             mv.visitJumpInsn(IFEQ, fl);
 
             // save stack
-            final Type returnType = Type.getReturnType(desc);
-            final boolean hasReturn = returnType != Type.VOID_TYPE;
+            Type returnType = Type.getReturnType(desc);
+            boolean hasReturn = returnType != Type.VOID_TYPE;
             if (hasReturn) {
                 mv.visitInsn(returnType.getSize() == 1 ? POP : POP2);
             }
@@ -265,7 +265,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
                     mv.visitInsn(SWAP);
                     mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, PUSH_METHOD + "Object", "(Ljava/lang/Object;)V");
                 } else {
-                    final Type type = value.getType();
+                    Type type = value.getType();
                     if (type.getSize() > 1) {
                         mv.visitInsn(ACONST_NULL); // dummy stack entry
                         mv.visitVarInsn(ALOAD, stackRecorderVar);
@@ -281,7 +281,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
                 }
             }
 
-            final boolean isInstanceMethod = (methodNode.access & ACC_STATIC) == 0;
+            boolean isInstanceMethod = (methodNode.access & ACC_STATIC) == 0;
             if (isInstanceMethod) {
                 mv.visitVarInsn(ALOAD, stackRecorderVar);
                 mv.visitVarInsn(ALOAD, 0);
@@ -289,9 +289,9 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
             }
 
             // save locals
-            final int fsize = currentFrame.getLocals();
+            int fsize = currentFrame.getLocals();
             for (int j = 0; j < fsize; j++) {
-                final BasicValue value = (BasicValue) currentFrame.getLocal(j);
+                BasicValue value = (BasicValue) currentFrame.getLocal(j);
                 if (isNull(value)) {
                     // no need to save null
                 } else if (value == BasicValue.UNINITIALIZED_VALUE) {
@@ -316,7 +316,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
             mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushInt", "(I)V");
 
             if (currentFrame instanceof MonitoringFrame) {
-                final int[] monitoredLocals = ((MonitoringFrame) currentFrame).getMonitored();
+                int[] monitoredLocals = ((MonitoringFrame) currentFrame).getMonitored();
                 //System.out.println(System.identityHashCode(currentFrame)+" Monitored locals "+monitoredLocals.length);
                 for (int j = 0; j < monitoredLocals.length; j++) {
                     //System.out.println(System.identityHashCode(currentFrame)+" Monitored local "+monitoredLocals[j]);
@@ -325,7 +325,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
                 }
             }
 
-            final Type methodReturnType = Type.getReturnType(methodNode.desc);
+            Type methodReturnType = Type.getReturnType(methodNode.desc);
             pushDefault(methodReturnType);
             mv.visitInsn(methodReturnType.getOpcode(IRETURN));
             mv.visitLabel(fl);
@@ -351,7 +351,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
             return true;
         if (!value.isReference())
             return false;
-        final Type type = value.getType();
+        Type type = value.getType();
         return "Lnull;".equals(type.getDescriptor()); 
     }
 

@@ -78,7 +78,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
 
     // Bug in rev 1632 (Refactoring to remove redundant code (and for easier subclassing).
-    protected LabelNode getLabelNode(final Label l) {
+    protected LabelNode getLabelNode(Label l) {
         if (!(l.info instanceof LabelNode)) {
             l.info = new LabelNode(l); // error was here -- new LabelNode(/* nothing */);
         }
@@ -86,8 +86,8 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
 
     Frame getFrameByNode(AbstractInsnNode node) {
-        final int insIndex = instructions.indexOf(node);
-        final Frame[] frames = analyzer.getFrames();
+        int insIndex = instructions.indexOf(node);
+        Frame[] frames = analyzer.getFrames();
         return null == frames || insIndex >= frames.length ? null : frames[insIndex];
     }
 
@@ -117,12 +117,12 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
             analyzer = new Analyzer(new FastClassVerifier(inheritanceLookup)) {
                 @Override
-                protected Frame newFrame(final int nLocals, final int nStack) {
+                protected Frame newFrame(int nLocals, final int nStack) {
                     return new MonitoringFrame(nLocals, nStack);
                 }
 
                 @Override
-                protected Frame newFrame(final Frame src) {
+                protected Frame newFrame(Frame src) {
                     return new MonitoringFrame(src);
                 }
             };
@@ -130,21 +130,21 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             analyzer.analyze(className, this);
             accept(new ContinuableMethodVisitor(this));
 
-        } catch (final AnalyzerException ex) {
+        } catch (AnalyzerException ex) {
             throw new RuntimeException(ex);
         }
     }
 
     void moveNew() throws AnalyzerException {
-        final SourceInterpreter i = new SourceInterpreter();
-        final Analyzer a = new Analyzer(i);
+        SourceInterpreter i = new SourceInterpreter();
+        Analyzer a = new Analyzer(i);
         a.analyze(className, this);
 
-        final HashMap<AbstractInsnNode, MethodInsnNode> movable = new HashMap<AbstractInsnNode, MethodInsnNode>();
+        HashMap<AbstractInsnNode, MethodInsnNode> movable = new HashMap<AbstractInsnNode, MethodInsnNode>();
 
-        final Frame[] frames = a.getFrames();
+        Frame[] frames = a.getFrames();
         for (int j = 0; j < methods.size(); j++) {
-            final MethodInsnNode mnode = (MethodInsnNode) methods.get(j);
+            MethodInsnNode mnode = (MethodInsnNode) methods.get(j);
             // require to move NEW instruction
             int n = instructions.indexOf(mnode);
             Frame f = frames[n];
@@ -153,7 +153,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             SourceValue v = (SourceValue) f.getStack(f.getStackSize() - args.length - 1);
             @SuppressWarnings("unchecked")
             Set<AbstractInsnNode> insns = v.insns;
-            for (final AbstractInsnNode ins : insns) {
+            for (AbstractInsnNode ins : insns) {
                 if (ins.getOpcode() == NEW) {
                     movable.put(ins, mnode);
                 } else {
@@ -176,7 +176,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         }
 
         int updateMaxStack = 0;
-        for (final Map.Entry<AbstractInsnNode, MethodInsnNode> e : movable.entrySet()) {
+        for (Map.Entry<AbstractInsnNode, MethodInsnNode> e : movable.entrySet()) {
             AbstractInsnNode node1 = e.getKey();
             int n1 = instructions.indexOf(node1);
             AbstractInsnNode node2 = instructions.get(n1 + 1);
@@ -203,7 +203,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
             // optimizations for some common cases
             if (args.length == 0) {
-                final InsnList doNew = new InsnList();
+                InsnList doNew = new InsnList();
                 doNew.add(node1); // NEW
                 if (requireDup)
                     doNew.add(new InsnNode(DUP));
@@ -213,7 +213,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             }
 
             if (args.length == 1 && args[0].getSize() == 1) {
-                final InsnList doNew = new InsnList();
+                InsnList doNew = new InsnList();
                 doNew.add(node1); // NEW
                 if (requireDup) {
                     doNew.add(new InsnNode(DUP));
@@ -231,7 +231,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             // TODO this one untested!
             if ((args.length == 1 && args[0].getSize() == 2) ||
                     (args.length == 2 && args[0].getSize() == 1 && args[1].getSize() == 1)) {
-                final InsnList doNew = new InsnList();
+                InsnList doNew = new InsnList();
                 doNew.add(node1); // NEW
                 if (requireDup) {
                     doNew.add(new InsnNode(DUP));
@@ -248,7 +248,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
                 continue;
             }
 
-            final InsnList doNew = new InsnList();
+            InsnList doNew = new InsnList();
             // generic code using temporary locals
             // save stack
             for (int j = args.length - 1; j >= 0; j--) {
@@ -309,10 +309,10 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
             opcode == Opcodes.INVOKESPECIAL   ||
             opcode == Opcodes.INVOKESTATIC    ||
             opcode == Opcodes.INVOKEVIRTUAL) {
-            final ContinuableClassInfo classInfo;
+            ContinuableClassInfo classInfo;
             try {
                 classInfo = cciResolver.resolve(owner);
-            } catch (final IOException ex) {
+            } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
             return null != classInfo && classInfo.isContinuableMethod(opcode, name, desc, desc);
@@ -320,10 +320,10 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         return false;
     }
 
-    final private static String CONTINUATION_CLASS_INTERNAL_NAME = "org/apache/commons/javaflow/api/Continuation";
-    final private static Set<String> CONTINUATION_CLASS_CONTINUABLE_METHODS = new HashSet<String>(Arrays.asList(
-            "suspend", "again", "cancel" 
-            // we are suspending here with potential resume later
-            // "startWith", "continueWith", "exit" are unnecessary
-            ));
+    private static final String CONTINUATION_CLASS_INTERNAL_NAME = "org/apache/commons/javaflow/api/Continuation";
+    private static final Set<String> CONTINUATION_CLASS_CONTINUABLE_METHODS = new HashSet<String>(Arrays.asList(
+        "suspend", "again", "cancel" 
+        // we are suspending here with potential resume later
+        // "startWith", "continueWith", "exit" are unnecessary
+    ));
 }

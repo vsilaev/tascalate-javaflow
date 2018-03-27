@@ -29,12 +29,12 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 
 class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
-    final private Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();
-    final private Set<String> processedAnnotations = new HashSet<String>();
-    final private Set<String> continuableAnnotations = new HashSet<String>();
-    final private ResourceLoader resourceLoader;
+    private final Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();
+    private final Set<String> processedAnnotations = new HashSet<String>();
+    private final Set<String> continuableAnnotations = new HashSet<String>();
+    private final ResourceLoader resourceLoader;
 
-    Asm5ContinuableClassInfoResolver(final ResourceLoader classLoader) {
+    Asm5ContinuableClassInfoResolver(ResourceLoader classLoader) {
         this.resourceLoader = classLoader;
         markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE.getDescriptor());
     }
@@ -47,25 +47,25 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         return visitedClasses.remove(className);
     }
 
-    public ContinuableClassInfo resolve(final String classInternalName, final byte[] classBytes) {
+    public ContinuableClassInfo resolve(String classInternalName, byte[] classBytes) {
         return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
     }
 
-    public ContinuableClassInfo resolve(final String classInternalName) throws IOException {
-        final InputStream classBytes = resourceLoader.getResourceAsStream(classInternalName + ".class");
+    public ContinuableClassInfo resolve(String classInternalName) throws IOException {
+        InputStream classBytes = resourceLoader.getResourceAsStream(classInternalName + ".class");
         try {
             return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
         } finally {
             if (null != classBytes)
-                try { classBytes.close(); } catch (final IOException exIgnore) {}
+                try { classBytes.close(); } catch (IOException exIgnore) {}
         }
     }
 
-    private ContinuableClassInfo resolveContinuableClassInfo(final String classInternalName, final ClassReader reader) {
+    private ContinuableClassInfo resolveContinuableClassInfo(String classInternalName, ClassReader reader) {
         ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
         if (classInfo == null) {
 
-            final MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
+            MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
             reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 
             if (maybeContinuableClassVisitor.isContinuable()) {
@@ -81,9 +81,12 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         return classInfo == UNSUPPORTED_CLASS_INFO ? null : classInfo;
     }
 
-    private boolean resolveContinuableAnnotation(final String annotationClassDescriptor, final ClassReader reader) {
-        final MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(this); 
-        reader.accept(maybeContinuableAnnotationVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+    private boolean resolveContinuableAnnotation(String annotationClassDescriptor, ClassReader reader) {
+        MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(this); 
+        reader.accept(
+            maybeContinuableAnnotationVisitor, 
+            ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG
+        );
 
         if (maybeContinuableAnnotationVisitor.isContinuable()) {
             markContinuableAnnotation(annotationClassDescriptor);
@@ -93,7 +96,7 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         }
     }
 
-    private AnnotationProcessingState getAnnotationProcessingState(final String annotationClassDescriptor) {
+    private AnnotationProcessingState getAnnotationProcessingState(String annotationClassDescriptor) {
         if (continuableAnnotations.contains(annotationClassDescriptor))
             return AnnotationProcessingState.SUPPORTED;
         else if (processedAnnotations.contains(annotationClassDescriptor))
@@ -102,16 +105,16 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
             return AnnotationProcessingState.UNKNON;
     }
 
-    private void markProcessedAnnotation(final String annotationClassDescriptor) {
+    private void markProcessedAnnotation(String annotationClassDescriptor) {
         processedAnnotations.add(annotationClassDescriptor);
     }
 
-    private void markContinuableAnnotation(final String annotationClassDescriptor) {
+    private void markContinuableAnnotation(String annotationClassDescriptor) {
         markProcessedAnnotation(annotationClassDescriptor);
         continuableAnnotations.add(annotationClassDescriptor);
     }
 
-    public boolean isContinuableAnnotation(final String annotationClassDescriptor) {
+    public boolean isContinuableAnnotation(String annotationClassDescriptor) {
         switch (getAnnotationProcessingState(annotationClassDescriptor)) {
             case SUPPORTED:
                 return true;
@@ -122,15 +125,15 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     
                 final Type type = Type.getType(annotationClassDescriptor);	
                 try {
-                    final InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
+                    InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
                     try {
                         return resolveContinuableAnnotation(annotationClassDescriptor, new ClassReader(annotationBytes));
                     } finally {
                         if (null != annotationBytes) {
-                            try { annotationBytes.close(); } catch (final IOException exIgnore) {}
+                            try { annotationBytes.close(); } catch (IOException exIgnore) {}
                         }
                     }
-                } catch (final IOException ex) {
+                } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
             default:
@@ -138,8 +141,8 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         }
     }
 
-    final private static Type CONTINUABLE_ANNOTATION_TYPE = Type.getObjectType("org/apache/commons/javaflow/api/ContinuableAnnotation");
-    final private static ContinuableClassInfo UNSUPPORTED_CLASS_INFO = new ContinuableClassInfo() {
+    private static final Type CONTINUABLE_ANNOTATION_TYPE = Type.getObjectType("org/apache/commons/javaflow/api/ContinuableAnnotation");
+    private static final ContinuableClassInfo UNSUPPORTED_CLASS_INFO = new ContinuableClassInfo() {
 
         public void markClassProcessed() {}
 
