@@ -29,7 +29,7 @@ import org.apache.commons.javaflow.extras.Continuations;
 public class LambdasExample {
     public static void main(String[] argv) throws Exception {
         LambdasExample demo = new LambdasExample();
-        Continuations.execute(demo::runExamples, s -> System.out.println("Interrupted " + s));
+        Continuations.execute(demo::runExamples, (String s) -> System.out.println("Interrupted " + s));
 
         System.out.println("===");
 

@@ -18,7 +18,7 @@ package org.apache.commons.javaflow.examples.lambdas;
 import org.apache.commons.javaflow.api.Continuation;
 import org.apache.commons.javaflow.extras.Continuations;
 
-public class LambdasExampleMinimal {
+public class LambdasExampleMinimalLoop {
 
     public static void main(String[] argv) throws Exception {
 

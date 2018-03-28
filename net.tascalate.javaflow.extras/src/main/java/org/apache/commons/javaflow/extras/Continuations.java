@@ -18,8 +18,10 @@ package org.apache.commons.javaflow.extras;
 import static org.apache.commons.javaflow.extras.ContinuationSupport.toRunnable;
 
 import java.util.Iterator;
-import java.util.function.Supplier;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.javaflow.api.Continuation;
 import org.apache.commons.javaflow.api.continuable;
@@ -64,29 +66,56 @@ final public class Continuations {
         return Continuation.startWith(toRunnable(o));
     }
 
+    public static <T> CoIterator<T> iterate(Continuation continuation) {
+        return new CoIterator<>(continuation);
+    }
+    
+    public static <T> CoIterator<T> iterate(ContinuableRunnable generator) {
+        return iterate(create(generator));
+    }
+    
+    public static <T> Stream<T> stream(Continuation continuation) {
+        CoIterator<T> iterator = iterate(continuation);
+        return StreamSupport
+               .stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
+               .onClose(iterator::close);
+    }
+
+    public static <T> Stream<T> stream(ContinuableRunnable generator) {
+        return stream(create(generator));
+    }
+
     /**
      * Executes the suspended continuation from the point specified till the end 
-     * of the corresponding code block and performs a potentially suspendable action 
+     * of the corresponding code block and performs a non-suspendable action 
      * on each value yielded.
      * 
+     * @param <T> a type of values  
      * @param continuation a continuation to resume a code block that yields multiple results
+     * @param valueType a type of the values yielded from code block
      * @param action a continuable action to perform on the values yielded
-     */  
-    public @continuable static void execute(Continuation continuation, ContinuableConsumer<? super Object> action) {
-        execute(continuation, Object.class, action);
+     */
+    public static <T> void execute(Continuation continuation, Consumer<? super T> action) {
+        try (CoIterator<T> iter = new CoIterator<>(continuation)) {
+            while (iter.hasNext()) {
+                action.accept(iter.next());
+            }
+        }
     }
     
     /**
-     * Fully executes the continuable code block and performs a potentially suspendable 
+     * Fully executes the continuable code block and performs a non-suspendable 
      * action on each value yielded.
      * 
+     * @param <T> a type of values 
      * @param generator a continuable code block that yields multiple results
+     * @param valueType a type of the values yielded from code block
      * @param action a continuable action to perform on the values yielded
      */
-    public @continuable static void execute(ContinuableRunnable generator, ContinuableConsumer<? super Object> action) {
-        execute(generator, Object.class, action);
+    public static <T> void execute(ContinuableRunnable generator, Consumer<? super T> action) {
+        execute(create(generator), action);
     }
-    
+
     
     /**
      * Executes the suspended continuation from the point specified till the end 
@@ -98,7 +127,7 @@ final public class Continuations {
      * @param valueType a type of the values yielded from code block
      * @param action a continuable action to perform on the values yielded
      */
-    public @continuable static <T> void execute(Continuation continuation, Class<T> valueType, ContinuableConsumer<? super T> action) {
+    public @continuable static <T> void executeContinuable(Continuation continuation, ContinuableConsumer<? super T> action) {
         forEach(()-> new CoIterator<>(continuation), action);
     }
     
@@ -111,16 +140,9 @@ final public class Continuations {
      * @param valueType a type of the values yielded from code block
      * @param action a continuable action to perform on the values yielded
      */
-    public @continuable static <T> void execute(ContinuableRunnable generator, Class<T> valueType, ContinuableConsumer<? super T> action) {
-        forEach(()-> new CoIterator<>(generator), action);
+    public @continuable static <T> void executeContinuable(ContinuableRunnable generator, ContinuableConsumer<? super T> action) {
+        executeContinuable(create(generator), action);
     }
-
-    private @continuable static <T> void execute(Supplier<CoIterator<T>> iteratorProvider, Class<T> valueType, ContinuableConsumer<? super T> action) {
-        try (CoIterator<T> iterator = iteratorProvider.get()) {
-            forEach(iterator, action);
-        }
-    }
-    
 
     /**
      * Performs an continuable action for each element of the {@link Stream} supplied.
