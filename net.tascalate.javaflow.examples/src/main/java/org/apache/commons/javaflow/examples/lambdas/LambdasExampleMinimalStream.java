@@ -24,10 +24,8 @@ import org.apache.commons.javaflow.extras.Continuations;
 public class LambdasExampleMinimalStream {
 
     public static void main(String[] argv) throws Exception {
-        // use try-with-resources to close the stream 
-        // (and hence terminate underlying continuation) 
-        // in case of early exit
-        try (Stream<Integer> stream = Continuations.stream(() -> {
+        // Create suspended continuation
+        Continuation cc = Continuations.create(() -> {
             try {
                 for (int i = 1; i <= 5; i++) {
                     System.out.println("Exe before suspend");
@@ -37,7 +35,12 @@ public class LambdasExampleMinimalStream {
             } finally {
                 System.out.println("Continuation gracefully exited");
             }
-        })) {
+        });
+        
+        // use try-with-resources to close the stream 
+        // (and hence terminate underlying continuation) 
+        // in case of early exit
+        try (Stream<Integer> stream = Continuations.stream(cc)) {
             Optional<Integer> firstDividableByThree = 
                 stream.peek(v -> System.out.println("Interrupted " + v))
                       .filter(v -> v% 3 == 0)

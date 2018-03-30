@@ -16,7 +16,6 @@
 package org.apache.commons.javaflow.extras;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.javaflow.api.Continuation;
@@ -41,10 +40,10 @@ import org.apache.commons.javaflow.api.Continuation;
  * it's impossible to pass value back to continuation from client code; the result of 
  * {@link Continuation#suspend(Object)} in continuation will be always <i>null</i> 
  * 
- * @param <T>
+ * @param <E>
  * Type of objects returned by the iterator
  */
-public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
+public class CoIterator<E> implements ClosableIterator<E>, Serializable {
     private static final long serialVersionUID = 1L;
     
     private boolean advance;
@@ -59,7 +58,7 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
      */
     public CoIterator(Runnable code) {
         cc = Continuation.startSuspendedWith(code);
-        advance = true;
+        advance = null != cc;
     }
 
     /**
@@ -74,16 +73,32 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
     }
 
     /**
-     * Iterator constructor
+     * <p>Iterator constructor
+     * <p>Valued returned by this iterator will be results these are yielded via call to 
+     * {@link Continuation#suspend(Object)}, i.e. cc.value() is not included
      * 
      * @param cc
      * Current {@link Continuation} to start iteration from. 
-     * Valued returned by this iterator will be results these are yielded via call to 
-     * {@link Continuation#suspend(Object)}, i.e. cc.value() is not included
      */
     public CoIterator(Continuation cc) {
+        this(cc, false);
+    }
+    
+    /**
+     * <p>Iterator constructor
+     * <p>Valued returned by this iterator will be results these are yielded via call to 
+     * {@link Continuation#suspend(Object)}, i.e. cc.value() is not included unless 
+     * <code>useCurrentValue</code> is true
+     *  
+     * @param cc
+     * Current {@link Continuation} to start iteration from.
+     * 
+     * @param useCurrentValue
+     * Should the value of the supplied continuation be used as a first returned value 
+     */
+    public CoIterator(Continuation cc, boolean useCurrentValue) {
         this.cc = cc;
-        advance = true;
+        advance = !useCurrentValue && null != cc;
     }
     
     public boolean hasNext() {
@@ -91,14 +106,14 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
         return cc != null;
     }
 
-    public T next() {
+    public E next() {
         advanceIfNecessary();
 
         if (cc == null)
             throw new NoSuchElementException();
 
         @SuppressWarnings("unchecked")
-        T result = (T) cc.value();
+        E result = (E)cc.value();
         advance = true;
 
         return result;
@@ -109,21 +124,18 @@ public class CoIterator<T> implements Iterator<T>, Serializable, AutoCloseable {
     }
 
     public void close() {
-        if (null != cc) {
-            try {
-                cc.terminate();
-            } finally {
-                cc = null;
-                advance = false;
-            }
-        } else {
+        try {
+            cc.terminate();
+        } finally {
+            cc = null;
             advance = false;
         }
     }
     
     protected void advanceIfNecessary() {
-        if (advance)
+        if (advance) {
             cc = cc.resume();
+        }
         advance = false;
     }
 }

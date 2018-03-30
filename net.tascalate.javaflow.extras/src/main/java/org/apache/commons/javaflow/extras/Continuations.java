@@ -66,23 +66,32 @@ final public class Continuations {
         return Continuation.startWith(toRunnable(o));
     }
 
-    public static <T> CoIterator<T> iterate(Continuation continuation) {
-        return new CoIterator<>(continuation);
+    public static <T> ClosableIterator<T> iterate(Continuation continuation) {
+        return iterate(continuation, false);
     }
     
-    public static <T> CoIterator<T> iterate(ContinuableRunnable generator) {
-        return iterate(create(generator));
+    public static <T> ClosableIterator<T> iterate(Continuation continuation, boolean useCurrentValue) {
+        return new CoIterator<>(continuation, useCurrentValue);
+    }
+    
+    
+    public static <T> ClosableIterator<T> iterate(ContinuableRunnable generator) {
+        return iterate(create(generator), false);
     }
     
     public static <T> Stream<T> stream(Continuation continuation) {
-        CoIterator<T> iterator = iterate(continuation);
+        return stream(continuation, false);
+    }
+    
+    public static <T> Stream<T> stream(Continuation continuation, boolean useCurrentValue) {
+        ClosableIterator<T> iterator = iterate(continuation, useCurrentValue);
         return StreamSupport
                .stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                .onClose(iterator::close);
     }
 
     public static <T> Stream<T> stream(ContinuableRunnable generator) {
-        return stream(create(generator));
+        return stream(create(generator), false);
     }
 
     /**
@@ -92,11 +101,24 @@ final public class Continuations {
      * 
      * @param <T> a type of values  
      * @param continuation a continuation to resume a code block that yields multiple results
-     * @param valueType a type of the values yielded from code block
-     * @param action a continuable action to perform on the values yielded
+     * @param action a non-continuable action to perform on the values yielded
      */
     public static <T> void execute(Continuation continuation, Consumer<? super T> action) {
-        try (CoIterator<T> iter = new CoIterator<>(continuation)) {
+        execute(continuation, false, action);
+    }
+    
+    /**
+     * Executes the suspended continuation from the point specified till the end 
+     * of the corresponding code block and performs a non-suspendable action 
+     * on each value yielded.
+     * 
+     * @param <T> a type of values  
+     * @param continuation a continuation to resume a code block that yields multiple results
+     * @param useCurrentValue should the value of the supplied continuation be used as a first value to process
+     * @param action a non-continuable action to perform on the values yielded
+     */
+    public static <T> void execute(Continuation continuation, boolean useCurrentValue, Consumer<? super T> action) {
+        try (ClosableIterator<T> iter = iterate(continuation, useCurrentValue)) {
             while (iter.hasNext()) {
                 action.accept(iter.next());
             }
@@ -109,8 +131,7 @@ final public class Continuations {
      * 
      * @param <T> a type of values 
      * @param generator a continuable code block that yields multiple results
-     * @param valueType a type of the values yielded from code block
-     * @param action a continuable action to perform on the values yielded
+     * @param action a non-continuable action to perform on the values yielded
      */
     public static <T> void execute(ContinuableRunnable generator, Consumer<? super T> action) {
         execute(create(generator), action);
@@ -124,12 +145,27 @@ final public class Continuations {
      * 
      * @param <T> a type of values  
      * @param continuation a continuation to resume a code block that yields multiple results
-     * @param valueType a type of the values yielded from code block
      * @param action a continuable action to perform on the values yielded
      */
     public @continuable static <T> void executeContinuable(Continuation continuation, ContinuableConsumer<? super T> action) {
-        forEach(()-> new CoIterator<>(continuation), action);
+        executeContinuable(continuation, false, action);
     }
+    
+    /**
+     * Executes the suspended continuation from the point specified till the end 
+     * of the corresponding code block and performs a potentially suspendable action 
+     * on each value yielded.
+     * 
+     * @param <T> a type of values  
+     * @param useCurrentValue should the value of the supplied continuation be used as a first value to process
+     * @param action a continuable action to perform on the values yielded
+     */
+    public @continuable static <T> void executeContinuable(Continuation continuation, boolean useCurrentValue, ContinuableConsumer<? super T> action) {
+        try (ClosableIterator<T> iter = iterate(continuation, useCurrentValue)) {
+            forEach(iter, action);
+        }
+    }
+
     
     /**
      * Fully executes the continuable code block and performs a potentially suspendable 
@@ -137,11 +173,10 @@ final public class Continuations {
      * 
      * @param <T> a type of values 
      * @param generator a continuable code block that yields multiple results
-     * @param valueType a type of the values yielded from code block
      * @param action a continuable action to perform on the values yielded
      */
     public @continuable static <T> void executeContinuable(ContinuableRunnable generator, ContinuableConsumer<? super T> action) {
-        executeContinuable(create(generator), action);
+        executeContinuable(create(generator), false, action);
     }
 
     /**
@@ -169,7 +204,10 @@ final public class Continuations {
      * @param action a continuable action to perform on the elements
      */   
     public @continuable static <T> void forEach(Iterable<T> iterable, ContinuableConsumer<? super T> action) {
-        forEach(iterable.iterator(), action);
+        Iterator<T> iter = iterable.iterator();
+        try (ClosableIterator<T> closable = asClosable(iter)) {
+            forEach(iter, action);
+        }
     }
 
     /**
@@ -188,5 +226,9 @@ final public class Continuations {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private static <E> ClosableIterator<E> asClosable(Object o) {
+        return o instanceof ClosableIterator ? (ClosableIterator<E>)o : null;
+    }
 
 }

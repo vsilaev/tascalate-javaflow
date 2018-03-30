@@ -16,8 +16,7 @@
 package org.apache.commons.javaflow.examples.lambdas;
 
 import org.apache.commons.javaflow.api.Continuation;
-
-import org.apache.commons.javaflow.extras.CoIterator;
+import org.apache.commons.javaflow.extras.ClosableIterator;
 import org.apache.commons.javaflow.extras.Continuations;
 
 public class LambdasExampleMinimalIterator {
@@ -40,7 +39,7 @@ public class LambdasExampleMinimalIterator {
         // use try-with-resources to close the coIterator 
         // (and hence terminate underlying continuation) 
         // in case of early exit
-        try (CoIterator<Integer> i = Continuations.iterate(cc)) {
+        try (ClosableIterator<Integer> i = Continuations.iterate(cc)) {
             int c = 0;
             while (i.hasNext()) {
                 System.out.println("Interrupted " + i.next());
