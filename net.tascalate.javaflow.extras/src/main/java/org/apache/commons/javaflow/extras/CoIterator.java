@@ -43,7 +43,7 @@ import org.apache.commons.javaflow.api.Continuation;
  * @param <E>
  * Type of objects returned by the iterator
  */
-public class CoIterator<E> implements ClosableIterator<E>, Serializable {
+public class CoIterator<E> implements CloseableIterator<E>, Serializable {
     private static final long serialVersionUID = 1L;
     
     private boolean advance;

@@ -15,10 +15,11 @@
  */
 package org.apache.commons.javaflow.extras;
 
+import java.io.Closeable;
 import java.util.Iterator;
 
 /**
- * Iterator that additionally implements {@link Closable} interface 
+ * Iterator that additionally implements {@link Closeable} interface 
  * to execute clean-up when not fully iterated
  * 
  * @author vsilaev
@@ -26,7 +27,7 @@ import java.util.Iterator;
  * @param <E>
  * Type of objects returned by the iterator 
  */
-public interface ClosableIterator<E> extends Iterator<E>, AutoCloseable {
+public interface CloseableIterator<E> extends Iterator<E>, AutoCloseable {
     @Override
     void close();
 }

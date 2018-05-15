@@ -66,16 +66,16 @@ final public class Continuations {
         return Continuation.startWith(toRunnable(o));
     }
 
-    public static <T> ClosableIterator<T> iterate(Continuation continuation) {
+    public static <T> CloseableIterator<T> iterate(Continuation continuation) {
         return iterate(continuation, false);
     }
     
-    public static <T> ClosableIterator<T> iterate(Continuation continuation, boolean useCurrentValue) {
+    public static <T> CloseableIterator<T> iterate(Continuation continuation, boolean useCurrentValue) {
         return new CoIterator<>(continuation, useCurrentValue);
     }
     
     
-    public static <T> ClosableIterator<T> iterate(ContinuableRunnable generator) {
+    public static <T> CloseableIterator<T> iterate(ContinuableRunnable generator) {
         return iterate(create(generator), false);
     }
     
@@ -84,7 +84,7 @@ final public class Continuations {
     }
     
     public static <T> Stream<T> stream(Continuation continuation, boolean useCurrentValue) {
-        ClosableIterator<T> iterator = iterate(continuation, useCurrentValue);
+        CloseableIterator<T> iterator = iterate(continuation, useCurrentValue);
         return StreamSupport
                .stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
                .onClose(iterator::close);
@@ -118,7 +118,7 @@ final public class Continuations {
      * @param action a non-continuable action to perform on the values yielded
      */
     public static <T> void execute(Continuation continuation, boolean useCurrentValue, Consumer<? super T> action) {
-        try (ClosableIterator<T> iter = iterate(continuation, useCurrentValue)) {
+        try (CloseableIterator<T> iter = iterate(continuation, useCurrentValue)) {
             while (iter.hasNext()) {
                 action.accept(iter.next());
             }
@@ -161,7 +161,7 @@ final public class Continuations {
      * @param action a continuable action to perform on the values yielded
      */
     public @continuable static <T> void executeContinuable(Continuation continuation, boolean useCurrentValue, ContinuableConsumer<? super T> action) {
-        try (ClosableIterator<T> iter = iterate(continuation, useCurrentValue)) {
+        try (CloseableIterator<T> iter = iterate(continuation, useCurrentValue)) {
             forEach(iter, action);
         }
     }
@@ -205,7 +205,7 @@ final public class Continuations {
      */   
     public @continuable static <T> void forEach(Iterable<T> iterable, ContinuableConsumer<? super T> action) {
         Iterator<T> iter = iterable.iterator();
-        try (ClosableIterator<T> closable = asClosable(iter)) {
+        try (CloseableIterator<T> closeable = asCloseable(iter)) {
             forEach(iter, action);
         }
     }
@@ -227,8 +227,8 @@ final public class Continuations {
     }
 
     @SuppressWarnings("unchecked")
-    private static <E> ClosableIterator<E> asClosable(Object o) {
-        return o instanceof ClosableIterator ? (ClosableIterator<E>)o : null;
+    private static <E> CloseableIterator<E> asCloseable(Object o) {
+        return o instanceof CloseableIterator ? (CloseableIterator<E>)o : null;
     }
 
 }
