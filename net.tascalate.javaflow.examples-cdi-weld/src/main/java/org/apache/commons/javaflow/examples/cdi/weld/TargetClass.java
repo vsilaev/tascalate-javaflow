@@ -28,11 +28,11 @@ public class TargetClass implements TargetInterface {
 
     @Override
     @TransactionalMethod
+    @LoggableMethod
     public @continuable void execute(String prefix) {
         executeNested(prefix);
     }
 
-    @LoggableMethod
     protected @continuable void executeNested(String prefix) {
         System.out.println("In target BEFORE suspend");
         Object value = Continuation.suspend(this + " @ " + prefix);
