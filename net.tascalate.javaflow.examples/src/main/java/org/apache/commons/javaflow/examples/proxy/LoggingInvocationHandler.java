@@ -41,7 +41,7 @@ public class LoggingInvocationHandler implements InvocationHandler {
             System.out.println("::Entering method " + method);
             // Need to balance reference stack due to intermediate
             // non-continuable calls
-            InterceptorSupport.beforeExecution();
+            InterceptorSupport.beforeExecution(delegate);
             try {
                 return method.invoke(delegate, args);
             } finally {

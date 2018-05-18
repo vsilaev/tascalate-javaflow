@@ -15,6 +15,7 @@
  */
 package org.apache.commons.javaflow.examples.cdi.owb.interceptors;
 
+import javax.annotation.Priority;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
@@ -22,15 +23,16 @@ import javax.interceptor.InvocationContext;
 import org.apache.commons.javaflow.examples.cdi.owb.annotations.SecureBean;
 
 @SecureBean @Interceptor
+@Priority(Interceptor.Priority.PLATFORM_BEFORE + 2)
 public class SecureBeanInterceptor {
 
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {
-        System.out.println("Security Interceptor before call");
+        System.out.println(">> Security Interceptor before call " + ctx.getMethod());
         try {
             return ctx.proceed();
         } finally {
-            System.out.println("Security Interceptor after call");
+            System.out.println(">> Security Interceptor after call " + ctx.getMethod());
         }
     }
 }

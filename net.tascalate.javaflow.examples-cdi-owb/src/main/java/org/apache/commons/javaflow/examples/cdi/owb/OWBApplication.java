@@ -27,6 +27,9 @@ public class OWBApplication {
 
     @Inject
     Execution execution;
+    
+    @Inject
+    SimpleInterface simpleInterface;
 
     public void run() {
         int i = 0;
@@ -35,6 +38,8 @@ public class OWBApplication {
         }
 
         System.out.println("===");
+        simpleInterface.execute("ABC");
+        ((SimpleBean)simpleInterface).executeNested("XYZ");
     }
 
     public static void main(String[] argv) throws Exception {

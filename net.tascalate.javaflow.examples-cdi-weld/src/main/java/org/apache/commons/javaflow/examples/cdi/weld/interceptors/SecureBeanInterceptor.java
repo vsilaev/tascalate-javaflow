@@ -28,11 +28,11 @@ public class SecureBeanInterceptor {
 
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {
-        System.out.println("Security Interceptor before call");
+        System.out.println(">> Security Interceptor before call " + ctx.getMethod());
         try {
             return ctx.proceed();
         } finally {
-            System.out.println("Security Interceptor after call");
+            System.out.println(">> Security Interceptor after call " + ctx.getMethod());
         }
     }
 }

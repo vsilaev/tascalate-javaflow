@@ -23,50 +23,30 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     final protected String className;
-    final protected String methodName;
 
     private Label startFinally;
-    private int stackRecorderVar;
 
     protected AroundCdiProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
         super(api, mv, acc, methodName, desc);
         this.className = className;
-        this.methodName = methodName;
     }
 
     abstract protected void loadProxiedInstance();
-
+    
     @Override
     protected void onMethodEnter() {
-        // When restoring on enter replace
-        // the proxy (self) (top reference) with actual proxied target 
-        // verify if restoring
-        stackRecorderVar = newLocal(STACK_RECORDER_TYPE);
-        Label startDelegated = new Label();
-
-        // PC: StackRecorder stackRecorder = StackRecorder.get();
-        stackRecorderGet();
-        dup();
-        storeLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        // PC: if (stackRecorder != null && stackRecorder.isRestoring) {
-        ifNull(startDelegated);
-        loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        getField(STACK_RECORDER_TYPE, "isRestoring", Type.BOOLEAN_TYPE);
-        visitJumpInsn(IFEQ, startDelegated);
-
-        loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        stackRecorderPopRef();
-        pop();
-
-        loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        loadProxiedInstance();
-        stackRecorderPushRef();
-
-        visitLabel(startDelegated);
-
+        loadProxiedInstance();        
+        mv.visitMethodInsn(
+            Opcodes.INVOKESTATIC, 
+            INTERCEPTOR_SUPPORT_TYPE.getInternalName(), 
+            "beforeExecution", 
+            Type.getMethodDescriptor(Type.VOID_TYPE, OBJECT_TYPE), 
+            false
+        );
         super.onMethodEnter();
     }
-
+    
+    
     @Override
     public void visitCode() {
         super.visitCode();
@@ -91,57 +71,17 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     }
 
     private void onFinally(int opcode) {
-        // When capturing on exit replace
-        // actual proxied target (top reference) with the proxy (self)
-        Label done = new Label();
-        loadLocal(stackRecorderVar);
-        // PC: if (stackRecorder != null && stackRecorder.isCapturing) {
-        ifNull(done);
-        loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        getField(STACK_RECORDER_TYPE, "isCapturing", Type.BOOLEAN_TYPE);
-        visitJumpInsn(IFEQ, done);
-
-        loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        stackRecorderPopRef();
-        pop();
-        loadLocal(stackRecorderVar, STACK_RECORDER_TYPE);
-        loadThis();
-        stackRecorderPushRef();
-        visitLabel(done);
-
-    }
-    
-    private void stackRecorderGet() {
+        loadThis();        
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC, 
-            STACK_RECORDER_TYPE.getInternalName(), 
-            "get", 
-            Type.getMethodDescriptor(STACK_RECORDER_TYPE), 
-            false
-        );
-    }
-    
-    private void stackRecorderPopRef() {
-        mv.visitMethodInsn(
-            Opcodes.INVOKEVIRTUAL, 
-            STACK_RECORDER_TYPE.getInternalName(), 
-            "popReference", 
-            Type.getMethodDescriptor(OBJECT_TYPE), 
-            false
-        );
-    }
-    
-    private void stackRecorderPushRef() {
-        mv.visitMethodInsn(
-            Opcodes.INVOKEVIRTUAL, 
-            STACK_RECORDER_TYPE.getInternalName(), 
-            "pushReference", 
+            INTERCEPTOR_SUPPORT_TYPE.getInternalName(), 
+            "afterExecution", 
             Type.getMethodDescriptor(Type.VOID_TYPE, OBJECT_TYPE), 
             false
         );
     }
-
+    
     private static final Type OBJECT_TYPE = Type.getObjectType("java/lang/Object");
-    private static final Type STACK_RECORDER_TYPE = Type.getObjectType("org/apache/commons/javaflow/core/StackRecorder");
+    private static final Type INTERCEPTOR_SUPPORT_TYPE = Type.getObjectType("org/apache/commons/javaflow/api/InterceptorSupport");
 
 }

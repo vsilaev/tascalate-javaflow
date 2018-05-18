@@ -44,17 +44,24 @@ public final class InterceptorSupport {
         return false;
     }
     
-    public static void beforeExecution() {
-        // Currently no-op
+    public static void beforeExecution(Object actualTarget) {
+        // When restoring we should replace target on top of the stack (if any)
+        // with the actual target (supplied as argument) from interceptor
+        // to balance the effect of non-continuable interceptors call
+        // There are might be no reference at all if interceptor is non-continuable
+        StackRecorder stackRecorder = StackRecorder.get();
+        if (null != stackRecorder && stackRecorder.isRestoring && stackRecorder.hasReference()) {
+            stackRecorder.popReference();
+            stackRecorder.pushReference(actualTarget);
+        }
     }
     
     public static void afterExecution(Object proxiedTarget) {
-        StackRecorder stackRecorder = StackRecorder.get();
-        
         // When capturing we should replace target on top of the stack
         // with the proxied target (supplied as argument) expected by the caller 
         // to balance the effect of non-continuable interceptors call
-        if (stackRecorder != null && stackRecorder.isCapturing) {
+        StackRecorder stackRecorder = StackRecorder.get();
+        if (null != stackRecorder && stackRecorder.isCapturing) {
             stackRecorder.popReference();
             stackRecorder.pushReference(proxiedTarget);
         }

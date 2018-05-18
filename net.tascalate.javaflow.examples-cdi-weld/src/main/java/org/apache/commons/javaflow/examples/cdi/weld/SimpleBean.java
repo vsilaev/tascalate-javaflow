@@ -15,32 +15,31 @@
  */
 package org.apache.commons.javaflow.examples.cdi.weld;
 
-import org.apache.commons.javaflow.api.Continuation;
-import org.apache.commons.javaflow.api.continuable;
+import javax.enterprise.context.ApplicationScoped;
+
 import org.apache.commons.javaflow.examples.cdi.weld.annotations.LoggableMethod;
 import org.apache.commons.javaflow.examples.cdi.weld.annotations.SecureBean;
 import org.apache.commons.javaflow.examples.cdi.weld.annotations.TransactionalMethod;
-import org.jboss.weld.environment.se.contexts.ThreadScoped;
 
 @SecureBean
-@ThreadScoped
-public class TargetClass implements TargetInterface {
+@ApplicationScoped
+public class SimpleBean implements SimpleInterface {
 
     @Override
     @TransactionalMethod
     @LoggableMethod
-    public @continuable void execute(String prefix) {
+    public void execute(String prefix) {
+        System.out.println("Before execute nested");
         executeNested(prefix);
+        System.out.println("After execute nested");
     }
 
-    // In Weld & OWB @LoggableMethod and @SecureBean 
-    // MAY NOT BE INVOKED here here while method is 
-    // invoked directly (not via proxy)
+    // In Weld & OWB neither @LoggableMethod nor @SecureBean has effect
+    // here while method is invoked directly (not via proxy)
     @LoggableMethod
-    protected @continuable void executeNested(String prefix) {
-        System.out.println("In target BEFORE suspend");
-        Object value = Continuation.suspend(this + " @ " + prefix);
-        System.out.println("In target AFTER suspend: " + value);
+    protected void executeNested(String prefix) {
+        System.out.println("Inside execute nested: " + prefix);
     }
-
+    
+    
 }

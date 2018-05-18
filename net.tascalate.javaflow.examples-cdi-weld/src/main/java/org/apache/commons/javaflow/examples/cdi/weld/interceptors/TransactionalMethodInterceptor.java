@@ -28,17 +28,17 @@ public class TransactionalMethodInterceptor {
 
     @AroundInvoke
     public Object manageTransaction(InvocationContext ctx) throws Throwable {
-        System.out.println("Begin transaction...");
+        System.out.println("> Begin transaction... " + ctx.getMethod());
         boolean success = true;
         try {
             return ctx.proceed();
         } catch (Throwable ex) {
-            System.out.println("...Rollback transaction");
+            System.out.println("> ...Rollback transaction " + ctx.getMethod());
             success = false;
             throw ex;
         } finally {
             if (success) {
-                System.out.println("...Commit transaction");
+                System.out.println("> ...Commit transaction " + ctx.getMethod());
             }
         }
     }

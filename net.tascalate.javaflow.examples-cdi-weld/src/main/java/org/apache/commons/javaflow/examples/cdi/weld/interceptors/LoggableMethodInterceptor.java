@@ -28,11 +28,11 @@ public class LoggableMethodInterceptor {
 
     @AroundInvoke
     public Object manageSecurityContext(InvocationContext ctx) throws Exception {
-        System.out.println("Entering " + ctx.getMethod());
+        System.out.println(">>> Entering " + ctx.getMethod());
         try {
             return ctx.proceed();
         } finally {
-            System.out.println("Exiting " + ctx.getMethod());
+            System.out.println(">>> Exiting " + ctx.getMethod());
         }
     }
 }

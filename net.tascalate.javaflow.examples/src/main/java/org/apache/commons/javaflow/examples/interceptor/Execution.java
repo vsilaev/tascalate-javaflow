@@ -44,7 +44,7 @@ public class Execution implements Runnable {
         }
 
         public void decorateCall(String param) {
-            InterceptorSupport.beforeExecution();
+            InterceptorSupport.beforeExecution(null);
             try {
                 // If there were no interceptors then we will have the following
                 // call here:

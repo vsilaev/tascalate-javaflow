@@ -27,6 +27,9 @@ public class WeldApplication {
 
     @Inject
     Execution execution;
+    
+    @Inject
+    SimpleInterface simpleInterface;
 
     public void run(@Observes ContainerInitialized event) {
         System.out.println("Execution is proxy? " + (execution instanceof ProxyObject));
@@ -36,6 +39,7 @@ public class WeldApplication {
         }
 
         System.out.println("===");
-
+        simpleInterface.execute("ABC");
+        ((SimpleBean)simpleInterface).executeNested("XYZ");
     }
 }

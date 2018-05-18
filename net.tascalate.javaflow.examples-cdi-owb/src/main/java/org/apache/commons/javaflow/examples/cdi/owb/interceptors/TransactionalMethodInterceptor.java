@@ -15,6 +15,7 @@
  */
 package org.apache.commons.javaflow.examples.cdi.owb.interceptors;
 
+import javax.annotation.Priority;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
@@ -22,21 +23,22 @@ import javax.interceptor.InvocationContext;
 import org.apache.commons.javaflow.examples.cdi.owb.annotations.TransactionalMethod;
 
 @TransactionalMethod @Interceptor
+@Priority(Interceptor.Priority.PLATFORM_BEFORE + 1)
 public class TransactionalMethodInterceptor {
 
     @AroundInvoke
     public Object manageTransaction(InvocationContext ctx) throws Throwable {
-        System.out.println("Begin transaction...");
+        System.out.println("> Begin transaction... " + ctx.getMethod());
         boolean success = true;
         try {
             return ctx.proceed();
         } catch (Throwable ex) {
-            System.out.println("...Rollback transaction");
+            System.out.println("> ...Rollback transaction " + ctx.getMethod());
             success = false;
             throw ex;
         } finally {
             if (success) {
-                System.out.println("...Commit transaction");
+                System.out.println("> ...Commit transaction " + ctx.getMethod());
             }
         }
     }
