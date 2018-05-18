@@ -49,13 +49,13 @@ public final class InterceptorSupport {
         }
     }
     
-    public static void afterExecution(Object interceptor) {
+    public static void afterExecution(Object proxiedTarget) {
         StackRecorder stackRecorder = StackRecorder.get();
         
         // When capturing we should place self-reference on the stack
         // to balance the effect of non-continuable interceptors call
         if (stackRecorder != null && stackRecorder.isCapturing) {
-            stackRecorder.pushReference(interceptor);
+            stackRecorder.pushReference(proxiedTarget);
         }
     }
 }
