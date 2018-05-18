@@ -38,6 +38,8 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
 
     @Override
     protected void onMethodEnter() {
+        // When restoring on enter replace
+        // the proxy (self) (top reference) with actual proxied target 
         // verify if restoring
         stackRecorderVar = newLocal(STACK_RECORDER_TYPE);
         Label startDelegated = new Label();
@@ -89,6 +91,8 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     }
 
     private void onFinally(int opcode) {
+        // When capturing on exit replace
+        // actual proxied target (top reference) with the proxy (self)
         Label done = new Label();
         loadLocal(stackRecorderVar);
         // PC: if (stackRecorder != null && stackRecorder.isCapturing) {
