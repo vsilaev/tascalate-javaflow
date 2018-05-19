@@ -67,5 +67,4 @@ public class LoggingInvocationHandler implements InvocationHandler {
             }
         }
     }
-
 }
