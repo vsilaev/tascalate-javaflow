@@ -60,7 +60,7 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
         mv.visitLabel(endFinally);
         onFinally(ATHROW);
         mv.visitInsn(ATHROW);
-        mv.visitMaxs(maxStack, maxLocals);
+        mv.visitMaxs(Math.max(1, maxStack), maxLocals);
     }
 
     @Override
