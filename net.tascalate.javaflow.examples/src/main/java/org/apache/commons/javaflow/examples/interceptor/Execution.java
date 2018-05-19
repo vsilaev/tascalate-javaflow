@@ -26,6 +26,7 @@ public class Execution implements Runnable {
         // Need either @ccs on var or @continuable type
         @ccs
         InterceptorInterface interceptor = new InterceptorGuard(
+            target,
             new TransactionalInterceptor(new SecurityInterceptor(target))
         );
         String[] array = new String[] { "A", "B", "C" };
@@ -37,14 +38,16 @@ public class Execution implements Runnable {
 
     // Guard is required to balance stack variables
     static class InterceptorGuard implements InterceptorInterface {
+        final Object target;
         final InterceptorInterface next;
 
-        public InterceptorGuard(InterceptorInterface next) {
+        public InterceptorGuard(Object target, InterceptorInterface next) {
+            this.target = target;
             this.next = next;
         }
 
         public void decorateCall(String param) {
-            InterceptorSupport.beforeExecution(null);
+            InterceptorSupport.beforeExecution(target);
             try {
                 // If there were no interceptors then we will have the following
                 // call here:

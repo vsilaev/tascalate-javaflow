@@ -15,28 +15,19 @@
  */
 package org.apache.commons.javaflow.examples.proxy;
 
-import java.lang.reflect.Proxy;
-
+import org.apache.commons.javaflow.api.Continuation;
 import org.apache.commons.javaflow.api.continuable;
 
-public class TargetClass implements Execution {
-
-    public @continuable void execute() {
-        for (String s : new String[] {"A", "B", "C"}) {
-            innerCall(s);
-        }
-    }
+public class NestedClass implements NestedInterface {
+    final private String s;
     
+    NestedClass(String s) {
+        this.s = s;
+    } 
     
-    protected @continuable void innerCall(String s) {
-        NestedInterface callable = (NestedInterface) Proxy.newProxyInstance(
-            ProxyExample.class.getClassLoader(), 
-            new Class<?>[]{NestedInterface.class}, 
-            new LoggingInvocationHandler(new NestedClass(s)));
-        callable.call();
-    }
-    
-    public String nonContinuableTest() {
-        return "This is " + this;
+    public @continuable void call() {
+        System.out.println("Before suspend: " + s);
+        Object ret = Continuation.suspend(s);
+        System.out.println("After suspend: " + s + ", reply is: " + ret);
     }
 }
