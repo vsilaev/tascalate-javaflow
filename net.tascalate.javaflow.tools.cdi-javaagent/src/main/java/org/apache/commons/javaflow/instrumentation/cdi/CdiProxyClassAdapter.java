@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2018 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.apache.commons.javaflow.instrumentation.cdi;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,10 +32,64 @@ import org.objectweb.asm.Opcodes;
 
 class CdiProxyClassAdapter extends ClassVisitor {
 
-    private String className;
-    private Type owbProxiedInstanceType;
-    private Type owbProxiedInstanceProviderType;
-    private boolean isWeldProxy;
+    static enum CdiEnvironmentType {
+        WELD("org/jboss/weld/bean/proxy/ProxyObject") {
+            
+            @Override
+            boolean accept(String className, String interfaceName) {
+                // *$$_WeldSubclass is not a scope/interceptor proxy
+                // Otherwise it's indeed a proxy
+                return super.accept(className, interfaceName) && !className.endsWith("$$_WeldSubclass");
+            }
+            
+            @Override
+            MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc) {
+                return new AroundWeldProxyInvocationAdvice(ca.api, mv, acc, ca.className, name, desc);
+            }
+        }, 
+        SPRING("org/springframework/aop/framework/Advised") {
+            
+            @Override
+            MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc) {
+                return new AroundWeldProxyInvocationAdvice(ca.api, mv, acc, ca.className, name, desc);
+            }
+        }, 
+        OWB(
+            "org/apache/webbeans/proxy/OwbInterceptorProxy",
+            "org/apache/webbeans/proxy/OwbNormalScopeProxy" 
+            ) {
+            
+            @Override
+            MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc) {
+                if (null != ca.owbProxiedInstanceType) {
+                    return new AroundOwbInterceptorProxyAdvice(ca.api, mv, acc, ca.className, name, desc, ca.owbProxiedInstanceType); 
+                } else if (null != ca.owbProxiedInstanceProviderType) {
+                    return new AroundOwbScopeProxyAdvice(ca.api, mv, acc, ca.className, name, desc, ca.owbProxiedInstanceProviderType); 
+                } else {
+                    return mv;
+                }
+            }            
+        }
+        ;
+
+        private Set<String> markerInterfaces;
+        
+        private CdiEnvironmentType(String... markerInterfaces) {
+            this.markerInterfaces = 
+                Collections.unmodifiableSet( new HashSet<String>(Arrays.asList(markerInterfaces)) );
+        }
+        
+        abstract MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc);
+        boolean accept(String className, String interfaceName) {
+            return markerInterfaces.contains(interfaceName);
+        }
+    }
+    
+    String className;
+    Type owbProxiedInstanceType;
+    Type owbProxiedInstanceProviderType;
+    
+    private CdiEnvironmentType cdiEnvironmentType;
     private ContinuableClassInfo classInfo;
 
     private final ContinuableClassInfoResolver cciResolver;
@@ -48,27 +103,26 @@ class CdiProxyClassAdapter extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         className = name;
-        boolean hasMarker = false;
+        CdiEnvironmentType selectedType = null;
+        CdiEnvironmentType[] cdiEnvironmentTypes = CdiEnvironmentType.values();
+        outerLoop:
         for (final String interfaze : interfaces) {
-            if (MARKER_INTERFACES.contains(interfaze)) {
-                if (WELD_PROXY_OBJECT.equals(interfaze)) {
-                    if (!className.endsWith("$$_WeldSubclass")) {
-                        // *$$_WeldSubclass is not a scope/interceptor proxy
-                        // Otherwise it's indeed a proxy
-                        isWeldProxy = true;
-                        hasMarker = true;
-                    }
+            for (int i = cdiEnvironmentTypes.length - 1; i >= 0; i--) {
+                selectedType = cdiEnvironmentTypes[i];
+                if (selectedType.accept(name, interfaze)) {
+                 // Exclusive, may exit early
+                  break outerLoop;  
                 } else {
-                    hasMarker = true;
+                    selectedType = null;
                 }
-                // Exclusive, may exit early
-                break;
             }
         }
 
-        if (!hasMarker) {
+        if (null == selectedType) {
             throw StopException.INSTANCE;
         }
+        
+        cdiEnvironmentType = selectedType;
 
         try {
             classInfo = cciResolver.resolve(superName);
@@ -95,31 +149,17 @@ class CdiProxyClassAdapter extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int acc, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = cv.visitMethod(acc, name, desc, signature, exceptions);
-        if (isContinuableMethodProxy(acc, name, desc, signature, exceptions)) {
-            if (isWeldProxy) {
-                mv = new AroundWeldProxyInvocationAdvice(api, mv, acc, className, name, desc);
-            } else if (null != owbProxiedInstanceType) {
-                mv = new AroundOwbInterceptorProxyAdvice(api, mv, acc, className, name, desc, owbProxiedInstanceType); 
-            } else if (null != owbProxiedInstanceProviderType) {
-                mv = new AroundOwbScopeProxyAdvice(api, mv, acc, className, name, desc, owbProxiedInstanceProviderType); 
-            }
+        if (isContinuableMethodProxy(acc, name, desc, signature, exceptions) && null != cdiEnvironmentType) {
+            mv = cdiEnvironmentType.createAdviceAdapter(this, mv, acc, name, desc);
         }
         return mv;
     }
 
-    protected boolean isContinuableMethodProxy(int acc, String name, String desc, String signature, String[] exceptions) {
+    private boolean isContinuableMethodProxy(int acc, String name, String desc, String signature, String[] exceptions) {
         int idx = name.lastIndexOf("$$super");
         if (idx > 0) {
             name = name.substring(0, idx);
         }
         return ! "<init>".equals(name) && classInfo.isContinuableMethod(acc, name, desc, signature);
     }
-
-    private static final String OWB_INTERCEPTOR_PROXY  = "org/apache/webbeans/proxy/OwbInterceptorProxy";
-    private static final String OWB_NORMAL_SCOPE_PROXY = "org/apache/webbeans/proxy/OwbNormalScopeProxy";
-    private static final String WELD_PROXY_OBJECT      = "org/jboss/weld/bean/proxy/ProxyObject";
-
-    private static final Set<String> MARKER_INTERFACES = new HashSet<String>(Arrays.asList(
-        OWB_INTERCEPTOR_PROXY, OWB_NORMAL_SCOPE_PROXY, WELD_PROXY_OBJECT
-    )); 
 }
