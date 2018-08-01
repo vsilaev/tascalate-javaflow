@@ -82,14 +82,19 @@ class MaybeContinuableClassVisitor extends ClassAdapter {
         boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0 ;
         if (isSynthetic) {
             boolean isPackagePrivate =  (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0 ;
-            boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
-            boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
+            final boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
+            final boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
             if (isAccessor || isBridge) {
                 return new MethodAdapter(NOP) {
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc) {
                         if (selfclass.equals(owner)) {
-                            normal2synthetic.put(targetName + targetDesc, name + desc);
+                            if (isAccessor) {
+                                normal2synthetic.put(targetName + targetDesc, name + desc);
+                            } else {
+                                // Reversed for bridge
+                                normal2synthetic.put(name + desc, targetName + targetDesc);
+                            }
                         }
                     }
                 };
@@ -120,13 +125,14 @@ class MaybeContinuableClassVisitor extends ClassAdapter {
 
     @Override
     public void visitEnd() {
+        visitInheritanceChain();
+        checkOuterClass();
+        // Check after inheritance -- required by bridged methods (specialization of inherited)
         for (Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
             if (continuableMethods.contains(n2s.getKey())) {
                 continuableMethods.add(n2s.getValue());
             }
-        }
-        visitInheritanceChain();
-        checkOuterClass();
+        }        
     }
 
     private boolean inheritanceChainVisited = false;

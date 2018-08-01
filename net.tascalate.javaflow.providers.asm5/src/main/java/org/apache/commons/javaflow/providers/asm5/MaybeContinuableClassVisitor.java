@@ -88,13 +88,18 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc, boolean intf) {
                         if (selfclass.equals(owner)) {
-                            normal2synthetic.put(targetName + targetDesc, name + desc);
+                            if (isAccessor) {
+                                normal2synthetic.put(targetName + targetDesc, name + desc);
+                            } else {
+                                // Reversed for bridge
+                                normal2synthetic.put(name + desc, targetName + targetDesc);
+                            }
                         }
                     }
 
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-                        this.visitMethodInsn(opcode, owner, name, desc);
+                        this.visitMethodInsn(opcode, owner, name, desc, false);
                     }
                 };
             }
@@ -130,13 +135,14 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
+        visitInheritanceChain();
+        checkOuterClass();
+        // Check after inheritance -- required by bridged methods (specialization of inherited)
         for (Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
             if (continuableMethods.contains(n2s.getKey())) {
                 continuableMethods.add(n2s.getValue());
             }
         }
-        visitInheritanceChain();
-        checkOuterClass();
         // Take desugared lambda bodies in consideration always 
         // If there is no calls to continuable inside then
         // there are will be no run-time penalty anyway
