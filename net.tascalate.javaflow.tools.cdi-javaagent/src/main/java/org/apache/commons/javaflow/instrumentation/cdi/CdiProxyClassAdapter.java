@@ -51,7 +51,7 @@ class CdiProxyClassAdapter extends ClassVisitor {
             
             @Override
             MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc) {
-                return new AroundWeldProxyInvocationAdvice(ca.api, mv, acc, ca.className, name, desc);
+                return new AroundSpringProxyInvocationAdvice(ca.api, mv, acc, ca.className, name, desc);
             }
         }, 
         OWB(
