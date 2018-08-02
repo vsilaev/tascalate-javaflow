@@ -68,6 +68,9 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 			} catch (final RuntimeException ex) {
 				log.error(ex);
 				return null;
+			} catch (ClassCircularityError ex) {
+			    log.warn("Ignoring class circularity error: " + ex.getMessage());
+			    return null;
 			} catch (final Error ex) {
 				log.error(ex);
 				throw ex;
