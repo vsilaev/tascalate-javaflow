@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * Copyright 2013-2018 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,7 @@ final public class Continuations {
      * on each value yielded.
      * 
      * @param <T> a type of values  
+     * @param continuation a continuation to resume a code block that yields multiple results 
      * @param useCurrentValue should the value of the supplied continuation be used as a first value to process
      * @param action a continuable action to perform on the values yielded
      */
