@@ -38,8 +38,9 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     private String outerClassMethodName;
     private String outerClassMethodDesc;
     
-    private 
-    final Map<String, String> normal2synthetic = new HashMap<String, String>();
+    private final Map<String, String> actual2accessor = new HashMap<String, String>();
+    private final Map<String, String> bridge2specialization = new HashMap<String, String>();
+    
     final Set<String> continuableMethods = new HashSet<String>();
 
     private boolean isAnnotation = false;
@@ -88,10 +89,10 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
                     public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc) {
                         if (selfclass.equals(owner)) {
                             if (isAccessor) {
-                                normal2synthetic.put(targetName + targetDesc, name + desc);
-                            } else {
-                                // Reversed for bridge
-                                normal2synthetic.put(name + desc, targetName + targetDesc);
+                                actual2accessor.put(targetName + targetDesc, name + desc);
+                            }
+                            if (isBridge) {
+                                bridge2specialization.put(name + desc, targetName + targetDesc);
                             }
                         }
                     }
@@ -123,14 +124,19 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
-        visitInheritanceChain();
-        checkOuterClass();
-        // Check after inheritance -- required by bridged methods (specialization of inherited)
-        for (Map.Entry<String, String> n2s : normal2synthetic.entrySet() ) {
+        for (Map.Entry<String, String> n2s : actual2accessor.entrySet() ) {
             if (continuableMethods.contains(n2s.getKey())) {
                 continuableMethods.add(n2s.getValue());
             }
-        }        
+        }
+        visitInheritanceChain();
+        checkOuterClass();
+        // Check after inheritance -- required by bridged methods (specialization of inherited)
+        for (Map.Entry<String, String> n2s : bridge2specialization.entrySet() ) {
+            if (continuableMethods.contains(n2s.getKey())) {
+                continuableMethods.add(n2s.getValue());
+            }
+        }  
     }
 
     private boolean inheritanceChainVisited = false;
