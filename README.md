@@ -28,6 +28,12 @@ You have to add the following configuration to enable build-time instrumentation
 			<artifactId>net.tascalate.javaflow.api</artifactId>
 			<version>2.3.0</version>
 		</dependency>
+		<!-- Add-on for Java 8 and above -->
+		<dependency>
+			<groupId>net.tascalate.javaflow.util</groupId>
+			<artifactId>net.tascalate.javaflow.util.lib</artifactId>
+			<version>1.0.0</version>
+		</dependency>	
 		...
 	</dependencies>
 
