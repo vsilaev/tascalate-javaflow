@@ -3,7 +3,7 @@
 
 	<groupId>net.tascalate.javaflow</groupId>
 	<artifactId>net.tascalate.javaflow.parent</artifactId>
-	<version>2.2.4-SNAPSHOT</version>
+	<version>2.3.0</version>
 	<packaging>pom</packaging>
 
 	<name>Tascalate JavFlow</name>
@@ -65,16 +65,11 @@
 		<module>net.tascalate.javaflow.tools.ant</module>
 		<module>net.tascalate.javaflow.tools.cdi-javaagent</module>
 		<module>net.tascalate.javaflow.tools.runtime</module>
-		<module>net.tascalate.javaflow.extras</module>
-		<module>net.tascalate.javaflow.examples</module>
-		<module>net.tascalate.javaflow.examples-dyninvoke</module>
-		<module>net.tascalate.javaflow.examples-cdi-weld</module>
-		<module>net.tascalate.javaflow.examples-cdi-owb</module>
 	</modules>
 
 
 	<properties>
-                <project.version>2.2.4-SNAPSHOT</project.version>
+                <project.version>2.3.0</project.version>
                 <asm.version>5.2</asm.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>

@@ -21,7 +21,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.utils;
+package org.apache.commons.javaflow.util;
 
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
