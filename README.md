@@ -115,5 +115,7 @@ Please note, that CDI-specific agent neither requires javaflow.instrument-contin
 ```
 CDI functionality is tested with JBoss Weld 2.x (up to 2.4.2) and Apache OpenWebBeans 1.6.x / 1.7.x (up to 1.7.2). Contribution for other CDI/CDI-like containers (Spring, Google Guice, etc) is welcome.
 
-# More documentation
+# More documentation & exmaples
+Examples of the library usage may be found in the [Tascalate JavaFlow Examples](https://github.com/vsilaev/tascalate-javaflow-examples) project. The covered topics are common tasks, inheritance, lambdas support, proxies, usage with CDI containers like JBoss Weld and Apache OpenWebBeans.
+
 For additional documentation, tutorials and guidelines please visit my [blog](http://vsilaev.com)
