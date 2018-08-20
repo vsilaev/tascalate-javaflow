@@ -125,7 +125,9 @@ public class CoIterator<E> implements CloseableIterator<E>, Serializable {
 
     public void close() {
         try {
-            cc.terminate();
+            if (null != cc) {
+                cc.terminate();
+            }
         } finally {
             cc = null;
             advance = false;

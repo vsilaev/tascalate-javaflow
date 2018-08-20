@@ -31,6 +31,7 @@ public class CdiProxyInstrumentationAgent {
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
+        System.setProperty(CdiProxyInstrumentationAgent.class.getName(), "true");        
     }
 
     /**
@@ -45,6 +46,17 @@ public class CdiProxyInstrumentationAgent {
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
+        for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
+            if (instrumentation.isModifiableClass(clazz) && 
+                !CdiProxyClassTransformer.skipClassByName(clazz.getName())) {
+                try {
+                    instrumentation.retransformClasses(clazz);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.setProperty(CdiProxyInstrumentationAgent.class.getName(), "true");        
     }
 
     private static void setupInstrumentation(Instrumentation instrumentation) {

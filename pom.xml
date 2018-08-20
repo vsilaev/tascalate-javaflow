@@ -64,8 +64,8 @@
 		<module>net.tascalate.javaflow.tools.maven</module>
 		<module>net.tascalate.javaflow.tools.ant</module>
 		<module>net.tascalate.javaflow.tools.cdi-javaagent</module>
+		<module>net.tascalate.javaflow.tools.runtime</module>
 		<module>net.tascalate.javaflow.extras</module>
-		<module>net.tascalate.javaflow.utils</module>
 		<module>net.tascalate.javaflow.examples</module>
 		<module>net.tascalate.javaflow.examples-dyninvoke</module>
 		<module>net.tascalate.javaflow.examples-cdi-weld</module>

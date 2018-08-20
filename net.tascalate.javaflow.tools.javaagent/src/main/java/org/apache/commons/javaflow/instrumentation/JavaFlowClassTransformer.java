@@ -47,6 +47,13 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 			final ProtectionDomain protectionDomain,
 			final byte[] classfileBuffer) throws IllegalClassFormatException {
 
+	    if (skipClassByName(className)) {
+	        if (log.isInfoEnabled()) {
+	            log.info("Ignoring class by name (looks like Java std. class): " + className);
+	        }
+	        return null;
+	    }
+	    
 		classLoader = getSafeClassLoader(classLoader);
 		final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
 
@@ -69,7 +76,9 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 				log.error(ex);
 				return null;
 			} catch (ClassCircularityError ex) {
-			    log.warn("Ignoring class circularity error: " + ex.getMessage());
+			    if (log.isWarnEnabled()) {
+			        log.warn("Ignoring class circularity error: " + ex.getMessage());
+			    }
 			    return null;
 			} catch (final Error ex) {
 				log.error(ex);
@@ -94,6 +103,19 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 				return cachedResolver;
 			}
 		}
+	}
+	
+	static boolean skipClassByName(String className) {
+	    return null != className && (
+	           className.startsWith("java.") ||
+	           className.startsWith("javax.") ||
+	           className.startsWith("sun.") ||
+	           className.startsWith("com.sun.") ||
+	           className.startsWith("oracle.") ||
+	           className.startsWith("com.oracle.") ||
+	           className.startsWith("ibm.") ||
+	           className.startsWith("com.ibm")
+	           );
 	}
 
 	final private static Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();

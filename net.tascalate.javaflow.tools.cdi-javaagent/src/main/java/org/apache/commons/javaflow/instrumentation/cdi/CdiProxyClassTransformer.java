@@ -45,6 +45,13 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
             final Class<?> classBeingRedefined,
             final ProtectionDomain protectionDomain, 
             final byte[] classfileBuffer) throws IllegalClassFormatException {
+        
+        if (skipClassByName(className)) {
+            if (log.isInfoEnabled()) {
+                log.info("Ignoring class by name (looks like Java std. class): " + className);
+            }
+            return null;
+        }
 
         classLoader = getSafeClassLoader(classLoader);
         final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
@@ -93,6 +100,19 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
                 return cachedResolver;
             }
         }
+    }
+    
+    static boolean skipClassByName(String className) {
+        return null != className && (
+               className.startsWith("java.") ||
+               className.startsWith("javax.") ||
+               className.startsWith("sun.") ||
+               className.startsWith("com.sun.") ||
+               className.startsWith("oracle.") ||
+               className.startsWith("com.oracle.") ||
+               className.startsWith("ibm.") ||
+               className.startsWith("com.ibm")
+               );
     }
 
     private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();

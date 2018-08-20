@@ -8,10 +8,10 @@
 		<relativePath>../</relativePath>
 	</parent>
 
-	<artifactId>net.tascalate.javaflow.utils</artifactId>
+	<artifactId>net.tascalate.javaflow.tools.runtime</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Tascalate JavaFlow / Bytecode ClassLoader &amp; Co</name>
+	<name>Tascalate JavaFlow / Tools / Bytecode ClassLoader</name>
 
 	<properties>
 		<license.header>../HEADER-DERRIVED.txt</license.header>

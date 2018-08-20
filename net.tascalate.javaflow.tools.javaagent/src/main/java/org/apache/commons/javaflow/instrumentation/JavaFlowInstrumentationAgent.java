@@ -29,9 +29,9 @@ public class JavaFlowInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void premain(final String args,
-            final Instrumentation instrumentation) throws Exception {
+    public static void premain(String args, Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
+        System.setProperty(JavaFlowInstrumentationAgent.class.getName(), "true");
     }
 
     /**
@@ -44,13 +44,22 @@ public class JavaFlowInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void agentmain(final String args,
-            final Instrumentation instrumentation) throws Exception {
+    public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
+        for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
+            if (instrumentation.isModifiableClass(clazz) && 
+                !JavaFlowClassTransformer.skipClassByName(clazz.getName())) {
+                try {
+                    instrumentation.retransformClasses(clazz);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.setProperty(JavaFlowInstrumentationAgent.class.getName(), "true");        
     }
 
-    private static void setupInstrumentation(
-            final Instrumentation instrumentation) {
+    private static void setupInstrumentation(Instrumentation instrumentation) {
         instrumentation.addTransformer(new JavaFlowClassTransformer(), true);
     }
 
