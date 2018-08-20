@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/#artifactdetails%7Cnet.tascalate.javaflow%7Cnet.tascalate.javaflow.parent%7C2.3.0%7Cpom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.3.0) [![license](https://img.shields.io/github/license/vsilaev/tascalate-javaflow.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
+[![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/artifact/net.tascalate.javaflow/net.tascalate.javaflow.parent/2.3.0/pom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.3.0) [![license](https://img.shields.io/github/license/vsilaev/tascalate-javaflow.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 # IMPORTNAT NOTICE FOR RELEASE 2.3.0!!!
 - `net.tascalate.javaflow.extras` artifact is withdrawn, its code serves as a basis for the project [Tascalate JavaFlow Util](https://github.com/vsilaev/tascalate-javaflow-util)
@@ -115,5 +115,7 @@ Please note, that CDI-specific agent neither requires javaflow.instrument-contin
 ```
 CDI functionality is tested with JBoss Weld 2.x (up to 2.4.2) and Apache OpenWebBeans 1.6.x / 1.7.x (up to 1.7.2). Contribution for other CDI/CDI-like containers (Spring, Google Guice, etc) is welcome.
 
-# More documentation
+# More documentation & exmaples
+Examples of the library usage may be found in the [Tascalate JavaFlow Examples](https://github.com/vsilaev/tascalate-javaflow-examples) project. The covered topics are common tasks, inheritance, lambdas support, proxies, usage with CDI containers like JBoss Weld and Apache OpenWebBeans.
+
 For additional documentation, tutorials and guidelines please visit my [blog](http://vsilaev.com)
