@@ -1,4 +1,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/#artifactdetails%7Cnet.tascalate.javaflow%7Cnet.tascalate.javaflow.parent%7C2.3.0%7Cpom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.3.0) [![license](https://img.shields.io/github/license/vsilaev/tascalate-javaflow.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+# IMPORTNAT NOTICE FOR RELEASE 2.3.0!!!
+- net.tascalate.javaflow.extras artifact is withdrawn, its code serves as a basis for the project [Tascalate JavaFlow Util](https://github.com/vsilaev/tascalate-javaflow-util)
+- All examples are moved to separate project [Tascalate JavaFlow Examples](https://github.com/vsilaev/tascalate-javaflow-examples)
+
 # Continuation support for Java
 This project contains libary, tools and examples to develop Java applications using continuations. 
 
