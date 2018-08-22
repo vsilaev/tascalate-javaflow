@@ -104,14 +104,14 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     
     static boolean skipClassByName(String className) {
         return null != className && (
-               className.startsWith("java.") ||
-               className.startsWith("javax.") ||
-               className.startsWith("sun.") ||
-               className.startsWith("com.sun.") ||
-               className.startsWith("oracle.") ||
-               className.startsWith("com.oracle.") ||
-               className.startsWith("ibm.") ||
-               className.startsWith("com.ibm")
+                className.startsWith("java/") ||
+                className.startsWith("javax/") ||
+                className.startsWith("sun/") ||
+                className.startsWith("com/sun/") ||
+                className.startsWith("oracle/") ||
+                className.startsWith("com/oracle/") ||
+                className.startsWith("ibm/") ||
+                className.startsWith("com/ibm/")
                );
     }
 
