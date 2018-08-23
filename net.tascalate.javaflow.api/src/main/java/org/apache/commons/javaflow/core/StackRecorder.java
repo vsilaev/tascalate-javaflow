@@ -197,7 +197,11 @@ public final class StackRecorder extends Stack {
      * Unbind the current stack recorder to running thread.
      */
     private void deregisterThread(StackRecorder old) {
-        threadMap.set(old);
+        if (null == old) {
+            threadMap.remove();
+        } else {
+            threadMap.set(old);
+        }
     }
 
     /**
