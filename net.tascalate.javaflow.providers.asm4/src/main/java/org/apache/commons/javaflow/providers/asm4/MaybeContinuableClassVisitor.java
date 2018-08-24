@@ -40,6 +40,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     
     private final Map<String, String> actual2accessor = new HashMap<String, String>();
     private final Map<String, String> bridge2specialization = new HashMap<String, String>();
+    private final Set<String> desugaredLambdaBodies = new HashSet<String>();
     
     final Set<String> continuableMethods = new HashSet<String>();
 
@@ -78,9 +79,9 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             return null;
         }
 
-        boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0 ;
+        boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0;
+        boolean isPackagePrivate =  (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0;
         if (isSynthetic) {
-            boolean isPackagePrivate =  (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0 ;
             final boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
             final boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
             if (isAccessor || isBridge) {
@@ -99,7 +100,14 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
                 };
             }
         }
-        
+
+        // If this method is desugared lambda body
+        if ( isSynthetic && isPackagePrivate && name.startsWith("lambda$") ) {
+            // RetroLambda desugars method body to package private
+            desugaredLambdaBodies.add(name + desc);
+            return null;
+        }
+
         return new MethodVisitor(Opcodes.ASM4) {
 
             private boolean methodContinuableAnnotationFound = false;
@@ -136,7 +144,11 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             if (continuableMethods.contains(n2s.getKey())) {
                 continuableMethods.add(n2s.getValue());
             }
-        }  
+        }
+        // Take desugared lambda bodies in consideration always 
+        // If there is no calls to continuable inside then
+        // there are will be no run-time penalty anyway
+        continuableMethods.addAll(desugaredLambdaBodies);
     }
 
     private boolean inheritanceChainVisited = false;

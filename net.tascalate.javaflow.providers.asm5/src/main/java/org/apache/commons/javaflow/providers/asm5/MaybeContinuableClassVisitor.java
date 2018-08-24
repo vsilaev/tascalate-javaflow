@@ -79,9 +79,9 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             return null;
         }
 
-        boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0 ;
+        boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0;
+        boolean isPackagePrivate = (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0;
         if (isSynthetic) {
-            boolean isPackagePrivate =  (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0 ;
             boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
             boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
             if (isAccessor || isBridge) {
@@ -107,7 +107,10 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         }
 
         // If this method is desugared lambda body
-        if ( isSynthetic && (access & Opcodes.ACC_PRIVATE) != 0 && name.startsWith("lambda$") ) {
+        boolean isPrivateOrPackagePrivate = isPackagePrivate || (access & Opcodes.ACC_PRIVATE) != 0; 
+        if ( isSynthetic && isPrivateOrPackagePrivate && name.startsWith("lambda$") ) {
+            // Java8 lambda body is private
+            // RetroLambda desugars method body to package private
             desugaredLambdaBodies.add(name + desc);
             return null;
         }
