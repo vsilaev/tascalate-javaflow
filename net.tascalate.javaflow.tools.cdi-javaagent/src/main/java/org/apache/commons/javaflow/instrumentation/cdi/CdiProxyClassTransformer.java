@@ -47,8 +47,8 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
             final byte[] classfileBuffer) throws IllegalClassFormatException {
         
         if (skipClassByName(className)) {
-            if (log.isInfoEnabled()) {
-                log.info("Ignoring class by name (looks like Java std. class): " + className);
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring class by name (looks like Java std. class): " + className);
             }
             return null;
         }
