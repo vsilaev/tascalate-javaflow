@@ -32,7 +32,7 @@ You have to add the following configuration to enable build-time instrumentation
 		<dependency>
 			<groupId>net.tascalate.javaflow.util</groupId>
 			<artifactId>net.tascalate.javaflow.util.lib</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.1</version>
 		</dependency>	
 		...
 	</dependencies>
