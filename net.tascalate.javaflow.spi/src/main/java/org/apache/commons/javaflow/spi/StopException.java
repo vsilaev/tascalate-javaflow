@@ -41,12 +41,17 @@ public class StopException extends RuntimeException {
                 }
             }
         }
+        String lname = name.toLowerCase();
+        if (lname.contains("$$enhancer") && lname.contains("cglib")) {
+            return true;
+        }
         return false;
     }
 
     private static final Set<String> PROXY_MARKER_INTERFACES = new HashSet<String>(Arrays.asList(
         "org/apache/webbeans/proxy/OwbInterceptorProxy",
         "org/apache/webbeans/proxy/OwbNormalScopeProxy",
-        "org/jboss/weld/bean/proxy/ProxyObject"
+        "org/jboss/weld/bean/proxy/ProxyObject",
+        "org/jboss/as/ee/component/serialization/WriteReplaceInterface"
     ));
 }
