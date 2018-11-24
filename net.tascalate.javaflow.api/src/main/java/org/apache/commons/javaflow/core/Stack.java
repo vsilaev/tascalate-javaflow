@@ -45,17 +45,17 @@ public class Stack implements Serializable {
     private int iTop, fTop, dTop, lTop, oTop, rTop;
     protected Runnable runnable;
 
-    public Stack(Runnable pRunnable) {
-        istack = new int[10];
-        lstack = new long[5];
-        dstack = new double[5];
-        fstack = new float[5];
-        ostack = new Object[10];
-        rstack = new Object[5];
+    Stack(Runnable pRunnable) {
+        istack = new int[8];
+        lstack = new long[4];
+        dstack = new double[4];
+        fstack = new float[4];
+        ostack = new Object[8];
+        rstack = new Object[4];
         runnable = pRunnable;
     }
 
-    public Stack(final Stack pParent) {
+    Stack(final Stack pParent) {
         istack = new int[pParent.istack.length];
         lstack = new long[pParent.lstack.length];
         dstack = new double[pParent.dstack.length];
@@ -77,67 +77,75 @@ public class Stack implements Serializable {
         runnable = pParent.runnable;
     }
 
-    public boolean hasDouble() {
+    public final boolean hasDouble() {
         return dTop > 0;
     }
 
-    public double popDouble() {
+    public final double popDouble() {
         if (dTop == 0) {
             throw new EmptyStackException("pop double");
         }
 
         final double d = dstack[--dTop];
-        log.debug("pop double " + d + " " + getStats());
+        if (log.isDebugEnabled()) {
+            log.debug("pop double " + d + " " + getStats());
+        }
         return d;
     }
 
-    public boolean hasFloat() {
+    public final boolean hasFloat() {
         return fTop > 0;
     }
 
-    public float popFloat() {
+    public final float popFloat() {
         if (fTop == 0) {
             throw new EmptyStackException("pop float");
         }
 
         final float f = fstack[--fTop];
-        log.debug("pop float " + f + " " + getStats());
+        if (log.isDebugEnabled()) {
+            log.debug("pop float " + f + " " + getStats());
+        }
         return f;
     }
 
-    public boolean hasInt() {
+    public final boolean hasInt() {
         return iTop > 0;
     }
 
-    public int popInt() {
+    public final int popInt() {
         if (iTop == 0) {
             throw new EmptyStackException("pop int");
         }
 
         final int i = istack[--iTop];
-        log.debug("pop int " + i + " " + getStats());
+        if (log.isDebugEnabled()) {
+            log.debug("pop int " + i + " " + getStats());
+        }
         return i;
     }
 
-    public boolean hasLong() {
+    public final boolean hasLong() {
         return lTop > 0;
     }
 
-    public long popLong() {
+    public final long popLong() {
         if (lTop == 0) {
             throw new EmptyStackException("pop long");
         }
 
         final long l = lstack[--lTop];
-        log.debug("pop long " + l + " " + getStats());
+        if (log.isDebugEnabled()) {
+            log.debug("pop long " + l + " " + getStats());
+        }
         return l;
     }
 
-    public boolean hasObject() {
+    public final boolean hasObject() {
         return oTop > 0;
     }
 
-    public Object popObject() {
+    public final Object popObject() {
         if (oTop == 0) {
             throw new EmptyStackException("pop object");
         }
@@ -152,11 +160,11 @@ public class Stack implements Serializable {
         return o;
     }
 
-    public boolean hasReference() {
+    public final boolean hasReference() {
         return rTop > 0;
     }
 
-    public Object popReference() {
+    public final Object popReference() {
         if (rTop == 0) {
             throw new EmptyStackException("pop reference");
         }
@@ -171,8 +179,10 @@ public class Stack implements Serializable {
         return o;
     }
 
-    public void pushDouble(double d) {
-        log.debug("push double " + d + " " + getStats());
+    public final void pushDouble(double d) {
+        if (log.isDebugEnabled()) {
+            log.debug("push double " + d + " " + getStats());
+        }
 
         if (dTop == dstack.length) {
             double[] hlp = new double[Math.max(8, dstack.length * 2)];
@@ -182,8 +192,10 @@ public class Stack implements Serializable {
         dstack[dTop++] = d;
     }
 
-    public void pushFloat(float f) {
-        log.debug("push float " + f + " " + getStats());
+    public final void pushFloat(float f) {
+        if (log.isDebugEnabled()) {
+            log.debug("push float " + f + " " + getStats());
+        }
 
         if (fTop == fstack.length) {
             float[] hlp = new float[Math.max(8, fstack.length * 2)];
@@ -193,8 +205,10 @@ public class Stack implements Serializable {
         fstack[fTop++] = f;
     }
 
-    public void pushInt(int i) {
-        log.debug("push int " + i + " " + getStats());
+    public final void pushInt(int i) {
+        if (log.isDebugEnabled()) {
+            log.debug("push int " + i + " " + getStats());
+        }
 
         if (iTop == istack.length) {
             int[] hlp = new int[Math.max(8, istack.length * 2)];
@@ -204,8 +218,10 @@ public class Stack implements Serializable {
         istack[iTop++] = i;
     }
 
-    public void pushLong(long l) {
-        log.debug("push long " + l + " " + getStats());
+    public final void pushLong(long l) {
+        if (log.isDebugEnabled()) {
+            log.debug("push long " + l + " " + getStats());
+        }
 
         if (lTop == lstack.length) {
             long[] hlp = new long[Math.max(8, lstack.length * 2)];
@@ -215,8 +231,7 @@ public class Stack implements Serializable {
         lstack[lTop++] = l;
     }
 
-    public void pushObject(Object o) {
-
+    public final void pushObject(Object o) {
         if (log.isDebugEnabled()) {
             log.debug("push object " + ReflectionUtils.descriptionOfObject(o) + " " + getStats());
         }
@@ -229,8 +244,7 @@ public class Stack implements Serializable {
         ostack[oTop++] = o;
     }
 
-    public void pushReference(Object o) {
-
+    public final void pushReference(Object o) {
         if (log.isDebugEnabled()) {
             log.debug("push reference " + ReflectionUtils.descriptionOfObject(o) + " " + getStats());
         }
@@ -259,16 +273,16 @@ public class Stack implements Serializable {
         return true;
     }
 
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return iTop == 0 && lTop == 0 && dTop == 0 && fTop == 0 && oTop == 0 && rTop == 0;
     }
 
-    public Runnable getRunnable() {
+    public final Runnable getRunnable() {
         return runnable;
     }
 
     private String getStats() {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         sb.append("i[").append(iTop).append("],");
         sb.append("l[").append(lTop).append("],");
         sb.append("d[").append(dTop).append("],");
@@ -279,7 +293,7 @@ public class Stack implements Serializable {
     }
 
     private String getContent() {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         sb.append("i[").append(iTop).append("]\n");
         sb.append("l[").append(lTop).append("]\n");
         sb.append("d[").append(dTop).append("]\n");
@@ -301,6 +315,7 @@ public class Stack implements Serializable {
         return sb.toString();
     }
 
+    @Override
     public String toString() {
         return getContent();
     }
