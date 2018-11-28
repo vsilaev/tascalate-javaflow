@@ -105,7 +105,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
 
         mv.visitVarInsn(ALOAD, stackRecorderVar);
         // PC:    stackRecorder.popInt();
-        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Int", "()I", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "popRet", "()I", false);
         mv.visitTableSwitchInsn(0, fsize - 1, l0, restoreLabels);
 
         // switch cases
@@ -319,7 +319,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
                 mv.visitInsn(ICONST_0 + currentIndex);
             else
                 mv.visitIntInsn(SIPUSH, currentIndex);
-            mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushInt", "(I)V", false);
+            mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushRet", "(I)V", false);
 
             if (currentFrame instanceof MonitoringFrame) {
                 int[] monitoredLocals = ((MonitoringFrame) currentFrame).getMonitored();

@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 public final class StackRecorder extends Stack {
 
     private static final Log log = LogFactory.getLog(StackRecorder.class);
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private static final ThreadLocal<StackRecorder> threadMap = new ThreadLocal<StackRecorder>();
 
