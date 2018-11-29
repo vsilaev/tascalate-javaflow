@@ -36,22 +36,23 @@ public class Stack implements Serializable {
     private static final Log log = LogFactory.getLog(Stack.class);
     private static final long serialVersionUID = 3L;
 
+    private int[] istack;
     private long[] pstack;
     private Object[] ostack;
     private Object[] rstack;
     private int iTop, fTop, dTop, lTop, oTop, rTop;
-    private int ret;
     protected Runnable runnable;
 
     Stack(Runnable pRunnable) {
-        ret = -1;
-        pstack = new long[16];
+        istack = new int[8];
+        pstack = new long[8];
         ostack = new Object[8];
         rstack = new Object[4];
         runnable = pRunnable;
     }
 
     Stack(final Stack pParent) {
+        istack = new int[pParent.istack.length];
         pstack = new long[pParent.pstack.length];
         ostack = new Object[pParent.ostack.length];
         rstack = new Object[pParent.rstack.length];
@@ -61,10 +62,10 @@ public class Stack implements Serializable {
         lTop = pParent.lTop;
         oTop = pParent.oTop;
         rTop = pParent.rTop;
+        System.arraycopy(pParent.istack, 0, istack, 0, iTop);
         System.arraycopy(pParent.pstack, 0, pstack, 0, dTop + fTop + lTop);
         System.arraycopy(pParent.ostack, 0, ostack, 0, oTop);
         System.arraycopy(pParent.rstack, 0, rstack, 0, rTop);
-        ret = pParent.ret;
         runnable = pParent.runnable;
     }
 
@@ -83,30 +84,6 @@ public class Stack implements Serializable {
             log.debug("pop double " + d + " " + getStats());
         }
         return d;
-    }
-
-    public final int popRet() {
-        if (ret < 0) {
-            throw new EmptyStackException("pop ret");
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("pop ret " + ret + " " + getStats());
-        }
-        final int result = ret;
-        ret = -1;
-        return result;
-    }
-    
-    public final void pushRet(int idx) {
-        if (log.isDebugEnabled()) {
-            log.debug("push ret " + idx + " " + getStats());
-        }
-
-        if (ret != -1) {
-            throw new IllegalStateException("ret is already set");
-        }
-        
-        ret = idx;
     }
     
     public final boolean hasFloat() {
@@ -152,8 +129,7 @@ public class Stack implements Serializable {
             throw new EmptyStackException("pop int");
         }
 
-        final int i = (int)popPrimitive();
-        --iTop;
+        final int i = istack[--iTop];
         if (log.isDebugEnabled()) {
             log.debug("pop int " + i + " " + getStats());
         }
@@ -232,9 +208,12 @@ public class Stack implements Serializable {
         if (log.isDebugEnabled()) {
             log.debug("push int " + i + " " + getStats());
         }
-        ensurePrimitivesStackSize();
-        pushPrimitive(i);
-        iTop++;
+        if (iTop == istack.length) {
+            int[] hlp = new int[Math.max(8, istack.length * 2)];
+            System.arraycopy(istack, 0, hlp, 0, istack.length);
+            istack = hlp;
+        }
+        istack[iTop++] = i;
     }
 
     public final void pushObject(Object o) {
@@ -327,15 +306,15 @@ public class Stack implements Serializable {
     }
     
     private final void pushPrimitive(long value) {
-        pstack[dTop + fTop + lTop + iTop] = value;
+        pstack[dTop + fTop + lTop] = value;
     }
     
     private final long popPrimitive() {
-        return pstack[dTop + fTop + lTop + iTop];
+        return pstack[dTop + fTop + lTop];
     }
     
     private final void ensurePrimitivesStackSize() {
-        if (dTop + fTop + lTop + iTop == pstack.length) {
+        if (dTop + fTop + lTop == pstack.length) {
             long[] hlp = new long[Math.max(8, pstack.length * 2)];
             System.arraycopy(pstack, 0, hlp, 0, pstack.length);
             pstack = hlp;
@@ -343,13 +322,15 @@ public class Stack implements Serializable {
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
-        s.writeInt(ret);
+        s.writeInt(iTop);
+        for (int i = 0; i < iTop; i++) {
+            s.writeInt(istack[i]);
+        }
         
         s.writeInt(dTop);
         s.writeInt(fTop);
         s.writeInt(lTop);
-        s.writeInt(iTop);
-        int pTop = dTop + fTop + lTop + iTop;
+        int pTop = dTop + fTop + lTop;
         for (int i = 0; i < pTop; i++) {
             s.writeLong(pstack[i]);
         }
@@ -368,13 +349,16 @@ public class Stack implements Serializable {
     }
 
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
-        ret  = s.readInt();
+        iTop = s.readInt();
+        istack = new int[iTop];
+        for (int i = 0; i < iTop; i++) {
+            istack[i] = s.readInt();
+        }
         
         dTop = s.readInt();
-        dTop = s.readInt();
+        fTop = s.readInt();
         lTop = s.readInt();
-        iTop = s.readInt();
-        int pTop = dTop + fTop + lTop + iTop;
+        int pTop = dTop + fTop + lTop;
         pstack = new long[pTop];
         for (int i = 0; i < pTop; i++) {
             pstack[i] = s.readLong();
