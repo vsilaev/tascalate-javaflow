@@ -116,19 +116,19 @@ abstract public class Continuation implements Serializable {
      * 
      * @param target
      *      The object whose <tt>run</tt> method will be executed. 
-     * @param optimized
+     * @param singleShot
      *      If true then continuation constructed is performance-optimized but 
-     *      may be resumed only once. Otherwise "restartable" continuation is created that may 
+     *      may be resumed only once. Otherwise "multi-shot" continuation is created that may 
      *      be resumed multiple times. 
      * @return
      *      always return a non-null valid object.
      */
-    public static Continuation startSuspendedWith(Runnable target, boolean optimized) {
+    public static Continuation startSuspendedWith(Runnable target, boolean singleShot) {
         if(target == null) {
             throw new IllegalArgumentException("target is null");
         }
         StackRecorder stackRecorder = new StackRecorder(target);
-        return optimized ? new OptimizedContinuation(stackRecorder, null) : new RestartableContinuation(stackRecorder, null);
+        return singleShot ? new SingleShotContinuation(stackRecorder, null) : new MultiShotContinuation(stackRecorder, null);
     }    
 
     /**
@@ -157,16 +157,16 @@ abstract public class Continuation implements Serializable {
      * 
      * @param target
      *      The object whose <tt>run</tt> method will be executed.
-     * @param optimized
+     * @param singleShot
      *      If true then continuation constructed is performance-optimized but 
-     *      may be resumed only once. Otherwise "restartable" continuation is created that may 
+     *      may be resumed only once. Otherwise "multi-shot" continuation is created that may 
      *      be resumed multiple times.       
      * @return
      *      Continuation object if runnable supplied is supended, otherwise <code>null</code>
      * @see #startWith(Runnable, Object)
      */
-    public static Continuation startWith(Runnable target, boolean optimized) {
-        return startWith(target, null, optimized);
+    public static Continuation startWith(Runnable target, boolean singleShot) {
+        return startWith(target, null, singleShot);
     }
 
     /**
@@ -201,9 +201,9 @@ abstract public class Continuation implements Serializable {
      * @param context
      *      This value can be obtained from {@link #getContext()} until this method returns.
      *      Can be null.
-     * @param optimized
+     * @param singleShot
      *      If true then continuation constructed is performance-optimized but 
-     *      may be resumed only once. Otherwise "restartable" continuation is created that may 
+     *      may be resumed only once. Otherwise "multi-shot" continuation is created that may 
      *      be resumed multiple times.      
      * @return
      *      If the execution completes and there's nothing more to continue, return null.
@@ -211,12 +211,12 @@ abstract public class Continuation implements Serializable {
      *      a new non-null continuation is returned.
      * @see #getContext()
      */
-    public static Continuation startWith(Runnable target, Object context, boolean optimized) {
+    public static Continuation startWith(Runnable target, Object context, boolean singleShot) {
         if (log.isDebugEnabled()) {
             log.debug("starting new flow from " + ReflectionUtils.descriptionOfObject(target));
         }
 
-        return startSuspendedWith(target, optimized).resume(context);
+        return startSuspendedWith(target, singleShot).resume(context);
     }    
 
     /**
@@ -344,22 +344,22 @@ abstract public class Continuation implements Serializable {
     }
     
     /**
-     * <p>View this continuation as a "restartable" continuation that may be resumed multiple times.
-     * <p>Conversion to the restartable continuation is not always possible, i.e. already resumed
-     * optimized continuation may not be converted to the restartable variant.  
+     * <p>View this continuation as a "multi-shot" continuation that may be resumed multiple times.
+     * <p>Conversion to the multi-shot continuation is not always possible, i.e. already resumed
+     * single-shot continuation may not be converted to the multi-shot variant.  
      * 
-     * @return self if this is already a restartable continuation or a newly constructed 
-     * restartable continuation
+     * @return self if this is already a multi-shot continuation or a newly constructed 
+     * multi-shot continuation
      */
-    abstract public Continuation restartable();
+    abstract public Continuation multiShot();
     
     /**
      * <p>View this continuation as a performance-optimized continuation that may be resumed only once.
-     * <p>Conversion to the optimized continuation is always possible
+     * <p>Conversion to the single-shot continuation is always possible
      * 
-     * @return self if this is already an optimized continuation or a newly constructed optimized continuation
+     * @return self if this is already a single-shot continuation or a newly constructed single-shot continuation
      */
-    abstract public Continuation optimized();
+    abstract public Continuation singleShot();
     
     /**
      * Stops the running continuation.
@@ -494,21 +494,21 @@ abstract public class Continuation implements Serializable {
     
     abstract protected Continuation resumeWith(ResumeParameter param);
     
-    static final class RestartableContinuation extends Continuation {
+    static final class MultiShotContinuation extends Continuation {
         private static final long serialVersionUID = 1L;
 
-        RestartableContinuation(StackRecorder stackRecorder, Object value) {
+        MultiShotContinuation(StackRecorder stackRecorder, Object value) {
             super(stackRecorder, value);
         }
         
         @Override
-        public Continuation restartable() {
+        public Continuation multiShot() {
             return this;
         }
         
         @Override
-        public Continuation optimized() {
-            return new OptimizedContinuation(new StackRecorder(stackRecorder), value());
+        public Continuation singleShot() {
+            return new SingleShotContinuation(new StackRecorder(stackRecorder), value());
         }
         
         @Override
@@ -530,31 +530,29 @@ abstract public class Continuation implements Serializable {
                     continue;
                 }
                 
-                return new RestartableContinuation(nextStackRecorder, result.value());
+                return new MultiShotContinuation(nextStackRecorder, result.value());
             } 
         }
     }
     
-    static final class OptimizedContinuation extends Continuation {
+    static final class SingleShotContinuation extends Continuation {
         private static final long serialVersionUID = 1L;
         private boolean isResumed = false;
 
-        OptimizedContinuation(StackRecorder stackRecorder, Object value) {
+        SingleShotContinuation(StackRecorder stackRecorder, Object value) {
             super(stackRecorder, value);
         }
         
         @Override
-        public Continuation restartable() {
-            synchronized (this) {
-                if (isResumed) {
-                   throw new IllegalStateException("Exclusive continuation may not be converted to restartable after resume"); 
-                }
-            }    
-            return new RestartableContinuation(new StackRecorder(stackRecorder), value());
+        public Continuation multiShot() {
+            if (isResumed) {
+               throw new IllegalStateException("Exclusive continuation may not be converted to multi-shot after resume"); 
+            }
+            return new MultiShotContinuation(new StackRecorder(stackRecorder), value());
         }
         
         @Override
-        public Continuation optimized() {
+        public Continuation singleShot() {
             return this;
         }
         
@@ -563,16 +561,14 @@ abstract public class Continuation implements Serializable {
             if (log.isDebugEnabled()) {
                 log.debug("continueing with continuation " + ReflectionUtils.descriptionOfObject(this));
             }
-            synchronized (this) {
-                if (isResumed) {
-                    if (param == ResumeParameter.exit()) {
-                        return null;
-                    } else {
-                        throw new IllegalStateException("Exclusive continuation may be resumed only once");
-                    }
+            if (isResumed) {
+                if (param == ResumeParameter.exit()) {
+                    return null;
+                } else {
+                    throw new IllegalStateException("Exclusive continuation may be resumed only once");
                 }
-                isResumed = true;
             }
+            isResumed = true;
             StackRecorder nextStackRecorder = stackRecorder; // Use existing one, don't copy
             SuspendResult result = nextStackRecorder.execute(param);
             if (SuspendResult.EXIT == result) {
@@ -586,7 +582,7 @@ abstract public class Continuation implements Serializable {
                 throw new IllegalStateException("Exclusive continuation may not be re-tried");
             }
             
-            return new OptimizedContinuation(nextStackRecorder, result.value());
+            return new SingleShotContinuation(nextStackRecorder, result.value());
         }
     }
 
