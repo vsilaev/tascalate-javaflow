@@ -546,7 +546,7 @@ abstract public class Continuation implements Serializable {
         @Override
         public Continuation multiShot() {
             if (isResumed) {
-               throw new IllegalStateException("Exclusive continuation may not be converted to multi-shot after resume"); 
+               throw new IllegalStateException("Single-shot continuation may not be converted to multi-shot after resume"); 
             }
             return new MultiShotContinuation(new StackRecorder(stackRecorder), value());
         }
@@ -565,7 +565,7 @@ abstract public class Continuation implements Serializable {
                 if (param == ResumeParameter.exit()) {
                     return null;
                 } else {
-                    throw new IllegalStateException("Exclusive continuation may be resumed only once");
+                    throw new IllegalStateException("Single-shot continuation may be resumed only once");
                 }
             }
             isResumed = true;
@@ -579,7 +579,7 @@ abstract public class Continuation implements Serializable {
                 return null;
             } else if (SuspendResult.AGAIN == result) {
                 // invalid operation for exclusive continuation
-                throw new IllegalStateException("Exclusive continuation may not be re-tried");
+                throw new IllegalStateException("Single-shot continuation may not be re-tried");
             }
             
             return new SingleShotContinuation(nextStackRecorder, result.value());
