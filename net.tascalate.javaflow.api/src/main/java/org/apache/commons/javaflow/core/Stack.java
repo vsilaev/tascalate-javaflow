@@ -43,7 +43,7 @@ public class Stack implements Serializable {
     protected Runnable runnable;
 
     Stack(Runnable pRunnable) {
-        pstack = new long[8];
+        pstack = new long[16];
         ostack = new Object[8];
         rstack = new Object[4];
         runnable = pRunnable;
@@ -59,7 +59,7 @@ public class Stack implements Serializable {
         lTop = pParent.lTop;
         oTop = pParent.oTop;
         rTop = pParent.rTop;
-        System.arraycopy(pParent.pstack, 0, pstack, 0, dTop + fTop + lTop + iTop);
+        System.arraycopy(pParent.pstack, 0, pstack, 0, pTop());
         System.arraycopy(pParent.ostack, 0, ostack, 0, oTop);
         System.arraycopy(pParent.rstack, 0, rstack, 0, rTop);
         runnable = pParent.runnable;
