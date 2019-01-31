@@ -160,8 +160,8 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
 
     void checkCallSites() {
-        List<LocalVariableAnnotationNode> varAnnotations = new ArrayList<>();
-        Map<Integer, List<AnnotationNode>> paramAnnotations = new HashMap<>();
+        List<LocalVariableAnnotationNode> varAnnotations = new ArrayList<LocalVariableAnnotationNode>();
+        Map<Integer, List<AnnotationNode>> paramAnnotations = new HashMap<Integer, List<AnnotationNode>>();
 
         varAnnotations.addAll(CallSiteFinder.annotationsList(visibleLocalVariableAnnotations));
         varAnnotations.addAll(CallSiteFinder.annotationsList(invisibleLocalVariableAnnotations));

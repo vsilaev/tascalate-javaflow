@@ -43,42 +43,44 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<finalName>javaflow.instrument-cdi-proxy</finalName>
-					<archive>
-						<index>true</index>
-						<compress>true</compress>
-						<manifest>
-							<!-- 
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							 -->
-						</manifest>
-						<manifestEntries>
-							<Premain-Class>org.apache.commons.javaflow.instrumentation.cdi.CdiProxyInstrumentationAgent</Premain-Class>
-							<Agent-Class>org.apache.commons.javaflow.instrumentation.cdi.CdiProxyInstrumentationAgent</Agent-Class>
-							<Can-Redefine-Classes>true</Can-Redefine-Classes>
-							<Can-Retransform-Classes>true</Can-Retransform-Classes>
-						</manifestEntries>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
-						<id>make-assembly</id>
-						<configuration>
-							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>						
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
+						<configuration>
+							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<finalName>javaflow.instrument-cdi-proxy</finalName>
+							<minimizeJar>true</minimizeJar>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/maven/*.*</exclude>
+										<exclude>META-INF/LICENSE.*</exclude>
+										<exclude>META-INF/NOTICE.*</exclude>
+										<exclude>module-info.class</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<Premain-Class>org.apache.commons.javaflow.instrumentation.cdi.CdiProxyInstrumentationAgent</Premain-Class>
+										<Agent-Class>org.apache.commons.javaflow.instrumentation.cdi.CdiProxyInstrumentationAgent</Agent-Class>
+										<Can-Redefine-Classes>true</Can-Redefine-Classes>
+										<Can-Retransform-Classes>true</Can-Retransform-Classes>
+									</manifestEntries>
+								</transformer>
+							</transformers>
+	
+						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> 
 		</plugins>
 	</build>
 </project>
