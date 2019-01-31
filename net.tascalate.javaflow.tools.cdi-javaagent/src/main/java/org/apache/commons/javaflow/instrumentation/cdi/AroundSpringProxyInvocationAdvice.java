@@ -27,12 +27,12 @@ class AroundSpringProxyInvocationAdvice extends AroundCdiProxyInvocationAdvice {
     @Override
     protected void loadProxiedInstance() {
         loadThis();
-        invokeVirtual(Type.getType(className), GET_TARGET_SOURCE);
+        invokeVirtual(Type.getObjectType(className), GET_TARGET_SOURCE);
         /*
          * May be used instead of above
         invokeInterface(Type.getType("org/springframework/aop/framework/Advised"), GET_TARGET_SOURCE);
         */
-        invokeInterface(Type.getType("org/springframework/aop/TargetSource"), GET_TARGET);
+        invokeInterface(Type.getObjectType("org/springframework/aop/TargetSource"), GET_TARGET);
     }
 
     private static final Method GET_TARGET_SOURCE = Method.getMethod("org.springframework.aop.TargetSource getTargetSource()");

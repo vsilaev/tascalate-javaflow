@@ -31,11 +31,11 @@ class AroundOwbScopeProxyAdvice extends AroundCdiProxyInvocationAdvice {
     @Override
     protected void loadProxiedInstance() {
         loadThis();
-        getField(Type.getType(className), FIELD_INSTANCE_PROVIDER, proxiedInstanceProviderType);
+        getField(Type.getObjectType(className), FIELD_INSTANCE_PROVIDER, proxiedInstanceProviderType);
         invokeInterface(PROVIDER, PROVIDER_GET);
     }
 
-    private static final Type PROVIDER = Type.getType("javax/inject/Provider");
+    private static final Type PROVIDER = Type.getObjectType("javax/inject/Provider");
     private static final Method PROVIDER_GET = Method.getMethod("java.lang.Object get()");
 
     static final String FIELD_INSTANCE_PROVIDER = "owbContextualInstanceProvider";//NormalScopeProxyFactory.FIELD_INSTANCE_PROVIDER;

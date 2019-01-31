@@ -27,7 +27,7 @@ class AroundWeldProxyInvocationAdvice extends AroundCdiProxyInvocationAdvice {
     @Override
     protected void loadProxiedInstance() {
         loadThis();
-        invokeVirtual(Type.getType(className), GET_TARGET_INSTANCE);
+        invokeVirtual(Type.getObjectType(className), GET_TARGET_INSTANCE);
     }
 
     private static final Method GET_TARGET_INSTANCE = Method.getMethod("java.lang.Object getTargetInstance()");

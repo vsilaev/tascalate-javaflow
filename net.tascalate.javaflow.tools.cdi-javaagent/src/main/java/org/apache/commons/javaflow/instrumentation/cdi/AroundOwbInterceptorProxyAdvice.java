@@ -30,7 +30,7 @@ class AroundOwbInterceptorProxyAdvice extends AroundCdiProxyInvocationAdvice {
     @Override
     protected void loadProxiedInstance() {
         loadThis();
-        getField(Type.getType(className), FIELD_PROXIED_INSTANCE, proxiedInstanceType);
+        getField(Type.getObjectType(className), FIELD_PROXIED_INSTANCE, proxiedInstanceType);
     }
 
     static final String FIELD_PROXIED_INSTANCE = "owbIntDecProxiedInstance"; //InterceptorDecoratorProxyFactory.FIELD_PROXIED_INSTANCE;

@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory;
-import org.apache.commons.javaflow.providers.asm5.ClassNameResolver;
+import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
+import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 public class JavaFlowClassTransformer implements ClassFileTransformer {
 	final private static Log log = LogFactory.getLog(JavaFlowClassTransformer.class);
 	
-	final private ResourceTransformationFactory resourceTransformationFactory = new Asm5ResourceTransformationFactory(); 
+	final private ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory(); 
 
 
 	//@Override

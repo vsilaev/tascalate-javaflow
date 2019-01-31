@@ -275,6 +275,7 @@ public final class RewritingUtils {
 	}
 	
 	public static enum TransformerType {
+	    ASMX("org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory"),
 		ASM5("org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory"),
 		ASM4("org.apache.commons.javaflow.providers.asm4.Asm4ResourceTransformationFactory"),
 		ASM3("org.apache.commons.javaflow.providers.asm3.Asm3ResourceTransformationFactory"),

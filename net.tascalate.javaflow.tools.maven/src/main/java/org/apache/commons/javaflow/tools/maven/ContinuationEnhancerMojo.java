@@ -102,7 +102,7 @@ public class ContinuationEnhancerMojo extends AbstractMojo {
 			loadAdditionalClassPath(classPath);
 
 			final ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
-				classPath.toArray(new URL[]{}), TransformerType.ASM5
+				classPath.toArray(new URL[]{}), TransformerType.ASMX
 			);
 			
 			final long now = System.currentTimeMillis();
