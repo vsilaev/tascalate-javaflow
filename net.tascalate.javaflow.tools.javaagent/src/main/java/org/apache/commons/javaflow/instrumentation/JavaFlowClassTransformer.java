@@ -73,7 +73,7 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 					currentTarget.asResource()
 				);
 			} catch (final RuntimeException ex) {
-				log.error(ex);
+				log.error("Error transforming " + currentTarget.className, ex);
 				return null;
 			} catch (ClassCircularityError ex) {
 			    if (log.isWarnEnabled()) {
@@ -107,14 +107,16 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 	
 	static boolean skipClassByName(String className) {
 	    return null != className && (
-	           className.startsWith("java/") ||
-	           className.startsWith("javax/") ||
-	           className.startsWith("sun/") ||
-	           className.startsWith("com/sun/") ||
-	           className.startsWith("oracle/") ||
+	           className.startsWith("java/")       || 
+	           className.startsWith("javax/")      ||
+               className.startsWith("jdk/")        || // Azul Zulu
+	           className.startsWith("sun/")        ||
+	           className.startsWith("com/sun/")    ||
+	           className.startsWith("oracle/")     ||
 	           className.startsWith("com/oracle/") ||
-	           className.startsWith("ibm/") ||
-	           className.startsWith("com/ibm/")
+	           className.startsWith("ibm/")        ||
+	           className.startsWith("com/ibm/")    ||
+	           className.startsWith("openj9/")        // Eclipse OpenJ9
 	           );
 	}
 

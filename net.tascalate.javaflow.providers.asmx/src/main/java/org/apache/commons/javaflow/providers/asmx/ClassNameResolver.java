@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.commons.javaflow.spi.StopException;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
 
 public class ClassNameResolver {
     public static class Result {
@@ -46,7 +45,7 @@ public class ClassNameResolver {
         if (null == resolvedClassName) {
             try {
                 ClassReader cv = new ClassReader(classfileBuffer);
-                cv.accept(new ClassVisitor(Opcodes.ASM5) {
+                cv.accept(new ClassVisitor(AsmVersion.CURRENT) {
                     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                         classNameFromBytes[0] = name;
                         throw StopException.INSTANCE;

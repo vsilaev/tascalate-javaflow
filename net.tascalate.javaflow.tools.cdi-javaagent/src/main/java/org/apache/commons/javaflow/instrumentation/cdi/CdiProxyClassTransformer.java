@@ -74,8 +74,7 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
             } catch (StopException ex) {
                 return null;
             } catch (RuntimeException ex) {
-                log.error(ex);
-                ex.printStackTrace(System.out);
+                log.error("Error transforming " + currentTarget.className, ex);
                 return null;
             } catch (Error ex) {
                 log.error(ex);
@@ -104,14 +103,16 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     
     static boolean skipClassByName(String className) {
         return null != className && (
-                className.startsWith("java/") ||
-                className.startsWith("javax/") ||
-                className.startsWith("sun/") ||
-                className.startsWith("com/sun/") ||
-                className.startsWith("oracle/") ||
-                className.startsWith("com/oracle/") ||
-                className.startsWith("ibm/") ||
-                className.startsWith("com/ibm/")
+               className.startsWith("java/")       || 
+               className.startsWith("javax/")      ||
+               className.startsWith("jdk/")        || // Azul Zulu
+               className.startsWith("sun/")        ||
+               className.startsWith("com/sun/")    ||
+               className.startsWith("oracle/")     ||
+               className.startsWith("com/oracle/") ||
+               className.startsWith("ibm/")        ||
+               className.startsWith("com/ibm/")    ||
+               className.startsWith("openj9/")        // Eclipse OpenJ9
                );
     }
 

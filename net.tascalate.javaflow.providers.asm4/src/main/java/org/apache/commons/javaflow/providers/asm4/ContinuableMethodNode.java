@@ -72,7 +72,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
                                  InheritanceLookup inheritanceLookup, 
                                  ContinuableClassInfoResolver cciResolver, 
                                  MethodVisitor mv) {
-        super(Opcodes.ASM4, access, name, desc, signature, exceptions);
+        super(AsmVersion.CURRENT, access, name, desc, signature, exceptions);
         this.className = className;
         this.inheritanceLookup = inheritanceLookup;
         this.cciResolver = cciResolver;

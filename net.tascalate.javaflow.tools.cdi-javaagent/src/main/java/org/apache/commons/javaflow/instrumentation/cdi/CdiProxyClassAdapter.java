@@ -95,7 +95,7 @@ class CdiProxyClassAdapter extends ClassVisitor {
     private final ContinuableClassInfoResolver cciResolver;
 
     CdiProxyClassAdapter(ClassVisitor delegate, ContinuableClassInfoResolver cciResolver) {
-        super(Opcodes.ASM5, delegate);
+        super(Opcodes.ASM7, delegate);
         this.cciResolver = cciResolver;
     }
 

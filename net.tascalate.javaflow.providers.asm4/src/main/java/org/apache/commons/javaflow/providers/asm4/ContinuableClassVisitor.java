@@ -51,7 +51,7 @@ public class ContinuableClassVisitor extends ClassVisitor {
                                    InheritanceLookup inheritanceLookup, 
                                    ContinuableClassInfoResolver cciResolver, 
                                    byte[] originalBytes) {
-        super(Opcodes.ASM4, cv);
+        super(AsmVersion.CURRENT, cv);
         this.inheritanceLookup = inheritanceLookup;
         this.cciResolver = cciResolver;
         this.originalBytes = originalBytes;

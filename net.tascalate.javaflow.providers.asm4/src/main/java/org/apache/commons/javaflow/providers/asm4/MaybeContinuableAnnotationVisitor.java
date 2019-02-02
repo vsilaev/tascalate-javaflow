@@ -25,7 +25,7 @@ public class MaybeContinuableAnnotationVisitor extends ClassVisitor {
     private boolean isAnnotation = false;
 
     public MaybeContinuableAnnotationVisitor(Asm4ContinuableClassInfoResolver environment) {
-        super(Opcodes.ASM4);
+        super(AsmVersion.CURRENT);
         this.environment = environment;
     }
 

@@ -17,8 +17,12 @@ package org.apache.commons.javaflow.instrumentation;
 
 import java.lang.instrument.Instrumentation;
 
-public class JavaFlowInstrumentationAgent {
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+public class JavaFlowInstrumentationAgent {
+    private static final Log log = LogFactory.getLog(JavaFlowInstrumentationAgent.class);
+    
     /**
      * JVM hook to statically load the javaagent at startup.
      * 
@@ -44,19 +48,23 @@ public class JavaFlowInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
+    public static void agentmain(String args, final Instrumentation instrumentation) throws Exception {
+        log.info("Installing agent...");
         setupInstrumentation(instrumentation);
+        log.info("Re-transforming existing classes...");
         for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
             if (instrumentation.isModifiableClass(clazz) && 
                 !JavaFlowClassTransformer.skipClassByName(clazz.getName())) {
                 try {
                     instrumentation.retransformClasses(clazz);
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    log.error("Error retransofrming class "+ clazz.getName(), e);
                 }
             }
         }
+        log.info("Existing classes was re-transormed");
         System.setProperty(JavaFlowInstrumentationAgent.class.getName(), "true");        
+        log.info("Agent was installed dynamically");
     }
 
     private static void setupInstrumentation(Instrumentation instrumentation) {

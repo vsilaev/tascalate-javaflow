@@ -33,7 +33,7 @@ public class FastClassVerifier extends SimpleVerifier {
     private final InheritanceLookup inheritanceLookup;
     
     public FastClassVerifier(InheritanceLookup inheritanceLookup) {
-        super(ASM5, Type.VOID_TYPE, Type.VOID_TYPE, Collections.emptyList(), false);
+        super(AsmVersion.CURRENT, Type.VOID_TYPE, Type.VOID_TYPE, Collections.emptyList(), false);
         this.inheritanceLookup = inheritanceLookup;
     }
     

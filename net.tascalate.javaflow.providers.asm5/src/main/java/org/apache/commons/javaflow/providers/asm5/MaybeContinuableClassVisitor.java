@@ -47,7 +47,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     private boolean isAnnotation = false;
 
     public MaybeContinuableClassVisitor(Asm5ContinuableClassInfoResolver environment) {
-        super(Opcodes.ASM5);
+        super(AsmVersion.CURRENT);
         this.environment = environment;
     }
 
@@ -85,7 +85,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             final boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
             final boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
             if (isAccessor || isBridge) {
-                return new MethodVisitor(Opcodes.ASM5) {
+                return new MethodVisitor(this.api) {
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String targetName, String targetDesc, boolean intf) {
                         if (selfclass.equals(owner)) {
@@ -115,7 +115,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             return null;
         }
 
-        return new MethodVisitor(Opcodes.ASM5) {
+        return new MethodVisitor(this.api) {
 
             private boolean methodContinuableAnnotationFound = false;
 

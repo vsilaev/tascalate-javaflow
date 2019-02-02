@@ -54,7 +54,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
 
 
     public ContinuableMethodVisitor(ContinuableMethodNode a) {
-        super(ASM5, a.mv);
+        super(AsmVersion.CURRENT, a.mv);
         this.methodNode = a;
         this.labels = a.labels;
         this.nodes = a.nodes;
