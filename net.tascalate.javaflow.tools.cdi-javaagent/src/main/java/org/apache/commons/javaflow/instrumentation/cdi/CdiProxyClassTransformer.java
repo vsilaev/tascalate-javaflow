@@ -74,7 +74,13 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
             } catch (StopException ex) {
                 return null;
             } catch (RuntimeException ex) {
-                log.error("Error transforming " + currentTarget.className, ex);
+                if (log.isErrorEnabled()) {
+                    if (VERBOSE_ERROR_REPORTS) {
+                        log.error("Error transforming " + currentTarget.className, ex);
+                    } else {
+                        log.error("Error transforming " + currentTarget.className);
+                    }
+                }
                 return null;
             } catch (Error ex) {
                 log.error(ex);
@@ -117,4 +123,5 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     }
 
     private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
+    private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation");
 }

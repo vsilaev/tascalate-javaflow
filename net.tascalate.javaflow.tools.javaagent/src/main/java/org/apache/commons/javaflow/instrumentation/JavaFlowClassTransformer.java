@@ -36,9 +36,9 @@ import org.apache.commons.logging.LogFactory;
 
 
 public class JavaFlowClassTransformer implements ClassFileTransformer {
-	final private static Log log = LogFactory.getLog(JavaFlowClassTransformer.class);
+	private static final Log log = LogFactory.getLog(JavaFlowClassTransformer.class);
 	
-	final private ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory(); 
+	private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory(); 
 
 
 	//@Override
@@ -73,10 +73,16 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 					currentTarget.asResource()
 				);
 			} catch (final RuntimeException ex) {
-				log.error("Error transforming " + currentTarget.className, ex);
+			    if (log.isErrorEnabled()) {
+			        if (VERBOSE_ERROR_REPORTS) {
+			            log.error("Error transforming " + currentTarget.className, ex);
+			        } else {
+			            log.error("Error transforming " + currentTarget.className);
+			        }
+			    }
 				return null;
 			} catch (ClassCircularityError ex) {
-			    if (log.isWarnEnabled()) {
+			    if (VERBOSE_ERROR_REPORTS && log.isWarnEnabled()) {
 			        log.warn("Ignoring class circularity error: " + ex.getMessage());
 			    }
 			    return null;
@@ -120,6 +126,7 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 	           );
 	}
 
-	final private static Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
+	private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
+	private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation");
 }
 	

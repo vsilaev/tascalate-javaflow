@@ -15,9 +15,7 @@
  */
 package org.apache.commons.javaflow.api;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
+import org.apache.commons.javaflow.core.Skip;
 import org.apache.commons.javaflow.core.StackRecorder;
 
 public final class InterceptorSupport {
@@ -34,14 +32,9 @@ public final class InterceptorSupport {
     public static boolean isInstrumented(Class<?> targetClass) {
         if (null == targetClass) {
             return false;
+        } else {
+            return null != targetClass.getAnnotation(Skip.class);
         }
-        try {
-            final Field field = targetClass.getField("___$$$CONT$$$___");
-            return (field.getModifiers() & Modifier.STATIC) != 0;
-        } catch (final NoSuchFieldException ex) {
-            // It's ok, just report "false" back
-        }
-        return false;
     }
     
     public static void beforeExecution(Object actualTarget) {

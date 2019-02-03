@@ -26,8 +26,8 @@ package org.apache.commons.javaflow.providers.asm5;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -45,7 +45,6 @@ public class ContinuableClassVisitor extends ClassVisitor {
     private String className;
     private ContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
-    private boolean isInterface = false;
 
     public ContinuableClassVisitor(ClassVisitor cv, 
                                    InheritanceLookup inheritanceLookup, 
@@ -62,8 +61,6 @@ public class ContinuableClassVisitor extends ClassVisitor {
     }
     
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
-        
         className = name;
         classInfo = cciResolver.resolve(name, originalBytes);
 
@@ -78,25 +75,22 @@ public class ContinuableClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        if (MaybeContinuableClassVisitor.MARKER_FIELD_NAME.equals(name) && (access & Opcodes.ACC_STATIC) != 0) {
+    public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
+        if (MaybeContinuableClassVisitor.SKIP_ENCHANCING_ANNOTATION.equals(descriptor)) {
             skipEnchancing = true;
             classInfo.markClassProcessed();
             throw StopException.INSTANCE;
-        }
-        return super.visitField(access, name, desc, signature, value);
+        }       
+        return super.visitAnnotation(descriptor, visible);
     }
 
     @Override
     public void visitEnd() {
         if (!skipEnchancing) {
-            super.visitField(
-                (isInterface ? Opcodes.ACC_PUBLIC : Opcodes.ACC_PRIVATE) + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC, 
-                MaybeContinuableClassVisitor.MARKER_FIELD_NAME, 
-                "Ljava/lang/String;", 
-                null, 
-                "A"
-            ).visitEnd();
+            AnnotationVisitor v = super.visitAnnotation(MaybeContinuableClassVisitor.SKIP_ENCHANCING_ANNOTATION, true);
+            if (null != v) {
+                v.visitEnd();
+            }
         }
         super.visitEnd();
     }

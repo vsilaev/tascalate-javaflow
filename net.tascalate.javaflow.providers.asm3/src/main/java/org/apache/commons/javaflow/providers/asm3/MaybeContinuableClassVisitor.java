@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassAdapter;
-import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -61,8 +60,8 @@ class MaybeContinuableClassVisitor extends ClassAdapter {
     }
 
     @Override
-    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        if (!isAnnotation && MaybeContinuableClassVisitor.MARKER_FIELD_NAME.equals(name) && (access & Opcodes.ACC_STATIC) != 0) {
+    public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
+        if (!isAnnotation && SKIP_ENCHANCING_ANNOTATION.equals(descriptor)) {
             classContinuatedMarkerFound = true;
         }
         return null;
@@ -202,7 +201,7 @@ class MaybeContinuableClassVisitor extends ClassAdapter {
         return classContinuatedMarkerFound;
     }
 
-    static final String MARKER_FIELD_NAME = "___$$$CONT$$$___";
+    static final String SKIP_ENCHANCING_ANNOTATION = "Lorg/apache/commons/javaflow/core/Skip;";
     static final EmptyVisitor NOP = new EmptyVisitor();
     
     private 

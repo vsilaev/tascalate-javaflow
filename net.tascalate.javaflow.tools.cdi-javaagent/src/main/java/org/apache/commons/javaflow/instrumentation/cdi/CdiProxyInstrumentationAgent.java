@@ -50,18 +50,22 @@ public class CdiProxyInstrumentationAgent {
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
         log.info("Installing agent...");
         setupInstrumentation(instrumentation);
-        log.info("Re-transforming existing classes...");
-        for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-            if (instrumentation.isModifiableClass(clazz) && 
-                !CdiProxyClassTransformer.skipClassByName(clazz.getName())) {
-                try {
-                    instrumentation.retransformClasses(clazz);
-                } catch (Throwable e) {
-                    log.error("Error retransofrming class "+ clazz.getName(), e);
+        if ("skip-retransform".equals(args)) {
+            log.info("skip-retransform argument passed, skipping re-transforming classes");
+        } else {
+            log.info("Re-transforming existing classes...");
+            for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
+                if (instrumentation.isModifiableClass(clazz) && 
+                    !CdiProxyClassTransformer.skipClassByName(clazz.getName())) {
+                    try {
+                        instrumentation.retransformClasses(clazz);
+                    } catch (Throwable e) {
+                        log.error("Error retransofrming class "+ clazz.getName(), e);
+                    }
                 }
             }
+            log.info("Existing classes was re-transormed");
         }
-        log.info("Existing classes was re-transormed");
         System.setProperty(CdiProxyInstrumentationAgent.class.getName(), "true");     
         log.info("Agent was installed dynamically");
     }

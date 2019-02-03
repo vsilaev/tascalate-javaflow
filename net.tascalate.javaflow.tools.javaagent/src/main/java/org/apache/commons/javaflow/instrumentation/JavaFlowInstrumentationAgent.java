@@ -51,18 +51,22 @@ public class JavaFlowInstrumentationAgent {
     public static void agentmain(String args, final Instrumentation instrumentation) throws Exception {
         log.info("Installing agent...");
         setupInstrumentation(instrumentation);
-        log.info("Re-transforming existing classes...");
-        for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-            if (instrumentation.isModifiableClass(clazz) && 
-                !JavaFlowClassTransformer.skipClassByName(clazz.getName())) {
-                try {
-                    instrumentation.retransformClasses(clazz);
-                } catch (Throwable e) {
-                    log.error("Error retransofrming class "+ clazz.getName(), e);
+        if ("skip-retransform".equals(args)) {
+            log.info("skip-retransform argument passed, skipping re-transforming classes");
+        } else {
+            log.info("Re-transforming existing classes...");
+            for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
+                if (instrumentation.isModifiableClass(clazz) && 
+                    !JavaFlowClassTransformer.skipClassByName(clazz.getName())) {
+                    try {
+                        instrumentation.retransformClasses(clazz);
+                    } catch (Throwable e) {
+                        log.error("Error retransofrming class "+ clazz.getName(), e);
+                    }
                 }
             }
+            log.info("Existing classes was re-transormed");
         }
-        log.info("Existing classes was re-transormed");
         System.setProperty(JavaFlowInstrumentationAgent.class.getName(), "true");        
         log.info("Agent was installed dynamically");
     }
