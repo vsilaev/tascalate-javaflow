@@ -55,13 +55,29 @@ public class CdiProxyInstrumentationAgent {
         } else {
             log.info("Re-transforming existing classes...");
             for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-                if (instrumentation.isModifiableClass(clazz) && 
-                    !CdiProxyClassTransformer.skipClassByName(clazz.getName())) {
+                String className = clazz.getName().replace('.', '/');
+                if (className.startsWith("org/apache/commons/logging/") ||
+                    className.startsWith("org/apache/commons/javaflow/") ||
+                    CdiProxyClassTransformer.skipClassByName(className)) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Skip re-transforming class: " + className);
+                    }
+                    continue;
+                }
+
+                if (instrumentation.isModifiableClass(clazz)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Re-transforming class: " + className);
+                    }
                     try {
                         instrumentation.retransformClasses(clazz);
                     } catch (Throwable e) {
-                        log.error("Error retransofrming class "+ clazz.getName(), e);
+                        log.error("Error re-transofrming class "+ className, e);
                     }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Non-modifiable class (re-transforming skipped): " + className);
+                    }                    
                 }
             }
             log.info("Existing classes was re-transormed");
