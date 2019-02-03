@@ -57,9 +57,7 @@ public class JavaFlowInstrumentationAgent {
             log.info("Re-transforming existing classes...");
             for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
                 String className = clazz.getName().replace('.', '/');
-                if (className.startsWith("org/apache/commons/logging/") ||
-                    className.startsWith("org/apache/commons/javaflow/") ||
-                    JavaFlowClassTransformer.skipClassByName(className)) {
+                if (JavaFlowClassTransformer.skipClassByName(className)) {
                     if (log.isTraceEnabled()) {
                         log.trace("Skip re-transforming class: " + className);
                     }

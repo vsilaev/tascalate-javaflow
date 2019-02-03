@@ -113,6 +113,8 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 	
 	static boolean skipClassByName(String className) {
 	    return null != className && (
+	           className.startsWith("org/apache/commons/logging/") || // Very special logging beast :)
+	           
 	           className.startsWith("java/")       || 
 	           className.startsWith("javax/")      ||
                className.startsWith("jdk/")        || // Azul Zulu
