@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
 
-public class FastClassVerifier extends SimpleVerifier {
+class FastClassVerifier extends SimpleVerifier {
     private final InheritanceLookup inheritanceLookup;
     
-    public FastClassVerifier(InheritanceLookup inheritanceLookup) {
+    FastClassVerifier(InheritanceLookup inheritanceLookup) {
         super(AsmVersion.CURRENT, Type.VOID_TYPE, Type.VOID_TYPE, Collections.emptyList(), false);
         this.inheritanceLookup = inheritanceLookup;
     }

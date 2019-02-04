@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         this.environment = environment;
     }
 
+    @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         isAnnotation = (access & Opcodes.ACC_ANNOTATION) > 0;
         selfclass = name;

@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.objectweb.asm.ClassWriter;
  * 
  * @author Eugene Kuleshov
  */
-final class AsmxClassTransformer implements ResourceTransformer {
+class AsmxClassTransformer implements ResourceTransformer {
 
     private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;

@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,25 +56,25 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
 
-public class ContinuableMethodNode extends MethodNode implements Opcodes {
+class ContinuableMethodNode extends MethodNode implements Opcodes {
     private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;
     private final String className;
 
-    protected final MethodVisitor mv;
+    final MethodVisitor mv;
 
-    protected final List<Label>            labels  = new ArrayList<Label>();
-    protected final List<AbstractInsnNode> nodes   = new ArrayList<AbstractInsnNode>();
-    protected final List<MethodInsnNode>   methods = new ArrayList<MethodInsnNode>();
+    final List<Label>            labels  = new ArrayList<Label>();
+    final List<AbstractInsnNode> nodes   = new ArrayList<AbstractInsnNode>();
+    final List<MethodInsnNode>   methods = new ArrayList<MethodInsnNode>();
 
-    protected Analyzer analyzer;
-    public int stackRecorderVar;
+    private Analyzer analyzer;
+    int stackRecorderVar;
 
-    public ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
-                                 String className, 
-                                 InheritanceLookup inheritanceLookup, 
-                                 ContinuableClassInfoResolver cciResolver, 
-                                 MethodVisitor mv) {
+    ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
+                          String className, 
+                          InheritanceLookup inheritanceLookup, 
+                          ContinuableClassInfoResolver cciResolver, 
+                          MethodVisitor mv) {
         
         super(AsmVersion.CURRENT, access, name, desc, signature, exceptions);
         this.className = className;
@@ -84,6 +84,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
 
     // Bug in rev 1632 (Refactoring to remove redundant code (and for easier subclassing).
+    @Override
     protected LabelNode getLabelNode(Label l) {
         if (!(l.info instanceof LabelNode)) {
             l.info = new LabelNode(l); // error was here -- new LabelNode(/* nothing */);
@@ -97,6 +98,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         return null == frames || insIndex >= frames.length ? null : frames[insIndex];
     }
 
+    @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean intf) {
         MethodInsnNode mnode = new MethodInsnNode(opcode, owner, name, desc, intf);
         if (opcode == INVOKESPECIAL || "<init>".equals(name)) {
@@ -111,10 +113,12 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         instructions.add(mnode);
     }
 
+    @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         visitMethodInsn(opcode, owner, name, desc, opcode == Opcodes.INVOKEINTERFACE);
     }
 
+    @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
         InvokeDynamicInsnNode mnode = new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs);
         if (needsFrameGuard(INVOKEDYNAMIC, bsm.getOwner(), name, desc)) {
@@ -126,6 +130,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         instructions.add(mnode);
     }
 
+    @Override
     public void visitEnd() {
 
         checkCallSites();
@@ -159,7 +164,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         }
     }
 
-    void checkCallSites() {
+    private void checkCallSites() {
         List<LocalVariableAnnotationNode> varAnnotations = new ArrayList<LocalVariableAnnotationNode>();
         Map<Integer, List<AnnotationNode>> paramAnnotations = new HashMap<Integer, List<AnnotationNode>>();
 
@@ -186,7 +191,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         }
     }
 
-    boolean checkContinuableAnnotation(Collection<String> annotationDescriptors) {
+    private boolean checkContinuableAnnotation(Collection<String> annotationDescriptors) {
         for (String annotationDescriptor : annotationDescriptors) {
             if (cciResolver.isContinuableAnnotation(annotationDescriptor)) {
                 return true;
@@ -195,7 +200,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         return false;
     }
 
-    int findCallSiteInvocationInsertionIndex(MethodInsnNode mnode) {
+    private int findCallSiteInvocationInsertionIndex(MethodInsnNode mnode) {
         int inSelected = -1;
         for (AbstractInsnNode otherIns = mnode; otherIns != null && inSelected < 0; ) {
             otherIns = otherIns.getNext();
@@ -206,7 +211,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         return inSelected;
     }
 
-    void moveNew() throws AnalyzerException {
+    private void moveNew() throws AnalyzerException {
         SourceInterpreter i = new SourceInterpreter();
         Analyzer a = new Analyzer(i);
         a.analyze(className, this);
@@ -360,7 +365,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         maxStack += updateMaxStack;
     }
 
-    boolean needsFrameGuard(int opcode, String owner, String name, String desc) {
+    private boolean needsFrameGuard(int opcode, String owner, String name, String desc) {
         if (owner.startsWith("java/") || owner.startsWith("javax/")) {
             //System.out.println("SKIP:: " + owner + "." + name + desc);
             return false;

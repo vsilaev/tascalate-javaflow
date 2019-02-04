@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 class CallSiteFinder {
 
-    public static class Result {
-        public final AbstractInsnNode callSite;
-        public final MethodInsnNode methodCall;
-        public final Set<String> annotations;
+    static class Result {
+        final AbstractInsnNode callSite;
+        final MethodInsnNode methodCall;
+        final Set<String> annotations;
 
         Result(AbstractInsnNode callSite, MethodInsnNode methodCall, Set<String> annotations) {
             this.callSite = callSite;
@@ -100,7 +100,7 @@ class CallSiteFinder {
         return result;
     }
 
-    protected Result findMatchingCallSite(MethodInsnNode m, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
+    private Result findMatchingCallSite(MethodInsnNode m, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
         int opcode = m.getOpcode(); 
 
         if (INVOKEVIRTUAL != opcode && INVOKEINTERFACE != opcode ) {
@@ -138,7 +138,7 @@ class CallSiteFinder {
         return null;
     }
 
-    protected Set<String> getVarAnnotations(List<LocalVariableAnnotationNode> varAnnotations, VarInsnNode v) {
+    private Set<String> getVarAnnotations(List<LocalVariableAnnotationNode> varAnnotations, VarInsnNode v) {
         Set<String> result = new TreeSet<>();
         for (LocalVariableAnnotationNode n : varAnnotations) {
             int idx = n.index.indexOf(v.var);
@@ -154,7 +154,7 @@ class CallSiteFinder {
         return result;
     }
 
-    protected boolean isVarBetweenBounds(AbstractInsnNode var, LabelNode lo, LabelNode hi) {
+    private boolean isVarBetweenBounds(AbstractInsnNode var, LabelNode lo, LabelNode hi) {
         AbstractInsnNode x;
         boolean loFound = false;
         for (x = var; !(x == null || loFound); x = x.getPrevious()) {
@@ -172,7 +172,7 @@ class CallSiteFinder {
 
     }
 
-    protected Set<String> getParamAnnotations(Map<Integer, List<AnnotationNode>> paramAnnotations, int varIdx) {
+    private Set<String> getParamAnnotations(Map<Integer, List<AnnotationNode>> paramAnnotations, int varIdx) {
         Set<String> result = new TreeSet<>();
         List<AnnotationNode> annos = paramAnnotations.get(varIdx);
         if (null != annos) {
@@ -184,7 +184,7 @@ class CallSiteFinder {
 
     }
 
-    protected static int getStackSizeChange(AbstractInsnNode ins) {
+    private static int getStackSizeChange(AbstractInsnNode ins) {
         /**
          * See http://cs.au.dk/~mis/dOvs/jvmspec/ref-Java.html
          */
