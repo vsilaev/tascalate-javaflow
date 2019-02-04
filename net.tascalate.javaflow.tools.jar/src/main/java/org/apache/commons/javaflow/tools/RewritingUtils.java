@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.jar.JarEntry;
@@ -255,10 +256,15 @@ public final class RewritingUtils {
 			}
     	}
 		try {
-			return transformerFactoryClass.newInstance();
+			// Class.newInstance is deprecated as of Java 9
+			return transformerFactoryClass.getDeclaredConstructor().newInstance();
 		} catch (final InstantiationException ex) {
 			throw new RuntimeException(ex);
 		} catch (final IllegalAccessException ex) {
+			throw new RuntimeException(ex);
+		} catch (InvocationTargetException ex) {
+			throw new RuntimeException(ex);
+		} catch (NoSuchMethodException ex) {
 			throw new RuntimeException(ex);
 		}
     }

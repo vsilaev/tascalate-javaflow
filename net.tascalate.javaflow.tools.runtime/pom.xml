@@ -50,9 +50,11 @@
 							<module>
 								<moduleInfoSource>
 								module net.tascalate.javaflow.tools.runtime {
+								    requires commons.logging;
+
+								    requires transitive net.tascalate.javaflow.spi;
+								    
 								    exports org.apache.commons.javaflow.util;
-								    requires net.tascalate.javaflow.spi;
-								    requires org.apache.commons.logging;
 								}
 								</moduleInfoSource>
 							</module>

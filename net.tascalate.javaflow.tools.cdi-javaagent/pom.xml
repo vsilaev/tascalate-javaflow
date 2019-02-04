@@ -56,14 +56,19 @@
 							<module>
 								<moduleInfoSource>
 								module net.tascalate.javaflow.tools.cdi_javaagent {
-								    exports org.apache.commons.javaflow.instrumentation.cdi;
-								    requires net.tascalate.javaflow.spi;
-								    requires net.tascalate.javaflow.providers.asmx;
-								    requires org.apache.commons.logging;
+								    requires java.instrument;
+								    
+								    requires commons.logging;
+								    
 								    requires org.objectweb.asm;
 								    requires org.objectweb.asm.commons;
 								    requires org.objectweb.asm.tree;
 								    requires org.objectweb.asm.tree.analysis;
+									
+								    requires net.tascalate.javaflow.spi;
+								    requires net.tascalate.javaflow.providers.asmx;
+								    
+								    exports org.apache.commons.javaflow.instrumentation.cdi;
 								}
 								</moduleInfoSource>
 							</module>

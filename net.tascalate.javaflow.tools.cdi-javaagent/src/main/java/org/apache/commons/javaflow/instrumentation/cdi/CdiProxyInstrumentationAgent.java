@@ -32,7 +32,7 @@ public class CdiProxyInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void premain(String args, Instrumentation instrumentation) throws Exception {
+    public static void premain(String args, @SuppressWarnings("exports") Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
         System.setProperty(CdiProxyInstrumentationAgent.class.getName(), "true");        
     }
@@ -47,7 +47,7 @@ public class CdiProxyInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
+    public static void agentmain(String args, @SuppressWarnings("exports") Instrumentation instrumentation) throws Exception {
         log.info("Installing agent...");
         setupInstrumentation(instrumentation);
         if ("skip-retransform".equals(args)) {

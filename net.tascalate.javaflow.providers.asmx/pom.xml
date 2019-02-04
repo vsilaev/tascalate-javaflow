@@ -65,11 +65,13 @@
 							<module>
 								<moduleInfoSource>
 								module net.tascalate.javaflow.providers.asmx {
+								    requires transitive org.objectweb.asm;
+								    requires transitive org.objectweb.asm.tree;
+								    requires transitive org.objectweb.asm.tree.analysis;
+
+								    requires transitive net.tascalate.javaflow.spi;
+
 								    exports org.apache.commons.javaflow.providers.asmx;
-								    requires net.tascalate.javaflow.spi;
-								    requires org.objectweb.asm;
-								    requires org.objectweb.asm.tree;
-								    requires org.objectweb.asm.tree.analysis;
 								}
 								</moduleInfoSource>
 							</module>

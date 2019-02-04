@@ -46,9 +46,10 @@
 							<module>
 								<moduleInfoSource>
 								module net.tascalate.javaflow.api {
+								    requires commons.logging;
+
 								    exports org.apache.commons.javaflow.api;
 								    exports org.apache.commons.javaflow.core;
-								    requires org.apache.commons.logging;
 								}
 								</moduleInfoSource>
 							</module>

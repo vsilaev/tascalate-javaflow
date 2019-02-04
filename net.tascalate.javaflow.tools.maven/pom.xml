@@ -98,30 +98,15 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>org.moditect</groupId>
-				<artifactId>moditect-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-module-infos</id>
-						<phase>package</phase>
-						<goals>
-							<goal>add-module-info</goal>
-						</goals>
-						<configuration>
-							<jvmVersion>9</jvmVersion>
-							<module>
-								<moduleInfoSource>
-								module net.tascalate.javaflow.tools.maven {
-								    exports org.apache.commons.javaflow.tools.maven;
-								    requires net.tascalate.javaflow.spi;
-								    requires net.tascalate.javaflow.tools.jar;
-								    requires org.apache.commons.logging;
-								}
-								</moduleInfoSource>
-							</module>
-						</configuration>
-					</execution>
-				</executions>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Automatic-Module-Name>net.tascalate.javaflow.tools.maven</Automatic-Module-Name>
+						</manifestEntries>
+					</archive>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

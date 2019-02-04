@@ -33,7 +33,7 @@ public class JavaFlowInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void premain(String args, Instrumentation instrumentation) throws Exception {
+    public static void premain(String args, @SuppressWarnings("exports") Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
         System.setProperty(JavaFlowInstrumentationAgent.class.getName(), "true");
     }
@@ -48,7 +48,7 @@ public class JavaFlowInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void agentmain(String args, final Instrumentation instrumentation) throws Exception {
+    public static void agentmain(String args, @SuppressWarnings("exports") final Instrumentation instrumentation) throws Exception {
         log.info("Installing agent...");
         setupInstrumentation(instrumentation);
         if ("skip-retransform".equals(args)) {

@@ -19,12 +19,12 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class MaybeContinuableAnnotationVisitor extends ClassVisitor {
+class MaybeContinuableAnnotationVisitor extends ClassVisitor {
     private final AsmxContinuableClassInfoResolver environment; 
     private boolean classContinuableAnnotationFound = false;
     private boolean isAnnotation = false;
 
-    public MaybeContinuableAnnotationVisitor(AsmxContinuableClassInfoResolver environment) {
+    MaybeContinuableAnnotationVisitor(AsmxContinuableClassInfoResolver environment) {
         super(AsmVersion.CURRENT);
         this.environment = environment;
     }

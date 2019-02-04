@@ -92,7 +92,7 @@ public class MonitoringFrame<V extends Value> extends Frame<V> {
     }
 
     public void monitorEnter(int local) {
-        monitored.add(new Integer(local));
+        monitored.add(Integer.valueOf(local));
     }
 
     public void monitorExit(int local) {
