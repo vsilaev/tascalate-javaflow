@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2018 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,12 +118,12 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
                className.startsWith("com/sun/")    ||
                className.startsWith("oracle/")     ||
                className.startsWith("com/oracle/") ||
-               className.startsWith("ibm/")        ||
-               className.startsWith("com/ibm/")    ||
+               className.startsWith("ibm/")        || // IBM J9
+               className.startsWith("com/ibm/")    || // IBM J9
                className.startsWith("openj9/")        // Eclipse OpenJ9
                );
     }
 
     private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
-    private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation");
+    private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
 }
