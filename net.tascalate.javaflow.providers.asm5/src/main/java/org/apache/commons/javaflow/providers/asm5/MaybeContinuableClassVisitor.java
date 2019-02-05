@@ -45,7 +45,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     private boolean isAnnotation = false;
 
-    public MaybeContinuableClassVisitor(Asm5ContinuableClassInfoResolver environment) {
+    MaybeContinuableClassVisitor(Asm5ContinuableClassInfoResolver environment) {
         super(AsmVersion.CURRENT);
         this.environment = environment;
     }

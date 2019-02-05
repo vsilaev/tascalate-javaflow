@@ -23,8 +23,6 @@
  */
 package org.apache.commons.javaflow.providers.asm5;
 
-import java.util.Collections;
-
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
@@ -33,7 +31,7 @@ class FastClassVerifier extends SimpleVerifier {
     private final InheritanceLookup inheritanceLookup;
     
     FastClassVerifier(InheritanceLookup inheritanceLookup) {
-        super(AsmVersion.CURRENT, Type.VOID_TYPE, Type.VOID_TYPE, Collections.emptyList(), false);
+        super(AsmVersion.CURRENT, null, null, null, false);
         this.inheritanceLookup = inheritanceLookup;
     }
     

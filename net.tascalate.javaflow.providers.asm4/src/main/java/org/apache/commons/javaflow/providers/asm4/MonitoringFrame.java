@@ -26,20 +26,21 @@ import org.objectweb.asm.tree.analysis.Value;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MonitoringFrame extends Frame {
+class MonitoringFrame extends Frame {
 
     // keeps track of monitored locals
     private List<Integer> monitored;
 
-    public MonitoringFrame(Frame frame) {
+    MonitoringFrame(Frame frame) {
         super(frame);
     }
 
-    public MonitoringFrame(int nLocals, int nStack) {
+    MonitoringFrame(int nLocals, int nStack) {
         super(nLocals, nStack);
         monitored = new LinkedList<Integer>();
     }
 
+    @Override
     public void execute(AbstractInsnNode insn, Interpreter interpreter) throws AnalyzerException {
 
         boolean never = false;
@@ -72,6 +73,7 @@ public class MonitoringFrame extends Frame {
         }
     }
 
+    @Override
     public Frame init(Frame frame) {
         super.init(frame);
         if (frame instanceof MonitoringFrame) {
@@ -82,7 +84,7 @@ public class MonitoringFrame extends Frame {
         return this;
     }
 
-    public int[] getMonitored() {
+    int[] getMonitored() {
         int[] res = new int[monitored.size()];
         for (int i = 0; i < monitored.size(); i++) {
             res[i] = monitored.get(i);
@@ -90,11 +92,11 @@ public class MonitoringFrame extends Frame {
         return res;
     }
 
-    public void monitorEnter(int local) {
+    private void monitorEnter(int local) {
         monitored.add(Integer.valueOf(local));
     }
 
-    public void monitorExit(int local) {
+    private void monitorExit(int local) {
         int index = monitored.lastIndexOf(local);
         if (index == -1) {
             // throw new IllegalStateException("Monitor Exit never entered");

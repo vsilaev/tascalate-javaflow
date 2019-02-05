@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public final class ContinuableMethodVisitor extends MethodVisitor {
+class ContinuableMethodVisitor extends MethodVisitor {
     private static final String STACK_RECORDER = "org/apache/commons/javaflow/core/StackRecorder";
     private static final String POP_METHOD = "pop";
     private static final String PUSH_METHOD = "push";
@@ -53,7 +53,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
     private Frame currentFrame = null;
 
 
-    public ContinuableMethodVisitor(ContinuableMethodNode a) {
+    ContinuableMethodVisitor(ContinuableMethodNode a) {
         super(AsmVersion.CURRENT, a.mv);
         this.methodNode = a;
         this.labels = a.labels;
@@ -80,6 +80,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
         }
     }
 
+    @Override
     public void visitCode() {
         mv.visitCode();
 
@@ -214,6 +215,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
         mv.visitLabel(l0);
     }
 
+    @Override
     public void visitLabel(Label label) {
         if (currentIndex < labels.size() && label == labels.get(currentIndex)) {
             //int i = methodNode.getIndex((AbstractInsnNode)nodes.get(currentIndex));
@@ -223,17 +225,19 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
         mv.visitLabel(label);
     }
 
+    @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         visitCall(Opcodes.INVOKEDYNAMIC, desc);
     }
 
+    @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         mv.visitMethodInsn(opcode, owner, name, desc);
         visitCall(opcode, desc);
     }
 
-    public void visitCall(int opcode, String desc) {
+    private void visitCall(int opcode, String desc) {
         if (currentFrame != null) {
             Label fl = new Label();
 
@@ -335,7 +339,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
         }
     }
 
-
+    @Override
     public void visitMaxs(int maxStack, int maxLocals) {
         Label endLabel = new Label();
         mv.visitLabel(endLabel);
@@ -346,7 +350,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
         //was mv.visitMaxs(0, 0);
     }
 
-    static boolean isNull(BasicValue value) {
+    private static boolean isNull(BasicValue value) {
         if (null == value)
             return true;
         if (!value.isReference())
@@ -355,7 +359,7 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
         return "Lnull;".equals(type.getDescriptor()); 
     }
 
-    void pushDefault(Type type) {
+    private void pushDefault(Type type) {
         switch (type.getSort()) {
             case Type.VOID:
                 break;
@@ -393,11 +397,11 @@ public final class ContinuableMethodVisitor extends MethodVisitor {
     };
 
 
-    String getPopMethod(Type type) {
+    private static String getPopMethod(Type type) {
         return POP_METHOD + SUFFIXES[type.getSort()];
     }
 
-    String getPushMethod(Type type) {
+    private static String getPushMethod(Type type) {
         return PUSH_METHOD + SUFFIXES[type.getSort()];
     }
 }

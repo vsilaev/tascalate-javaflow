@@ -34,7 +34,7 @@ import org.objectweb.asm.ClassWriter;
  * 
  * @author Eugene Kuleshov
  */
-final class Asm4ClassTransformer implements ResourceTransformer {
+class Asm4ClassTransformer implements ResourceTransformer {
 
     private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;

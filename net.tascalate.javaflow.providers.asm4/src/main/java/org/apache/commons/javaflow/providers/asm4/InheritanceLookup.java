@@ -48,20 +48,20 @@ import org.objectweb.asm.Type;
  * @author Eric Bruneton
  * @author vsilaev
  */
-public class InheritanceLookup {
+class InheritanceLookup {
     
     private final ResourceLoader loader;
     private final Map<Key, String> lookupCache = new HashMap<Key, String>();
     
-    public InheritanceLookup(ResourceLoader loader) {
+    InheritanceLookup(ResourceLoader loader) {
         this.loader = loader;
     }
     
-    public Type getCommonSuperType(Type type1, Type type2) {
+    Type getCommonSuperType(Type type1, Type type2) {
         return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
     }
     
-    public String getCommonSuperClass(String type1, String type2) {
+    String getCommonSuperClass(String type1, String type2) {
         Key key = new Key(type1, type2);
         String result;
         synchronized (lookupCache) {
@@ -74,7 +74,7 @@ public class InheritanceLookup {
         return result;
     }
 
-    protected String calculateCommonSuperClass(final String type1, final String type2) {
+    private String calculateCommonSuperClass(final String type1, final String type2) {
         try {
             ClassReader info1 = typeInfo(type1);
             ClassReader info2 = typeInfo(type2);
@@ -140,7 +140,7 @@ public class InheritanceLookup {
      *             if the bytecode of 'type' or of some of its ancestor class
      *             cannot be loaded.
      */
-    protected StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
+    private StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
         StringBuilder b = new StringBuilder();
         while (!"java/lang/Object".equals(type)) {
             b.append(';').append(type);
@@ -164,7 +164,7 @@ public class InheritanceLookup {
      *             if the bytecode of 'type' or of some of its ancestor class
      *             cannot be loaded.
      */
-    protected boolean typeImplements(String type, ClassReader info, String itf) throws IOException {
+    private boolean typeImplements(String type, ClassReader info, String itf) throws IOException {
         while (!"java/lang/Object".equals(type)) {
             String[] itfs = info.getInterfaces();
             for (int i = 0; i < itfs.length; ++i) {
@@ -192,7 +192,7 @@ public class InheritanceLookup {
      * @throws IOException
      *             if the bytecode of 'type' cannot be loaded.
      */
-    protected ClassReader typeInfo(String type) throws IOException {
+    private ClassReader typeInfo(String type) throws IOException {
         InputStream is = loader.getResourceAsStream(type + ".class");
         try {
             return new ClassReader(is);
