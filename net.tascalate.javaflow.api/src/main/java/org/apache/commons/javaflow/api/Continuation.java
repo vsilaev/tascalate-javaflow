@@ -29,8 +29,8 @@ import org.apache.commons.javaflow.core.ReflectionUtils;
 import org.apache.commons.javaflow.core.ResumeParameter;
 import org.apache.commons.javaflow.core.StackRecorder;
 import org.apache.commons.javaflow.core.SuspendResult;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Snapshot of a thread execution state.
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  */ 
 abstract public class Continuation implements Serializable {
 
-    private static final Log log = LogFactory.getLog(Continuation.class);
+    private static final Logger log = LoggerFactory.getLogger(Continuation.class);
     private static final long serialVersionUID = 3L;
     
     private final Object value;

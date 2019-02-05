@@ -38,15 +38,16 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public final class RewritingUtils {
 
-    private final static Log log = LogFactory.getLog(RewritingUtils.class);
+    private final static Logger log = LoggerFactory.getLogger(RewritingUtils.class);
 
     public interface Matcher {
         boolean isMatching( final String name );

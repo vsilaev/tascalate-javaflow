@@ -17,11 +17,11 @@ package org.apache.commons.javaflow.instrumentation.cdi;
 
 import java.lang.instrument.Instrumentation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CdiProxyInstrumentationAgent {
-    private static final Log log = LogFactory.getLog(CdiProxyInstrumentationAgent.class);
+    private static final Logger log = LoggerFactory.getLogger(CdiProxyInstrumentationAgent.class);
     /**
      * JVM hook to statically load the javaagent at startup.
      * 

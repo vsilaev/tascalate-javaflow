@@ -24,8 +24,8 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -33,35 +33,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.moditect</groupId>
-				<artifactId>moditect-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-module-infos</id>
-						<phase>package</phase>
-						<goals>
-							<goal>add-module-info</goal>
-						</goals>
-						<configuration>
-							<jvmVersion>9</jvmVersion>
-							<module>
-								<moduleInfoSource>
-								module net.tascalate.javaflow.tools.runtime {
-								    requires commons.logging;
-
-								    requires transitive net.tascalate.javaflow.spi;
-								    
-								    exports org.apache.commons.javaflow.util;
-								}
-								</moduleInfoSource>
-							</module>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>

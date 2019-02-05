@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
@@ -31,12 +34,8 @@ import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-
 public class JavaFlowClassTransformer implements ClassFileTransformer {
-	private static final Log log = LogFactory.getLog(JavaFlowClassTransformer.class);
+	private static final Logger log = LoggerFactory.getLogger(JavaFlowClassTransformer.class);
 	
 	private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory(); 
 
@@ -87,7 +86,7 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 			    }
 			    return null;
 			} catch (final Error ex) {
-				log.error(ex);
+				log.error("Internal error during transforming continuable class", ex);
 				throw ex;
 			}
 		}

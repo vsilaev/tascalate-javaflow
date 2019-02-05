@@ -26,8 +26,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author tcurdt
@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class ReflectionUtils {
     
-    private static final Log log = LogFactory.getLog(ReflectionUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
     
 	public interface Matcher {
         boolean matches(String pName);
@@ -174,10 +174,10 @@ public final class ReflectionUtils {
         try {
             return (Class<?>) defineClassMethod.invoke(cl, null, b, 0, b.length);
         } catch (InvocationTargetException ex) {
-            log.fatal("Could not define class", ex.getTargetException());
+            log.error("Could not define class", ex.getTargetException());
             throw new RuntimeException(ex.getTargetException());
         } catch (Exception ex) {
-            log.fatal("Could not invoke method \"defineClass\"", ex);
+            log.error("Could not invoke method \"defineClass\"", ex);
             throw new RuntimeException(ex);
         }
     }

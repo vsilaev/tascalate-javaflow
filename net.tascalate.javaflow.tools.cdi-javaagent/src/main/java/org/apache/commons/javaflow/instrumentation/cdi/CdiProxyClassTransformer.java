@@ -22,19 +22,20 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.StopException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 
 public class CdiProxyClassTransformer implements ClassFileTransformer {
-    private static final Log log = LogFactory.getLog(CdiProxyClassTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(CdiProxyClassTransformer.class);
 
     private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory();
 
@@ -83,7 +84,7 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
                 }
                 return null;
             } catch (Error ex) {
-                log.error(ex);
+                log.error("Internal error during transforming CDI continuable proxy", ex);
                 throw ex;
             }
         }

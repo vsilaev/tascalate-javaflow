@@ -28,8 +28,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stack to store the frame information along the invocation trace.
@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class Stack implements Serializable {
 
-    private static final Log log = LogFactory.getLog(Stack.class);
+	private static final Logger log = LoggerFactory.getLogger(Stack.class);
     private static final long serialVersionUID = 3L;
 
     private long[] pstack;

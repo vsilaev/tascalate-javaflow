@@ -50,35 +50,6 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.moditect</groupId>
-				<artifactId>moditect-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-module-infos</id>
-						<phase>package</phase>
-						<goals>
-							<goal>add-module-info</goal>
-						</goals>
-						<configuration>
-							<jvmVersion>9</jvmVersion>
-							<module>
-								<moduleInfoSource>
-								module net.tascalate.javaflow.providers.asmx {
-								    requires org.objectweb.asm;
-								    requires org.objectweb.asm.tree;
-								    requires org.objectweb.asm.tree.analysis;
-
-								    requires transitive net.tascalate.javaflow.spi;
-
-								    exports org.apache.commons.javaflow.providers.asmx;
-								}
-								</moduleInfoSource>
-							</module>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 </project>

@@ -17,11 +17,11 @@ package org.apache.commons.javaflow.instrumentation;
 
 import java.lang.instrument.Instrumentation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JavaFlowInstrumentationAgent {
-    private static final Log log = LogFactory.getLog(JavaFlowInstrumentationAgent.class);
+    private static final Logger log = LoggerFactory.getLogger(JavaFlowInstrumentationAgent.class);
     
     /**
      * JVM hook to statically load the javaagent at startup.
