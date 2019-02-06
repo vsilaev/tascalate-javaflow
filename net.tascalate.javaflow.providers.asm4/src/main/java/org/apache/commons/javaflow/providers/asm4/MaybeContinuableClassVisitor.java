@@ -80,7 +80,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         }
 
         boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0;
-        boolean isPackagePrivate =  (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0;
+        boolean isPackagePrivate = (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0;
         if (isSynthetic) {
             final boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
             final boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;

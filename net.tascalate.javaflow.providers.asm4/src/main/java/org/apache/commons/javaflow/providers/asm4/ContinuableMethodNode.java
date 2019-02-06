@@ -53,7 +53,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
 
-public class ContinuableMethodNode extends MethodNode implements Opcodes {
+class ContinuableMethodNode extends MethodNode implements Opcodes {
     private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;
     private final String className;
@@ -110,6 +110,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         instructions.add(mnode);
     }
 
+    @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
         InvokeDynamicInsnNode mnode = new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs);
         if (needsFrameGuard(INVOKEDYNAMIC, bsm.getOwner(), name, desc)) {

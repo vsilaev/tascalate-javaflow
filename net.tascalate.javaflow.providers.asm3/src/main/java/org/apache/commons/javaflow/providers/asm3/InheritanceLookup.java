@@ -1,3 +1,34 @@
+/***
+ * Extracted and modified from ASM 4 test suite. Original copyright notice preserved below
+ *
+ * ASM tests
+ * Copyright (c) 2000-2011 INRIA, France Telecom
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.apache.commons.javaflow.providers.asm3;
 
 import java.io.IOException;
@@ -17,20 +48,20 @@ import org.objectweb.asm.Type;
  * @author Eric Bruneton
  * @author vsilaev
  */
-public class InheritanceLookup {
+class InheritanceLookup {
     
     private final ResourceLoader loader;
     private final Map<Key, String> lookupCache = new HashMap<Key, String>();
     
-    public InheritanceLookup(ResourceLoader loader) {
+    InheritanceLookup(ResourceLoader loader) {
         this.loader = loader;
     }
     
-    public Type getCommonSuperType(Type type1, Type type2) {
+    Type getCommonSuperType(Type type1, Type type2) {
         return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
     }
     
-    public String getCommonSuperClass(String type1, String type2) {
+    String getCommonSuperClass(String type1, String type2) {
         Key key = new Key(type1, type2);
         String result;
         synchronized (lookupCache) {
@@ -43,7 +74,7 @@ public class InheritanceLookup {
         return result;
     }
 
-    protected String calculateCommonSuperClass(final String type1, final String type2) {
+    private String calculateCommonSuperClass(final String type1, final String type2) {
         try {
             ClassReader info1 = typeInfo(type1);
             ClassReader info2 = typeInfo(type2);
@@ -109,7 +140,7 @@ public class InheritanceLookup {
      *             if the bytecode of 'type' or of some of its ancestor class
      *             cannot be loaded.
      */
-    protected StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
+    private StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
         StringBuilder b = new StringBuilder();
         while (!"java/lang/Object".equals(type)) {
             b.append(';').append(type);
@@ -133,7 +164,7 @@ public class InheritanceLookup {
      *             if the bytecode of 'type' or of some of its ancestor class
      *             cannot be loaded.
      */
-    protected boolean typeImplements(String type, ClassReader info, String itf) throws IOException {
+    private boolean typeImplements(String type, ClassReader info, String itf) throws IOException {
         while (!"java/lang/Object".equals(type)) {
             String[] itfs = info.getInterfaces();
             for (int i = 0; i < itfs.length; ++i) {
@@ -161,7 +192,7 @@ public class InheritanceLookup {
      * @throws IOException
      *             if the bytecode of 'type' cannot be loaded.
      */
-    protected ClassReader typeInfo(String type) throws IOException {
+    private ClassReader typeInfo(String type) throws IOException {
         InputStream is = loader.getResourceAsStream(type + ".class");
         try {
             return new ClassReader(is);

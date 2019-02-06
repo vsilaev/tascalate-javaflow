@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,25 +51,25 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
 
-public class ContinuableMethodNode extends MethodNode implements Opcodes {
+class ContinuableMethodNode extends MethodNode implements Opcodes {
     private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;
     private final String className;
 
-    protected final MethodVisitor mv;
+    final MethodVisitor mv;
 
-    protected final List<Label>            labels  = new ArrayList<Label>();
-    protected final List<AbstractInsnNode> nodes   = new ArrayList<AbstractInsnNode>();
-    protected final List<MethodInsnNode>   methods = new ArrayList<MethodInsnNode>();
+    final List<Label>            labels  = new ArrayList<Label>();
+    final List<AbstractInsnNode> nodes   = new ArrayList<AbstractInsnNode>();
+    final List<MethodInsnNode>   methods = new ArrayList<MethodInsnNode>();
 
-    protected Analyzer analyzer;
-    public int stackRecorderVar;
+    private Analyzer analyzer;
+    int stackRecorderVar;
 
-    public ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
-                                 String className, 
-                                 InheritanceLookup inheritanceLookup, 
-                                 ContinuableClassInfoResolver cciResolver, 
-                                 MethodVisitor mv) {
+    ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
+                          String className, 
+                          InheritanceLookup inheritanceLookup, 
+                          ContinuableClassInfoResolver cciResolver, 
+                          MethodVisitor mv) {
         super(access, name, desc, signature, exceptions);
         this.className = className;
         this.inheritanceLookup = inheritanceLookup;
@@ -78,6 +78,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
 
     // Bug in rev 1632 (Refactoring to remove redundant code (and for easier subclassing).
+    @Override
     protected LabelNode getLabelNode(Label l) {
         if (!(l.info instanceof LabelNode)) {
             l.info = new LabelNode(l); // error was here -- new LabelNode(/* nothing */);
@@ -91,6 +92,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         return null == frames || insIndex >= frames.length ? null : frames[insIndex];
     }
 
+    @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         MethodInsnNode mnode = new MethodInsnNode(opcode, owner, name, desc);
         if (opcode == INVOKESPECIAL || "<init>".equals(name)) {
@@ -105,6 +107,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         instructions.add(mnode);
     }
 
+    @Override
     public void visitEnd() {
         if (instructions.size() == 0 || labels.size() == 0) {
             accept(mv);
@@ -117,7 +120,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
 
             analyzer = new Analyzer(new FastClassVerifier(inheritanceLookup)) {
                 @Override
-                protected Frame newFrame(int nLocals, final int nStack) {
+                protected Frame newFrame(int nLocals, int nStack) {
                     return new MonitoringFrame(nLocals, nStack);
                 }
 
@@ -135,7 +138,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         }
     }
 
-    void moveNew() throws AnalyzerException {
+    private void moveNew() throws AnalyzerException {
         SourceInterpreter i = new SourceInterpreter();
         Analyzer a = new Analyzer(i);
         a.analyze(className, this);
@@ -289,7 +292,7 @@ public class ContinuableMethodNode extends MethodNode implements Opcodes {
         maxStack += updateMaxStack;
     }
 
-    boolean needsFrameGuard(int opcode, String owner, String name, String desc) {
+    private boolean needsFrameGuard(int opcode, String owner, String name, String desc) {
         if (owner.startsWith("java/") || owner.startsWith("javax/")) {
             //System.out.println("SKIP:: " + owner + "." + name + desc);
             return false;

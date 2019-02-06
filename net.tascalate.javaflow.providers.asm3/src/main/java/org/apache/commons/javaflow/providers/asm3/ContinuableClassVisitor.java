@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2017 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.objectweb.asm.Opcodes;
  * 
  * @author Evgueni Koulechov
  */
-public class ContinuableClassVisitor extends ClassAdapter {
+class ContinuableClassVisitor extends ClassAdapter {
 
     private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;
@@ -47,10 +47,10 @@ public class ContinuableClassVisitor extends ClassAdapter {
     private ContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
 
-    public ContinuableClassVisitor(ClassVisitor cv, 
-                                   InheritanceLookup inheritanceLookup, 
-                                   ContinuableClassInfoResolver cciResolver, 
-                                   byte[] originalBytes) {
+    ContinuableClassVisitor(ClassVisitor cv, 
+                            InheritanceLookup inheritanceLookup, 
+                            ContinuableClassInfoResolver cciResolver, 
+                            byte[] originalBytes) {
         super(cv);
         this.inheritanceLookup = inheritanceLookup;
         this.cciResolver = cciResolver;
@@ -61,6 +61,7 @@ public class ContinuableClassVisitor extends ClassAdapter {
         return skipEnchancing;
     }
     
+    @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         className = name;
         classInfo = cciResolver.resolve(name, originalBytes);
@@ -96,6 +97,7 @@ public class ContinuableClassVisitor extends ClassAdapter {
         super.visitEnd();
     }
 
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         boolean skip = skipEnchancing || null == classInfo || mv == null

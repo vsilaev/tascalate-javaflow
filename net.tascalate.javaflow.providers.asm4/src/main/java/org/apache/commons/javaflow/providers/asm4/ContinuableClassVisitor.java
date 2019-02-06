@@ -36,7 +36,7 @@ import org.objectweb.asm.Opcodes;
  * 
  * @author Evgueni Koulechov
  */
-public class ContinuableClassVisitor extends ClassVisitor {
+class ContinuableClassVisitor extends ClassVisitor {
 
     private final InheritanceLookup inheritanceLookup;
     private final ContinuableClassInfoResolver cciResolver;
@@ -96,6 +96,7 @@ public class ContinuableClassVisitor extends ClassVisitor {
         super.visitEnd();
     }
 
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         boolean skip = skipEnchancing || null == classInfo || mv == null

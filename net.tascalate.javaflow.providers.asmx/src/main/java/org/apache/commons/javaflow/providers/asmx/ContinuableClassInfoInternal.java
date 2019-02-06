@@ -23,7 +23,7 @@ class ContinuableClassInfoInternal implements ContinuableClassInfo {
     private boolean processed;
     private final Set<String> methods;
 
-    public ContinuableClassInfoInternal(boolean defaultProcessed, Set<String> methods) {
+    ContinuableClassInfoInternal(boolean defaultProcessed, Set<String> methods) {
         this.processed = defaultProcessed;
         this.methods = methods;
     }
