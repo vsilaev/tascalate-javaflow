@@ -23,8 +23,6 @@
  */
 package org.apache.commons.javaflow.tools.runtime;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -42,6 +40,8 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+import org.apache.commons.javaflow.spi.FastByteArrayInputStream;
+import org.apache.commons.javaflow.spi.FastByteArrayOutputStream;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
@@ -413,7 +413,7 @@ public class ContinuableClassLoader extends URLClassLoader {
      *                classpath.
      */
     @Override
-    protected Class<?> loadClass(String classname, boolean resolve) throws ClassNotFoundException {
+    protected synchronized Class<?> loadClass(String classname, boolean resolve) throws ClassNotFoundException {
         // 'sync' is needed - otherwise 2 threads can load the same class
         // twice, resulting in LinkageError: duplicated class definition.
         // findLoadedClass avoids that, but without sync it won't work.
@@ -514,7 +514,7 @@ public class ContinuableClassLoader extends URLClassLoader {
      */
     private Class<?> getClassFromStream(InputStream stream, String classname) throws IOException, SecurityException {
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
         try {
 
             int bytesRead;
@@ -524,7 +524,7 @@ public class ContinuableClassLoader extends URLClassLoader {
                 baos.write(buffer, 0, bytesRead);
             }
 
-            byte[] classData = baos.toByteArray();
+            byte[] classData = baos.unsafeBytes();
             return defineClassFromData(classData, classname);
 
         } finally {
@@ -622,7 +622,7 @@ public class ContinuableClassLoader extends URLClassLoader {
         public InputStream getResourceAsStream(String name) throws IOException {
             CurrentClass current = CURRENT_CLASS.get();
             if (null != current && (current.className + ".class").equals(name)) {
-                return new ByteArrayInputStream(current.classData);
+                return new FastByteArrayInputStream(current.classData);
             } else {
                 return delegate.getResourceAsStream(name);
             }

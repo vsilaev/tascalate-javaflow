@@ -15,7 +15,6 @@
  */
 package org.apache.commons.javaflow.spi;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -68,7 +67,7 @@ public class ExtendedClasspathResourceLoader extends ClasspathResourceLoader {
         if (null != inMemoryResources) {
             byte[] bytecode = inMemoryResources.get(name);
             if (null != bytecode)
-                return new ByteArrayInputStream(bytecode);
+                return new FastByteArrayInputStream(bytecode);
         }
 
         return super.getResourceAsStream(name);

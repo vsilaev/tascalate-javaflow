@@ -23,7 +23,6 @@
  */
 package org.apache.commons.javaflow.tools;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
+import org.apache.commons.javaflow.spi.FastByteArrayOutputStream;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 
 public final class RewritingUtils {
@@ -169,9 +169,9 @@ public final class RewritingUtils {
     }
 
     public static byte[] toByteArray(InputStream in) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
         copy(in,baos);
-        return baos.toByteArray();
+        return baos.unsafeBytes();
     }
 
     /**
