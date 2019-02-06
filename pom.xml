@@ -159,6 +159,30 @@
 	</profiles>
 
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.moditect</groupId>
+					<artifactId>moditect-maven-plugin</artifactId>
+					<version>1.0.0.Beta2</version>
+					<executions>
+						<execution>
+							<id>add-module-infos</id>
+							<phase>package</phase>
+							<goals>
+								<goal>add-module-info</goal>
+							</goals>
+							<configuration>
+								<jvmVersion>9</jvmVersion>
+								<module>
+									<moduleInfoFile>src/main/java/module-info.java</moduleInfoFile>
+								</module>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<!--
 			<plugin>
@@ -193,30 +217,11 @@
 			</plugin> 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-toolchains-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<id>toolchain</id>
-						<goals>
-							<goal>toolchain</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<toolchains>
-						<jdk><version>9</version></jdk>
- 						<jdk><version>1.5</version></jdk>
-					</toolchains>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<executions>
 					<execution>
-						<id>base-compile</id>
+						<id>default-compile</id>
 						<goals>
 							<goal>compile</goal>
 						</goals>
@@ -226,22 +231,10 @@
 							</excludes>
 						</configuration>
 					</execution> 
-					<execution>
-						<id>default-compile</id>
-						<configuration>
-							<jdkToolchain>
-								<version>[9, )</version>
-							</jdkToolchain>
-							<release>9</release>
-						</configuration>
-					</execution>
 				</executions>
 				<configuration>
-				        <jdkToolchain>
-				            <version>[1.5, 9)</version>
-				        </jdkToolchain>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.6</source>
+					<target>1.6</target>
 				</configuration>
 			</plugin>
 			<plugin>

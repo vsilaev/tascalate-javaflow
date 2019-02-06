@@ -42,6 +42,10 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.moditect</groupId>
+				<artifactId>moditect-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.2.1</version>
@@ -75,9 +79,10 @@
 									<manifestEntries>
 										<Premain-Class>org.apache.commons.javaflow.instrumentation.JavaFlowInstrumentationAgent</Premain-Class>
 										<Agent-Class>org.apache.commons.javaflow.instrumentation.JavaFlowInstrumentationAgent</Agent-Class>
-										<Can-Redefine-Classes>true</Can-Redefine-Classes>
+										<Can-Redefine-Classes>false</Can-Redefine-Classes>
 										<Can-Retransform-Classes>true</Can-Retransform-Classes>
 										<Automatic-Module-Name>net.tascalate.javaflow.tools.javaagent.shaded</Automatic-Module-Name>
+										<Multi-Release>false</Multi-Release>
 									</manifestEntries>
 								</transformer>
 							</transformers>
