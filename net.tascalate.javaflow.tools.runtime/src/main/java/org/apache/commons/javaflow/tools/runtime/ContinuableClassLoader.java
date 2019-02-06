@@ -50,67 +50,70 @@ import org.apache.commons.javaflow.spi.ResourceTransformer;
  * {@link URLClassLoader} with bytecode instrumentation for javaflow.
  *
  * <p>
- * This class loader is useful where the application can set up multiple
- * class loaders (such as in a container environment,
+ * This class loader is useful where the application can set up multiple class
+ * loaders (such as in a container environment,
  * <a href="http://classworlds.codehaus.org/">ClassWorlds</a>, or
- * <a href="http://forehead.werken.com/">Forehead</a>) and when you can
- * isolate the continuation-enabled portion of your application into a separate
- * jar file.
+ * <a href="http://forehead.werken.com/">Forehead</a>) and when you can isolate
+ * the continuation-enabled portion of your application into a separate jar
+ * file.
  */
 public class ContinuableClassLoader extends URLClassLoader {
 
     private final static Logger log = LoggerFactory.getLogger(ContinuableClassLoader.class);
-    
-    public static abstract class AbstractBuilder<L extends ContinuableClassLoader, B extends AbstractBuilder<L, B>> {
-    	protected final ResourceTransformationFactory transformationFactory;
 
-    	protected ClassLoader parent;
-    	protected boolean parentFirst = true;
-    	protected boolean isolated = false;
-    	protected List<String> systemPackages = new ArrayList<String>();
-    	protected List<String> loaderPackages = new ArrayList<String>();
+    public static abstract class AbstractBuilder<L extends ContinuableClassLoader, B extends AbstractBuilder<L, B>> {
+        protected final ResourceTransformationFactory transformationFactory;
+
+        protected ClassLoader parent;
+        protected boolean parentFirst = true;
+        protected boolean isolated = false;
+        protected List<String> systemPackages = new ArrayList<String>();
+        protected List<String> loaderPackages = new ArrayList<String>();
+
         /**
          * Creates a classloader builder.
          *
          * @param transformationFactory
-         *      This factory is used to create necessary resolver/transformer to perform the byte-code enhancement.
-         *      May not be null.
+         *            This factory is used to create necessary
+         *            resolver/transformer to perform the byte-code enhancement.
+         *            May not be null.
          */
         protected AbstractBuilder(ResourceTransformationFactory transformationFactory) {
-        	this.transformationFactory = transformationFactory;
+            this.transformationFactory = transformationFactory;
         }
-    	
+
         abstract public L create(URL... urls);
-        
+
         final public L create() {
-        	return create(EMPTY_URL_ARRAY);
+            return create(EMPTY_URL_ARRAY);
         }
-        
 
         /**
          * Set parent class loader
          * 
-         * @param parent the parent classloader to which unsatisfied loading
-         *        attempts are delegated. May be <code>null</code>,
-         *        in which case the {@link ClassLoader#getSystemClassLoader() system classloader}
-         *        is used as the parent.
-         *      
+         * @param parent
+         *            the parent classloader to which unsatisfied loading
+         *            attempts are delegated. May be <code>null</code>, in which
+         *            case the {@link ClassLoader#getSystemClassLoader() system
+         *            classloader} is used as the parent.
+         * 
          * @return this builder
          */
         public B parent(ClassLoader parent) {
-        	this.parent = parent;
-        	return self();
+            this.parent = parent;
+            return self();
         }
-        
+
         /**
          * Control whether class lookup is delegated to the parent loader first
-         * or after this loader. Use with extreme caution. Setting this to
-         * false violates the class loader hierarchy and can lead to Linkage errors
+         * or after this loader. Use with extreme caution. Setting this to false
+         * violates the class loader hierarchy and can lead to Linkage errors
          *
-         * @param parentFirst if true, delegate initial class search to the parent
-         *                    classloader.
-         *                    
-         * @return this builder                    
+         * @param parentFirst
+         *            if true, delegate initial class search to the parent
+         *            classloader.
+         * 
+         * @return this builder
          */
         public B parentFirst(boolean parentFirst) {
             this.parentFirst = parentFirst;
@@ -119,14 +122,15 @@ public class ContinuableClassLoader extends URLClassLoader {
 
         /**
          * Sets whether this classloader should run in isolated mode. In
-         * isolated mode, classes not found on the given classpath will
-         * not be referred to the parent class loader but will cause a
+         * isolated mode, classes not found on the given classpath will not be
+         * referred to the parent class loader but will cause a
          * ClassNotFoundException.
          *
-         * @param isolated Whether or not this classloader should run in
-         *                 isolated mode.
-         *                 
-         * @return this builder                 
+         * @param isolated
+         *            Whether or not this classloader should run in isolated
+         *            mode.
+         * 
+         * @return this builder
          */
         public B isolated(boolean isolated) {
             this.isolated = isolated;
@@ -134,15 +138,16 @@ public class ContinuableClassLoader extends URLClassLoader {
         }
 
         /**
-         * Adds a package root to the list of packages which must be loaded on the
-         * parent loader.
+         * Adds a package root to the list of packages which must be loaded on
+         * the parent loader.
          *
          * All subpackages are also included.
          *
-         * @param packageRoot The root of all packages to be included.
-         *                    Should not be <code>null</code>.
-         *                    
-         * @return this builder                    
+         * @param packageRoot
+         *            The root of all packages to be included. Should not be
+         *            <code>null</code>.
+         * 
+         * @return this builder
          */
         public B addSystemPackageRoot(String packageRoot) {
             systemPackages.add(appendDot(packageRoot));
@@ -150,62 +155,60 @@ public class ContinuableClassLoader extends URLClassLoader {
         }
 
         /**
-         * Adds a package root to the list of packages which must be loaded using
-         * this loader.
+         * Adds a package root to the list of packages which must be loaded
+         * using this loader.
          *
          * All subpackages are also included.
          *
-         * @param packageRoot The root of all packages to be included.
-         *                    Should not be <code>null</code>.
-         *                    
-         * @return this builder                    
+         * @param packageRoot
+         *            The root of all packages to be included. Should not be
+         *            <code>null</code>.
+         * 
+         * @return this builder
          */
         public B addLoaderPackageRoot(String packageRoot) {
             loaderPackages.add(appendDot(packageRoot));
             return self();
         }
-        
+
         @SuppressWarnings("unchecked")
-		final private B self() {
-        	return (B)this;
+        final private B self() {
+            return (B) this;
         }
 
         private static String appendDot(String str) {
-            if(str.endsWith("."))
+            if (str.endsWith("."))
                 str += '.';
             return str;
         }
     }
-    
+
     public static class Builder extends AbstractBuilder<ContinuableClassLoader, Builder> {
         /**
          * Creates a classloader builder.
          *
          * @param transformationFactory
-         *      This factory is used to create necessary resolver/transformer to perform the byte-code enhancement.
-         *      May not be null.
+         *            This factory is used to create necessary
+         *            resolver/transformer to perform the byte-code enhancement.
+         *            May not be null.
          */
         Builder(ResourceTransformationFactory transformationFactory) {
-        	super(transformationFactory);
+            super(transformationFactory);
         }
 
-		@Override
-		public ContinuableClassLoader create(URL... urls) {
-			return new ContinuableClassLoader(
-				urls,  parent, transformationFactory, 
-				parentFirst, isolated, systemPackages, loaderPackages
-			);
-		}
-    	
-        
+        @Override
+        public ContinuableClassLoader create(URL... urls) {
+            return new ContinuableClassLoader(urls, parent, transformationFactory, parentFirst, isolated,
+                    systemPackages, loaderPackages);
+        }
     }
-    
+
     protected final ResourceTransformationFactory transforationFactory;
     protected final ContinuableClassInfoResolver cciResolver;
 
     /**
-     * Indicates whether the parent class loader should be
-     * consulted before trying to load with this class loader.
+     * Indicates whether the parent class loader should be consulted before
+     * trying to load with this class loader.
      */
     protected final boolean parentFirst;
 
@@ -218,114 +221,125 @@ public class ContinuableClassLoader extends URLClassLoader {
 
     /**
      * These are the package roots that are to be loaded by this class loader
-     * regardless of whether the parent class loader is being searched first
-     * or not.
+     * regardless of whether the parent class loader is being searched first or
+     * not.
      */
     protected final List<String> loaderPackages;
 
     /**
-     * Whether or not this classloader will ignore the base
-     * classloader if it can't find a class.
+     * Whether or not this classloader will ignore the base classloader if it
+     * can't find a class.
      *
      */
     protected final boolean isolated;
 
     /* The context to be used when loading classes and resources */
     protected final AccessControlContext acc;
-    
+
     /**
      * Creates a classloader solely to define classes dynamically.
      *
-     * @param urls The URLs from which to load classes and resources
-     * @param parent The parent classloader to which unsatisfied loading
-     *               attempts are delegated. May be <code>null</code>,
-     *               in which case the {@link ClassLoader#getSystemClassLoader() system classloader}
-     *               is used as the parent.
+     * @param urls
+     *            The URLs from which to load classes and resources
+     * @param parent
+     *            The parent classloader to which unsatisfied loading attempts
+     *            are delegated. May be <code>null</code>, in which case the
+     *            {@link ClassLoader#getSystemClassLoader() system classloader}
+     *            is used as the parent.
      */
     public ContinuableClassLoader(ClassLoader parent, ResourceTransformationFactory transformationFactory) {
-    	this(EMPTY_URL_ARRAY, parent, transformationFactory, true, false, null, null);
-    }    
+        this(EMPTY_URL_ARRAY, parent, transformationFactory, true, false, null, null);
+    }
 
     /**
      * Creates a classloader by using the classpath given.
      *
-     * @param urls The URLs from which to load classes and resources
-     * @param parent The parent classloader to which unsatisfied loading
-     *               attempts are delegated. May be <code>null</code>,
-     *               in which case the {@link ClassLoader#getSystemClassLoader() system classloader}
-     *               is used as the parent.
-     * @param transformationFactory This factory is used to create necessary resolver/transformer 
-     *                              to perform the byte-code enhancement.
-     *                              May not be null.
+     * @param urls
+     *            The URLs from which to load classes and resources
+     * @param parent
+     *            The parent classloader to which unsatisfied loading attempts
+     *            are delegated. May be <code>null</code>, in which case the
+     *            {@link ClassLoader#getSystemClassLoader() system classloader}
+     *            is used as the parent.
+     * @param transformationFactory
+     *            This factory is used to create necessary resolver/transformer
+     *            to perform the byte-code enhancement. May not be null.
      */
     public ContinuableClassLoader(URL[] urls, ClassLoader parent, ResourceTransformationFactory transformationFactory) {
-    	this(urls, parent, transformationFactory, true, false, null, null);
+        this(urls, parent, transformationFactory, true, false, null, null);
     }
-    
+
     /**
      * Creates a classloader by using the classpath given.
      *
-     * @param urls The URLs from which to load classes and resources
-     * @param parent The parent classloader to which unsatisfied loading
-     *               attempts are delegated. May be <code>null</code>,
-     *               in which case the {@link ClassLoader#getSystemClassLoader() system classloader}
-     *               is used as the parent.
-     * @param transformationFactory This factory is used to create necessary resolver/transformer 
-     *                              to perform the byte-code enhancement.
-     *                              May not be null.
+     * @param urls
+     *            The URLs from which to load classes and resources
+     * @param parent
+     *            The parent classloader to which unsatisfied loading attempts
+     *            are delegated. May be <code>null</code>, in which case the
+     *            {@link ClassLoader#getSystemClassLoader() system classloader}
+     *            is used as the parent.
+     * @param transformationFactory
+     *            This factory is used to create necessary resolver/transformer
+     *            to perform the byte-code enhancement. May not be null.
      * @param parentFirst
      * @param isolated
      * @param systemPackages
-     *        The package roots that are to be loaded by the parent class
-     *        loader regardless of whether the parent class loader is being searched
-     *        first or not.  
+     *            The package roots that are to be loaded by the parent class
+     *            loader regardless of whether the parent class loader is being
+     *            searched first or not.
      * @param loaderPackages
-     *        The package roots that are to be loaded by this class
-     *        loader regardless of whether the parent class loader is being searched
-     *        first or not.  
-     */    
+     *            The package roots that are to be loaded by this class loader
+     *            regardless of whether the parent class loader is being
+     *            searched first or not.
+     */
     public ContinuableClassLoader(URL[] urls, 
-    		                       ClassLoader parent, 
-    		                       ResourceTransformationFactory transformationFactory,
-    		                       boolean parentFirst, 
-    		                       boolean isolated,
-    		                       List<String> systemPackages,
-    		                       List<String> loaderPackages) {
-        super(urls,fixNullParent(parent));
-        if(transformationFactory==null)
+                                  ClassLoader parent, 
+                                  ResourceTransformationFactory transformationFactory,
+                                  boolean parentFirst, 
+                                  boolean isolated, 
+                                  List<String> systemPackages, 
+                                  List<String> loaderPackages) {
+        
+        super(urls, fixNullParent(parent));
+        
+        if (transformationFactory == null)
             throw new IllegalArgumentException();
+        
         this.transforationFactory = transformationFactory;
         this.cciResolver = transformationFactory.createResolver(
-        	new ExtendedResourceLoader(new ClasspathResourceLoader(this))
+            new ExtendedResourceLoader(new ClasspathResourceLoader(this))
         );
-        acc = AccessController.getContext();
+        
+        this.acc = AccessController.getContext();
         this.parentFirst = parentFirst;
-        this.isolated  = isolated;
+        this.isolated = isolated;
         this.systemPackages = readOnlyList(systemPackages);
         this.loaderPackages = readOnlyList(loaderPackages);
     }
-    
+
     public static Builder builder(ResourceTransformationFactory transformationFactory) {
-    	return new Builder(transformationFactory);
+        return new Builder(transformationFactory);
     }
 
     /**
      * Loads a class through this class loader even if that class is available
      * on the parent classpath.
      *
-     * This ensures that any classes which are loaded by the returned class
-     * will use this classloader.
+     * This ensures that any classes which are loaded by the returned class will
+     * use this classloader.
      *
-     * @param classname The name of the class to be loaded.
-     *                  Must not be <code>null</code>.
+     * @param classname
+     *            The name of the class to be loaded. Must not be
+     *            <code>null</code>.
      *
      * @return the required Class object
      *
-     * @exception ClassNotFoundException if the requested class does not exist
-     *                                   on this loader's classpath.
+     * @exception ClassNotFoundException
+     *                if the requested class does not exist on this loader's
+     *                classpath.
      */
-    public Class<?> forceLoadClass(String classname)
-         throws ClassNotFoundException {
+    public Class<?> forceLoadClass(String classname) throws ClassNotFoundException {
         log.debug("force loading " + classname);
 
         Class<?> theClass = findLoadedClass(classname);
@@ -338,13 +352,14 @@ public class ContinuableClassLoader extends URLClassLoader {
     }
 
     /**
-     * Tests whether or not the parent classloader should be checked for
-     * a resource before this one. If the resource matches both the
-     * "use parent classloader first" and the "use this classloader first"
-     * lists, the latter takes priority.
+     * Tests whether or not the parent classloader should be checked for a
+     * resource before this one. If the resource matches both the "use parent
+     * classloader first" and the "use this classloader first" lists, the latter
+     * takes priority.
      *
-     * @param resourceName The name of the resource to check.
-     *                     Must not be <code>null</code>.
+     * @param resourceName
+     *            The name of the resource to check. Must not be
+     *            <code>null</code>.
      *
      * @return whether or not the parent classloader should be checked for a
      *         resource before this one is.
@@ -378,21 +393,24 @@ public class ContinuableClassLoader extends URLClassLoader {
      * Loads a class with this class loader.
      *
      * This class attempts to load the class in an order determined by whether
-     * or not the class matches the system/loader package lists, with the
-     * loader package list taking priority. If the classloader is in isolated
-     * mode, failure to load the class in this loader will result in a
+     * or not the class matches the system/loader package lists, with the loader
+     * package list taking priority. If the classloader is in isolated mode,
+     * failure to load the class in this loader will result in a
      * ClassNotFoundException.
      *
-     * @param classname The name of the class to be loaded.
-     *                  Must not be <code>null</code>.
-     * @param resolve <code>true</code> if all classes upon which this class
-     *                depends are to be loaded.
+     * @param classname
+     *            The name of the class to be loaded. Must not be
+     *            <code>null</code>.
+     * @param resolve
+     *            <code>true</code> if all classes upon which this class depends
+     *            are to be loaded.
      *
      * @return the required Class object
      *
-     * @exception ClassNotFoundException if the requested class does not exist
-     * on the system classpath (when not in isolated mode) or this loader's
-     * classpath.
+     * @exception ClassNotFoundException
+     *                if the requested class does not exist on the system
+     *                classpath (when not in isolated mode) or this loader's
+     *                classpath.
      */
     @Override
     protected Class<?> loadClass(String classname, boolean resolve) throws ClassNotFoundException {
@@ -408,12 +426,10 @@ public class ContinuableClassLoader extends URLClassLoader {
         if (isParentFirst(classname)) {
             try {
                 theClass = getParent().loadClass(classname);
-                log.debug("Class " + classname + " loaded from parent loader "
-                    + "(parentFirst)");
+                log.debug("Class " + classname + " loaded from parent loader " + "(parentFirst)");
             } catch (ClassNotFoundException cnfe) {
                 theClass = findClass(classname);
-                log.debug("Class " + classname + " loaded from ant loader "
-                    + "(parentFirst)");
+                log.debug("Class " + classname + " loaded from ant loader " + "(parentFirst)");
             }
         } else {
             try {
@@ -438,8 +454,10 @@ public class ContinuableClassLoader extends URLClassLoader {
     /**
      * Define a class given its bytes
      *
-     * @param classData the bytecode data for the class
-     * @param classname the name of the class
+     * @param classData
+     *            the bytecode data for the class
+     * @param classname
+     *            the name of the class
      *
      * @return the Class instance created from the given data
      */
@@ -449,28 +467,28 @@ public class ContinuableClassLoader extends URLClassLoader {
                 // define a package if necessary.
                 int i = classname.lastIndexOf('.');
                 if (i > 0) {
-                    final String packageName = classname.substring(0,i);
+                    final String packageName = classname.substring(0, i);
                     @SuppressWarnings("deprecation")
-					final Package pkg = getPackage(packageName);
+                    final Package pkg = getPackage(packageName);
                     if (pkg == null) {
                         definePackage(packageName, null, null, null, null, null, null, null);
                     }
                 }
 
-            	ResourceTransformer transformer = transforationFactory.createTransformer(cciResolver);
-            	byte[] transfomred;
-            	CurrentClass prevClass = CURRENT_CLASS.get();
-            	CURRENT_CLASS.set(new CurrentClass(classname, classData));
-            	try {
-            		transfomred = transformer.transform(classData);
-            	} finally {
-            		CURRENT_CLASS.set(prevClass);
-            	}
-            	
-            	if (null == transfomred)
-            		transfomred = classData;
+                ResourceTransformer transformer = transforationFactory.createTransformer(cciResolver);
+                byte[] transfomred;
+                CurrentClass prevClass = CURRENT_CLASS.get();
+                CURRENT_CLASS.set(new CurrentClass(classname, classData));
+                try {
+                    transfomred = transformer.transform(classData);
+                } finally {
+                    CURRENT_CLASS.set(prevClass);
+                }
 
-            	ProtectionDomain domain = this.getClass().getProtectionDomain();
+                if (null == transfomred)
+                    transfomred = classData;
+
+                ProtectionDomain domain = this.getClass().getProtectionDomain();
                 return defineClass(null, transfomred, 0, transfomred.length, domain);
             }
         }, acc);
@@ -479,48 +497,53 @@ public class ContinuableClassLoader extends URLClassLoader {
     /**
      * Reads a class definition from a stream.
      *
-     * @param stream The stream from which the class is to be read.
-     *               Must not be <code>null</code>.
-     * @param classname The name of the class in the stream.
-     *                  Must not be <code>null</code>.
+     * @param stream
+     *            The stream from which the class is to be read. Must not be
+     *            <code>null</code>.
+     * @param classname
+     *            The name of the class in the stream. Must not be
+     *            <code>null</code>.
      *
      * @return the Class object read from the stream.
      *
-     * @exception IOException if there is a problem reading the class from the
-     * stream.
-     * @exception SecurityException if there is a security problem while
-     * reading the class from the stream.
+     * @exception IOException
+     *                if there is a problem reading the class from the stream.
+     * @exception SecurityException
+     *                if there is a security problem while reading the class
+     *                from the stream.
      */
     private Class<?> getClassFromStream(InputStream stream, String classname) throws IOException, SecurityException {
 
-    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-	        
-        	int bytesRead;
-	        byte[] buffer = new byte[BUFFER_SIZE];
-	
-	        while ((bytesRead = stream.read(buffer, 0, BUFFER_SIZE)) != -1) {
-	            baos.write(buffer, 0, bytesRead);
-	        }
-	
-	        byte[] classData = baos.toByteArray();
-	        return defineClassFromData(classData, classname);
-        
+
+            int bytesRead;
+            byte[] buffer = new byte[BUFFER_SIZE];
+
+            while ((bytesRead = stream.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+
+            byte[] classData = baos.toByteArray();
+            return defineClassFromData(classData, classname);
+
         } finally {
-        	baos.close();
+            baos.close();
         }
     }
 
     /**
      * Searches for and load a class on the classpath of this class loader.
      *
-     * @param name The name of the class to be loaded. Must not be
-     *             <code>null</code>.
+     * @param name
+     *            The name of the class to be loaded. Must not be
+     *            <code>null</code>.
      *
      * @return the required Class object
      *
-     * @exception ClassNotFoundException if the requested class does not exist
-     *                                   on this loader's classpath.
+     * @exception ClassNotFoundException
+     *                if the requested class does not exist on this loader's
+     *                classpath.
      */
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
@@ -530,13 +553,13 @@ public class ContinuableClassLoader extends URLClassLoader {
         String classFileName = name.replace('.', '/') + ".class";
 
         InputStream stream = getResourceAsStream(classFileName);
-        if(stream==null)
+        if (stream == null)
             throw new ClassNotFoundException(name);
 
         try {
             return getClassFromStream(stream, name);
         } catch (IOException e) {
-            throw new ClassNotFoundException(name,e);
+            throw new ClassNotFoundException(name, e);
         } finally {
             try {
                 stream.close();
@@ -547,15 +570,16 @@ public class ContinuableClassLoader extends URLClassLoader {
     }
 
     /**
-     * Finds the resource with the given name. A resource is
-     * some data (images, audio, text, etc) that can be accessed by class
-     * code in a way that is independent of the location of the code.
+     * Finds the resource with the given name. A resource is some data (images,
+     * audio, text, etc) that can be accessed by class code in a way that is
+     * independent of the location of the code.
      *
-     * @param name The name of the resource for which a stream is required.
-     *             Must not be <code>null</code>.
+     * @param name
+     *            The name of the resource for which a stream is required. Must
+     *            not be <code>null</code>.
      * @return a URL for reading the resource, or <code>null</code> if the
-     *         resource could not be found or the caller doesn't have
-     *         adequate privileges to get the resource.
+     *         resource could not be found or the caller doesn't have adequate
+     *         privileges to get the resource.
      */
     @Override
     public URL getResource(String name) {
@@ -567,54 +591,54 @@ public class ContinuableClassLoader extends URLClassLoader {
 
         // try this class loader first, then parent
         URL url = findResource(name);
-        if(url==null) {
+        if (url == null) {
             url = getParent().getResource(name);
         }
         return url;
     }
-    
-    private static final URL[] EMPTY_URL_ARRAY = new URL[]{};
-    private static final int BUFFER_SIZE = 4096;
-    
-    static class CurrentClass {
-    	final String className;
-    	final byte[] classData;
-    	
-    	CurrentClass(String className, byte[] classData) {
-    		this.className = className;
-    		this.classData = classData;
-    	}
-    }
-    
-    private static final ThreadLocal<CurrentClass> CURRENT_CLASS = new ThreadLocal<CurrentClass>();
-    
-    static class ExtendedResourceLoader implements ResourceLoader {
-    	private final ResourceLoader delegate;
-    	
-    	ExtendedResourceLoader(final ResourceLoader delegate) {
-    		this.delegate = delegate;
-    	}
 
-		public InputStream getResourceAsStream(String name) throws IOException {
-			CurrentClass current = CURRENT_CLASS.get();
-			if (null != current && (current.className + ".class").equals(name)) {
-				return new ByteArrayInputStream(current.classData);
-			} else {
-				return delegate.getResourceAsStream(name);
-			}
-		}
+    private static final URL[] EMPTY_URL_ARRAY = new URL[] {};
+    private static final int BUFFER_SIZE = 4096;
+
+    static class CurrentClass {
+        final String className;
+        final byte[] classData;
+
+        CurrentClass(String className, byte[] classData) {
+            this.className = className;
+            this.classData = classData;
+        }
     }
-    
+
+    private static final ThreadLocal<CurrentClass> CURRENT_CLASS = new ThreadLocal<CurrentClass>();
+
+    static class ExtendedResourceLoader implements ResourceLoader {
+        private final ResourceLoader delegate;
+
+        ExtendedResourceLoader(final ResourceLoader delegate) {
+            this.delegate = delegate;
+        }
+
+        public InputStream getResourceAsStream(String name) throws IOException {
+            CurrentClass current = CURRENT_CLASS.get();
+            if (null != current && (current.className + ".class").equals(name)) {
+                return new ByteArrayInputStream(current.classData);
+            } else {
+                return delegate.getResourceAsStream(name);
+            }
+        }
+    }
+
     private static ClassLoader fixNullParent(ClassLoader classLoader) {
-        if(classLoader!=null) {
+        if (classLoader != null) {
             return classLoader;
         } else {
             return getSystemClassLoader();
         }
     }
-    
+
     private static List<String> readOnlyList(List<String> source) {
-    	return null == source ? Collections.unmodifiableList(source)
-    			              : Collections.unmodifiableList(new ArrayList<String>(source));   
+        return null == source ? Collections.unmodifiableList(source)
+                : Collections.unmodifiableList(new ArrayList<String>(source));
     }
 }
