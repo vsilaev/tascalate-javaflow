@@ -18,5 +18,5 @@ module net.tascalate.javaflow.tools.runtime {
 
     requires transitive net.tascalate.javaflow.spi;
     
-    exports org.apache.commons.javaflow.util;
+    exports org.apache.commons.javaflow.tools.runtime;
 }
