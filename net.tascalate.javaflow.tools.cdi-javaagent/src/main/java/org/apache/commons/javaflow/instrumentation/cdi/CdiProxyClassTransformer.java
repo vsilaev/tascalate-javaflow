@@ -17,15 +17,18 @@ package org.apache.commons.javaflow.instrumentation.cdi;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+
 import java.security.ProtectionDomain;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.tascalate.javaflow.asmx.ClassReader;
+import net.tascalate.javaflow.asmx.ClassWriter;
 
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;

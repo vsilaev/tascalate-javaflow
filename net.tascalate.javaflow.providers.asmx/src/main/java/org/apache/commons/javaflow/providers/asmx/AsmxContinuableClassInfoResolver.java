@@ -25,8 +25,8 @@ import java.util.Set;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Type;
+import net.tascalate.javaflow.asmx.ClassReader;
+import net.tascalate.javaflow.asmx.Type;
 
 class AsmxContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     private final Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();

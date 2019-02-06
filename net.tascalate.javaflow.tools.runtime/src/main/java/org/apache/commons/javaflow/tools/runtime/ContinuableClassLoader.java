@@ -638,7 +638,7 @@ public class ContinuableClassLoader extends URLClassLoader {
     }
 
     private static List<String> readOnlyList(List<String> source) {
-        return null == source ? Collections.unmodifiableList(source)
-                : Collections.unmodifiableList(new ArrayList<String>(source));
+        return null == source ? Collections.<String>emptyList()
+                              : Collections.unmodifiableList(new ArrayList<String>(source));
     }
 }

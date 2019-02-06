@@ -16,12 +16,12 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
-import org.objectweb.asm.tree.analysis.Interpreter;
-import org.objectweb.asm.tree.analysis.Value;
+import net.tascalate.javaflow.asmx.Opcodes;
+import net.tascalate.javaflow.asmx.tree.AbstractInsnNode;
+import net.tascalate.javaflow.asmx.tree.analysis.AnalyzerException;
+import net.tascalate.javaflow.asmx.tree.analysis.Frame;
+import net.tascalate.javaflow.asmx.tree.analysis.Interpreter;
+import net.tascalate.javaflow.asmx.tree.analysis.Value;
 
 import java.util.LinkedList;
 import java.util.List;

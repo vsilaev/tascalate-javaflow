@@ -15,7 +15,7 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import static org.objectweb.asm.Opcodes.*;
+import static net.tascalate.javaflow.asmx.Opcodes.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,18 +26,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InvokeDynamicInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LocalVariableAnnotationNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MultiANewArrayInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import net.tascalate.javaflow.asmx.Type;
+import net.tascalate.javaflow.asmx.tree.AbstractInsnNode;
+import net.tascalate.javaflow.asmx.tree.AnnotationNode;
+import net.tascalate.javaflow.asmx.tree.FieldInsnNode;
+import net.tascalate.javaflow.asmx.tree.InsnList;
+import net.tascalate.javaflow.asmx.tree.InvokeDynamicInsnNode;
+import net.tascalate.javaflow.asmx.tree.LabelNode;
+import net.tascalate.javaflow.asmx.tree.LdcInsnNode;
+import net.tascalate.javaflow.asmx.tree.LocalVariableAnnotationNode;
+import net.tascalate.javaflow.asmx.tree.MethodInsnNode;
+import net.tascalate.javaflow.asmx.tree.MultiANewArrayInsnNode;
+import net.tascalate.javaflow.asmx.tree.VarInsnNode;
 
 class CallSiteFinder {
 

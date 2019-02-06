@@ -15,11 +15,11 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.AdviceAdapter;
+import net.tascalate.javaflow.asmx.Label;
+import net.tascalate.javaflow.asmx.MethodVisitor;
+import net.tascalate.javaflow.asmx.Opcodes;
+import net.tascalate.javaflow.asmx.Type;
+import net.tascalate.javaflow.asmx.commons.AdviceAdapter;
 
 abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     final protected String className;

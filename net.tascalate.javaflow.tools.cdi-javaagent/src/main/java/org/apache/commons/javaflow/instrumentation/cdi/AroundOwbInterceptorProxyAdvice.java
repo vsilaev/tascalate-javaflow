@@ -15,8 +15,8 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
+import net.tascalate.javaflow.asmx.MethodVisitor;
+import net.tascalate.javaflow.asmx.Type;
 
 class AroundOwbInterceptorProxyAdvice extends AroundCdiProxyInvocationAdvice {
 

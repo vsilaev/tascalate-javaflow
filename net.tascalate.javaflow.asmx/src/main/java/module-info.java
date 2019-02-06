@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.providers.asmx;
-
-import net.tascalate.javaflow.asmx.Opcodes;
-
-final class AsmVersion {
-    private AsmVersion() {}
-    
-    static final int CURRENT = Opcodes.ASM7;
+module net.tascalate.javaflow.asmx {
+    exports net.tascalate.javaflow.asmx;
+    exports net.tascalate.javaflow.asmx.commons;
+    exports net.tascalate.javaflow.asmx.signature;
+    exports net.tascalate.javaflow.asmx.tree;
 }

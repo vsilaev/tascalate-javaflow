@@ -26,11 +26,11 @@ package org.apache.commons.javaflow.providers.asmx;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 
+import net.tascalate.javaflow.asmx.AnnotationVisitor;
+import net.tascalate.javaflow.asmx.ClassVisitor;
+import net.tascalate.javaflow.asmx.MethodVisitor;
+import net.tascalate.javaflow.asmx.Opcodes;
 /**
  * ContinuableClassVisitor
  * 

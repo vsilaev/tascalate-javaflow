@@ -26,6 +26,7 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<scope>runtime</scope>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
@@ -37,6 +38,7 @@
 			<artifactId>net.tascalate.javaflow.providers.asmx</artifactId>
 			<version>${project.version}</version>
 			<scope>runtime</scope>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -65,14 +67,6 @@
 							<createDependencyReducedPom>true</createDependencyReducedPom>
 							<finalName>JavaFlowRewriteJar</finalName>
 							<minimizeJar>false</minimizeJar>
-							<artifactSet>
-								<includes>
-									<include>net.tascalate.javaflow:net.tascalate.javaflow.spi</include>
-									<include>net.tascalate.javaflow:net.tascalate.javaflow.providers.asmx</include>
-									<include>org.slf4j:*</include>
-									<include>org.ow2.asm:*</include>
-								</includes>
-							</artifactSet>
 							<filters>
 								<filter>
 									<artifact>*:*</artifact>
@@ -81,6 +75,12 @@
 										<exclude>**/module-info.class</exclude>
 									</excludes>
 								</filter>
+								<filter>
+									<artifact>org.slf4j:slf4j-simple</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>  
 							</filters>
 							<transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
 								<resource>simplelogger.properties</resource>

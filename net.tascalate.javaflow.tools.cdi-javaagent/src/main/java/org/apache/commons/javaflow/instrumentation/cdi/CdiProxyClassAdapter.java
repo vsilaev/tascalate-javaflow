@@ -24,11 +24,12 @@ import java.util.Set;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.Opcodes;
+
+import net.tascalate.javaflow.asmx.ClassVisitor;
+import net.tascalate.javaflow.asmx.FieldVisitor;
+import net.tascalate.javaflow.asmx.MethodVisitor;
+import net.tascalate.javaflow.asmx.Type;
+import net.tascalate.javaflow.asmx.Opcodes;
 
 class CdiProxyClassAdapter extends ClassVisitor {
 

@@ -26,8 +26,8 @@ package org.apache.commons.javaflow.providers.asmx;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.StopException;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import net.tascalate.javaflow.asmx.ClassReader;
+import net.tascalate.javaflow.asmx.ClassWriter;
 
 /**
  * AsmClassTransformer

@@ -59,6 +59,14 @@
 							<createDependencyReducedPom>true</createDependencyReducedPom>
 							<finalName>javaflow.instrument-continuations</finalName>
 							<minimizeJar>true</minimizeJar>
+							<relocations>
+								<!--
+								<relocation>
+									<pattern>net.tascalate.javaflow.asmx</pattern>
+									<shadedPattern>net.tascalate._a</shadedPattern>
+								</relocation>
+								-->
+							</relocations>
 							<filters>
 								<filter>
 									<artifact>*:*</artifact>

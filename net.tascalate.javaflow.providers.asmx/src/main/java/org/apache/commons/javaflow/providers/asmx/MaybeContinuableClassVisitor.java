@@ -21,11 +21,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import net.tascalate.javaflow.asmx.AnnotationVisitor;
+import net.tascalate.javaflow.asmx.ClassVisitor;
+import net.tascalate.javaflow.asmx.MethodVisitor;
+import net.tascalate.javaflow.asmx.Opcodes;
+import net.tascalate.javaflow.asmx.Type;
 
 class MaybeContinuableClassVisitor extends ClassVisitor {
     private final AsmxContinuableClassInfoResolver environment; 

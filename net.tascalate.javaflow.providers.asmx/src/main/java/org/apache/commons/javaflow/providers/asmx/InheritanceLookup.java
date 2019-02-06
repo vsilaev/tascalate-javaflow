@@ -37,9 +37,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import net.tascalate.javaflow.asmx.ClassReader;
+import net.tascalate.javaflow.asmx.Opcodes;
+import net.tascalate.javaflow.asmx.Type;
 
 /**
  * A class that computes the common super class of two classes without
