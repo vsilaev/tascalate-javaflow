@@ -18,4 +18,5 @@ module net.tascalate.javaflow.asmx {
     exports net.tascalate.javaflow.asmx.commons;
     exports net.tascalate.javaflow.asmx.signature;
     exports net.tascalate.javaflow.asmx.tree;
+    exports net.tascalate.javaflow.asmx.tree.analysis;
 }
