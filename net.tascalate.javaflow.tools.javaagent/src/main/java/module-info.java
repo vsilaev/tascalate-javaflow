@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 module net.tascalate.javaflow.tools.javaagent {
-    requires java.instrument;
+    requires transitive java.instrument;
 
     requires org.slf4j;
     

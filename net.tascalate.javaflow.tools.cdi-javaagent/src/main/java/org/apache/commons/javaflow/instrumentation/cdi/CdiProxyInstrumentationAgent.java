@@ -32,7 +32,7 @@ public class CdiProxyInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void premain(String args, @SuppressWarnings("exports") Instrumentation instrumentation) throws Exception {
+    public static void premain(String args, Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
         System.setProperty(CdiProxyInstrumentationAgent.class.getName(), "true");        
     }
@@ -47,23 +47,25 @@ public class CdiProxyInstrumentationAgent {
      * @param instrumentation
      * @throws Exception
      */
-    public static void agentmain(String args, @SuppressWarnings("exports") Instrumentation instrumentation) throws Exception {
+    public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
         log.info("Installing agent...");
         setupInstrumentation(instrumentation);
         if ("skip-retransform".equals(args)) {
             log.info("skip-retransform argument passed, skipping re-transforming classes");
+        } else if (!instrumentation.isRetransformClassesSupported()) {
+            log.info("JVM does not support re-transform, skipping re-transforming classes");
         } else {
             log.info("Re-transforming existing classes...");
+            ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
             for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-                String className = clazz.getName().replace('.', '/');
-                if (CdiProxyClassTransformer.skipClassByName(className)) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Skip re-transforming class: " + className);
-                    }
-                    continue;
-                }
-
+                String className = clazz.getName();
                 if (instrumentation.isModifiableClass(clazz)) {
+                    if (CdiProxyClassTransformer.isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
+                        if (log.isTraceEnabled()) {
+                            log.trace("Skip re-transforming class: " + className);
+                        }
+                        continue;
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("Re-transforming class: " + className);
                     }

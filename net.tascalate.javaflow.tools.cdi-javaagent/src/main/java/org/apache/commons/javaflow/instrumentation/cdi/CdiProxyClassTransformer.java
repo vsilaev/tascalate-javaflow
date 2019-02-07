@@ -41,6 +41,7 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     private static final Logger log = LoggerFactory.getLogger(CdiProxyClassTransformer.class);
 
     private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory();
+    private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
     // @Override
     public byte[] transform(
@@ -50,9 +51,9 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
             final ProtectionDomain protectionDomain, 
             final byte[] classfileBuffer) throws IllegalClassFormatException {
         
-        if (skipClassByName(className)) {
+        if (isSystemClassLoaderParent(classLoader)) {
             if (log.isDebugEnabled()) {
-                log.debug("Ignoring class by name (looks like Java std. class): " + className);
+                log.info("Ignoring class defined by boot or extensions/platform class loader: " + className);
             }
             return null;
         }
@@ -93,8 +94,8 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         }
     }
 
-    protected ClassLoader getSafeClassLoader(ClassLoader classLoader) {
-        return null != classLoader ? classLoader : ClassLoader.getSystemClassLoader();
+    protected ClassLoader getSafeClassLoader(final ClassLoader classLoader) {
+        return null != classLoader ? classLoader : systemClassLoader; 
     }
 
     protected ContinuableClassInfoResolver getCachedResolver(ClassLoader classLoader) {
@@ -111,21 +112,26 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         }
     }
     
-    static boolean skipClassByName(String className) {
-        return null != className && (
-               className.startsWith("org/apache/commons/logging/") || // Very special logging beast :)
-                
-               className.startsWith("java/")       || 
-               className.startsWith("javax/")      ||
-               className.startsWith("jdk/")        || // Azul Zulu
-               className.startsWith("sun/")        ||
-               className.startsWith("com/sun/")    ||
-               className.startsWith("oracle/")     ||
-               className.startsWith("com/oracle/") ||
-               className.startsWith("ibm/")        || // IBM J9
-               className.startsWith("com/ibm/")    || // IBM J9
-               className.startsWith("openj9/")        // Eclipse OpenJ9
-               );
+    private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
+        return isClassLoaderParent(systemClassLoader, maybeParent);
+    }
+    
+    /**
+     * Check if <code>maybeParent</code> is a parent (probably inderect) of the <code>classLoader</code>
+     * @param classLoader The classloader whose parents are checked, may not be null
+     * @param maybeParent Possible parent, may be null for boot class loader
+     * @return
+     */
+    static boolean isClassLoaderParent(ClassLoader classLoader, ClassLoader maybeParent) {
+        ClassLoader cl = classLoader;
+        do {
+            cl = cl.getParent();
+            if (maybeParent == cl) {
+                // Check includes null == null for bootstrap classloader
+                return true;
+            }
+        } while (cl != null);
+        return false;
     }
 
     private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();

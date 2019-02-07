@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 module net.tascalate.javaflow.tools.cdi_javaagent {
-    requires java.instrument;
+    requires transitive java.instrument;
     
     requires org.slf4j;
     
