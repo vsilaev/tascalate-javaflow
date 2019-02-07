@@ -122,7 +122,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
     /**
      * Converts the buffer's contents into a string decoding bytes using the
-     * platform's default character set. The length of the new <tt>String</tt>
+     * platform's default character set. The length of the new <code>String</code>
      * is a function of the character set, and hence may not be equal to the
      * size of the buffer.
      *
@@ -143,7 +143,7 @@ public class FastByteArrayOutputStream extends OutputStream {
     /**
      * Converts the buffer's contents into a string by decoding the bytes using
      * the named {@link java.nio.charset.Charset charset}. The length of the new
-     * <tt>String</tt> is a function of the charset, and hence may not be equal
+     * <code>String</code> is a function of the charset, and hence may not be equal
      * to the length of the byte array.
      *
      * <p> This method always replaces malformed-input and unmappable-character

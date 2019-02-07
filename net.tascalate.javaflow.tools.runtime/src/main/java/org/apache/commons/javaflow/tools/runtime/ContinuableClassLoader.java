@@ -239,13 +239,14 @@ public class ContinuableClassLoader extends URLClassLoader {
     /**
      * Creates a classloader solely to define classes dynamically.
      *
-     * @param urls
-     *            The URLs from which to load classes and resources
      * @param parent
      *            The parent classloader to which unsatisfied loading attempts
      *            are delegated. May be <code>null</code>, in which case the
      *            {@link ClassLoader#getSystemClassLoader() system classloader}
      *            is used as the parent.
+     * @param transformationFactory
+     *            This factory is used to create necessary resolver/transformer
+     *            to perform the byte-code enhancement. May not be null.
      */
     public ContinuableClassLoader(ClassLoader parent, ResourceTransformationFactory transformationFactory) {
         this(EMPTY_URL_ARRAY, parent, transformationFactory, true, false, null, null);
@@ -283,7 +284,11 @@ public class ContinuableClassLoader extends URLClassLoader {
      *            This factory is used to create necessary resolver/transformer
      *            to perform the byte-code enhancement. May not be null.
      * @param parentFirst
+     *            If true, delegate initial class search to the parent
+     *            classloader.
      * @param isolated
+     *            Whether or not this classloader should run in isolated
+     *            mode. 
      * @param systemPackages
      *            The package roots that are to be loaded by the parent class
      *            loader regardless of whether the parent class loader is being

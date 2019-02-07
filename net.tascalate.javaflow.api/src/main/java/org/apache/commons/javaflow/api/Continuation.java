@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * (3) local variables.
  *
  * <p>
- * <tt>Continuation</tt> objects are used to restore the captured execution states
+ * <code>Continuation</code> objects are used to restore the captured execution states
  * later.
  * 
  */ 
@@ -92,11 +92,11 @@ abstract public class Continuation implements Serializable {
      *
      * <p>
      * Unlike the {@link #startWith(Runnable)} method, this method doesn't actually
-     * execute the <tt>Runnable</tt> object. It will be executed when
+     * execute the <code>Runnable</code> object. It will be executed when
      * it's {@link #resume() resumed}.</p>
      * 
      * @param target
-     *      The object whose <tt>run</tt> method will be executed. 
+     *      The object whose <code>run</code> method will be executed. 
      * 
      * @return
      *      always return a non-null valid object.
@@ -111,11 +111,11 @@ abstract public class Continuation implements Serializable {
      *
      * <p>
      * Unlike the {@link #startWith(Runnable)} method, this method doesn't actually
-     * execute the <tt>Runnable</tt> object. It will be executed when
+     * execute the <code>Runnable</code> object. It will be executed when
      * it's {@link #resume() resumed}.</p>
      * 
      * @param target
-     *      The object whose <tt>run</tt> method will be executed. 
+     *      The object whose <code>run</code> method will be executed. 
      * @param singleShot
      *      If true then continuation constructed is performance-optimized but 
      *      may be resumed only once. Otherwise "multi-shot" continuation is created that may 
@@ -136,10 +136,10 @@ abstract public class Continuation implements Serializable {
      * that allows {@link Continuation#suspend()}.
      *
      * <p>
-     * This is a short hand for <tt>startWith(target,null)</tt>.
+     * This is a short hand for <code>startWith(target,null)</code>.
      * 
      * @param target
-     *      The object whose <tt>run</tt> method will be executed.  
+     *      The object whose <code>run</code> method will be executed.  
      * @return
      *      Continuation object if runnable supplied is supended, otherwise <code>null</code>
      * @see #startWith(Runnable, Object)
@@ -153,10 +153,10 @@ abstract public class Continuation implements Serializable {
      * that allows {@link Continuation#suspend()}.
      *
      * <p>
-     * This is a short hand for <tt>startWith(target,null)</tt>.
+     * This is a short hand for <code>startWith(target,null)</code>.
      * 
      * @param target
-     *      The object whose <tt>run</tt> method will be executed.
+     *      The object whose <code>run</code> method will be executed.
      * @param singleShot
      *      If true then continuation constructed is performance-optimized but 
      *      may be resumed only once. Otherwise "multi-shot" continuation is created that may 
@@ -176,7 +176,7 @@ abstract public class Continuation implements Serializable {
      * This method blocks until the continuation suspends or completes.
      *
      * @param target
-     *      The object whose <tt>run</tt> method will be executed.
+     *      The object whose <code>run</code> method will be executed.
      * @param context
      *      This value can be obtained from {@link #getContext()} until this method returns.
      *      Can be null.
@@ -197,7 +197,7 @@ abstract public class Continuation implements Serializable {
      * This method blocks until the continuation suspends or completes.
      *
      * @param target
-     *      The object whose <tt>run</tt> method will be executed.
+     *      The object whose <code>run</code> method will be executed.
      * @param context
      *      This value can be obtained from {@link #getContext()} until this method returns.
      *      Can be null.
@@ -225,7 +225,7 @@ abstract public class Continuation implements Serializable {
      * Resumes the execution of the specified continuation from where it's left off.
      *
      * <p>
-     * This is a short hand for <tt>continueWith(resumed,null)</tt>.
+     * This is a short hand for <code>continueWith(resumed,null)</code>.
      * 
      * @param continuation
      *      The suspended continuation to be resumed. Must not be null.
@@ -278,7 +278,7 @@ abstract public class Continuation implements Serializable {
      * Resumes the execution of the specified continuation from where it's left off.
      *
      * <p>
-     * This is a short hand for <tt>resume(null)</tt>.
+     * This is a short hand for <code>resume(null)</code>.
      * 
      * @return
      *      If the execution completes and there's nothing more to continue, return null.
