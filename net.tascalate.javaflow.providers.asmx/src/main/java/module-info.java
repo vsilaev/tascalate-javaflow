@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 module net.tascalate.javaflow.providers.asmx {
-    requires org.objectweb.asm;
-    requires org.objectweb.asm.tree; 
-    requires org.objectweb.asm.tree.analysis;
+    requires net.tascalate.javaflow.asmx;
 
     requires transitive net.tascalate.javaflow.spi;
 
