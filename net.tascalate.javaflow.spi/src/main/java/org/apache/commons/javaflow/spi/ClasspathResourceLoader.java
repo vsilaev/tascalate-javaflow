@@ -41,4 +41,22 @@ public class ClasspathResourceLoader implements ResourceLoader {
         }
         return result;
     }
+    
+    /**
+     * Check if <code>maybeParent</code> is a parent (probably inderect) of the <code>classLoader</code>
+     * @param classLoader The classloader whose parents are checked, may not be null
+     * @param maybeParent Possible parent, may be null for boot class loader
+     * @return
+     */
+    public static boolean isClassLoaderParent(ClassLoader classLoader, ClassLoader maybeParent) {
+        ClassLoader cl = classLoader;
+        do {
+            cl = cl.getParent();
+            if (maybeParent == cl) {
+                // Check includes null == null for bootstrap classloader
+                return true;
+            }
+        } while (cl != null);
+        return false;
+    }
 }

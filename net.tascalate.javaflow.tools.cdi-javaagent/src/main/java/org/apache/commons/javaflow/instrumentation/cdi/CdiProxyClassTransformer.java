@@ -32,6 +32,7 @@ import net.tascalate.javaflow.asmx.ClassWriter;
 
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
+import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
@@ -113,25 +114,7 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     }
     
     private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
-        return isClassLoaderParent(systemClassLoader, maybeParent);
-    }
-    
-    /**
-     * Check if <code>maybeParent</code> is a parent (probably inderect) of the <code>classLoader</code>
-     * @param classLoader The classloader whose parents are checked, may not be null
-     * @param maybeParent Possible parent, may be null for boot class loader
-     * @return
-     */
-    static boolean isClassLoaderParent(ClassLoader classLoader, ClassLoader maybeParent) {
-        ClassLoader cl = classLoader;
-        do {
-            cl = cl.getParent();
-            if (maybeParent == cl) {
-                // Check includes null == null for bootstrap classloader
-                return true;
-            }
-        } while (cl != null);
-        return false;
+        return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
     }
 
     private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();

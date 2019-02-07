@@ -20,6 +20,8 @@ import java.lang.instrument.Instrumentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
+
 public class CdiProxyInstrumentationAgent {
     private static final Logger log = LoggerFactory.getLogger(CdiProxyInstrumentationAgent.class);
     /**
@@ -60,7 +62,7 @@ public class CdiProxyInstrumentationAgent {
             for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
                 String className = clazz.getName();
                 if (instrumentation.isModifiableClass(clazz)) {
-                    if (CdiProxyClassTransformer.isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
+                    if (ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
                         if (log.isTraceEnabled()) {
                             log.trace("Skip re-transforming class: " + className);
                         }

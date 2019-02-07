@@ -20,6 +20,8 @@ import java.lang.instrument.Instrumentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
+
 public class JavaFlowInstrumentationAgent {
     private static final Logger log = LoggerFactory.getLogger(JavaFlowInstrumentationAgent.class);
     
@@ -61,7 +63,7 @@ public class JavaFlowInstrumentationAgent {
             for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
                 String className = clazz.getName();
                 if (instrumentation.isModifiableClass(clazz)) {
-                    if (JavaFlowClassTransformer.isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
+                    if (ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
                         if (log.isTraceEnabled()) {
                             log.trace("Skip re-transforming boot or extension/platform class: " + className);
                         }
