@@ -37,7 +37,7 @@ public class JavaFlowInstrumentationAgent {
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
-        System.setProperty(JavaFlowInstrumentationAgent.class.getName(), "true");
+        System.setProperty(JavaFlowClassTransformer.class.getName(), "true");
     }
 
     /**

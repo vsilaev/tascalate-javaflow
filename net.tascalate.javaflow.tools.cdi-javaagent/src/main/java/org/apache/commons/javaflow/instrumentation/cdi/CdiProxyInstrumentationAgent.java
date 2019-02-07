@@ -36,7 +36,7 @@ public class CdiProxyInstrumentationAgent {
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
         setupInstrumentation(instrumentation);
-        System.setProperty(CdiProxyInstrumentationAgent.class.getName(), "true");        
+        System.setProperty(CdiProxyClassTransformer.class.getName(), "true");        
     }
 
     /**
@@ -84,7 +84,7 @@ public class CdiProxyInstrumentationAgent {
             }
             log.info("Existing classes was re-transormed");
         }
-        System.setProperty(CdiProxyInstrumentationAgent.class.getName(), "true");     
+        System.setProperty(CdiProxyClassTransformer.class.getName(), "true");     
         log.info("Agent was installed dynamically");
     }
 
