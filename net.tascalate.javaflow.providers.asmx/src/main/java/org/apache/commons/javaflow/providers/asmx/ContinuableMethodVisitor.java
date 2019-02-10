@@ -23,20 +23,20 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
+import static net.tascalate.asmx.Opcodes.*;
+
 import java.util.List;
 
-import net.tascalate.javaflow.asmx.Handle;
-import net.tascalate.javaflow.asmx.Label;
-import net.tascalate.javaflow.asmx.MethodVisitor;
-import net.tascalate.javaflow.asmx.Opcodes;
-import net.tascalate.javaflow.asmx.Type;
-import net.tascalate.javaflow.asmx.tree.AbstractInsnNode;
-import net.tascalate.javaflow.asmx.tree.InvokeDynamicInsnNode;
-import net.tascalate.javaflow.asmx.tree.MethodInsnNode;
-import net.tascalate.javaflow.asmx.tree.analysis.BasicValue;
-import net.tascalate.javaflow.asmx.tree.analysis.Frame;
-
-import static net.tascalate.javaflow.asmx.Opcodes.*;
+import net.tascalate.asmx.Handle;
+import net.tascalate.asmx.Label;
+import net.tascalate.asmx.MethodVisitor;
+import net.tascalate.asmx.Opcodes;
+import net.tascalate.asmx.Type;
+import net.tascalate.asmx.tree.AbstractInsnNode;
+import net.tascalate.asmx.tree.InvokeDynamicInsnNode;
+import net.tascalate.asmx.tree.MethodInsnNode;
+import net.tascalate.asmx.tree.analysis.BasicValue;
+import net.tascalate.asmx.tree.analysis.Frame;
 
 class ContinuableMethodVisitor extends MethodVisitor {
     private static final String STACK_RECORDER = "org/apache/commons/javaflow/core/StackRecorder";

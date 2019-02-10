@@ -23,9 +23,9 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import net.tascalate.javaflow.asmx.Type;
-import net.tascalate.javaflow.asmx.tree.analysis.BasicValue;
-import net.tascalate.javaflow.asmx.tree.analysis.SimpleVerifier;
+import net.tascalate.asmx.Type;
+import net.tascalate.asmx.tree.analysis.BasicValue;
+import net.tascalate.asmx.tree.analysis.SimpleVerifier;
 
 class FastClassVerifier extends SimpleVerifier {
     private final InheritanceLookup inheritanceLookup;

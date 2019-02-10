@@ -15,7 +15,7 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import net.tascalate.javaflow.asmx.Opcodes;
+import net.tascalate.asmx.Opcodes;
 
 final class AsmVersion {
     private AsmVersion() {}

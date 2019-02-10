@@ -27,8 +27,8 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.tascalate.javaflow.asmx.ClassReader;
-import net.tascalate.javaflow.asmx.ClassWriter;
+import net.tascalate.asmx.ClassReader;
+import net.tascalate.asmx.ClassWriter;
 
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;

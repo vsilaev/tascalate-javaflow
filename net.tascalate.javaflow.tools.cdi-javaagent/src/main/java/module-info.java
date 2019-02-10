@@ -18,10 +18,10 @@ module net.tascalate.javaflow.tools.cdi_javaagent {
     
     requires org.slf4j;
     
-    requires org.objectweb.asm;
-    requires org.objectweb.asm.commons;
-    requires org.objectweb.asm.tree;
-    requires org.objectweb.asm.tree.analysis;
+    requires net.tascalate.asmx;
+    requires net.tascalate.asmx.commons;
+    requires net.tascalate.asmx.tree;
+    requires net.tascalate.asmx.tree.analysis;
 	
     requires net.tascalate.javaflow.spi;
     requires net.tascalate.javaflow.providers.asmx;

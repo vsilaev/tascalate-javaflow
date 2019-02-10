@@ -36,10 +36,11 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.tascalate.asmx.ClassReader;
+import net.tascalate.asmx.Opcodes;
+import net.tascalate.asmx.Type;
+
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import net.tascalate.javaflow.asmx.ClassReader;
-import net.tascalate.javaflow.asmx.Opcodes;
-import net.tascalate.javaflow.asmx.Type;
 
 /**
  * A class that computes the common super class of two classes without

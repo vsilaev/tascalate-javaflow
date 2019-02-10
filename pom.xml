@@ -56,7 +56,6 @@
 	<modules>
 		<module>net.tascalate.javaflow.api</module>
 		<module>net.tascalate.javaflow.spi</module>
-		<module>net.tascalate.javaflow.asmx</module>
 		<module>net.tascalate.javaflow.providers.asm3</module>
 		<module>net.tascalate.javaflow.providers.asm4</module>
 		<module>net.tascalate.javaflow.providers.asm5</module>
@@ -71,8 +70,7 @@
 
 
 	<properties>
-                <asm.version>7.0</asm.version>
-                <asmx.version>7.0.0-SNAPSHOT</asmx.version>
+                <asmx.version>7.0.0</asmx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

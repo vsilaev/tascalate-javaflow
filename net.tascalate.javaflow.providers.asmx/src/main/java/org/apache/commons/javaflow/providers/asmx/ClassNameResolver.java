@@ -18,9 +18,10 @@ package org.apache.commons.javaflow.providers.asmx;
 import java.util.Collections;
 import java.util.Map;
 
+import net.tascalate.asmx.ClassReader;
+import net.tascalate.asmx.ClassVisitor;
+
 import org.apache.commons.javaflow.spi.StopException;
-import net.tascalate.javaflow.asmx.ClassReader;
-import net.tascalate.javaflow.asmx.ClassVisitor;
 
 public class ClassNameResolver {
     public static class Result {

@@ -23,11 +23,12 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
+import net.tascalate.asmx.ClassReader;
+import net.tascalate.asmx.ClassWriter;
+
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.StopException;
-import net.tascalate.javaflow.asmx.ClassReader;
-import net.tascalate.javaflow.asmx.ClassWriter;
 
 /**
  * AsmClassTransformer

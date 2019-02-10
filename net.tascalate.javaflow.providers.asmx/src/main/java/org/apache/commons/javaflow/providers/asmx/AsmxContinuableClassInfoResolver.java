@@ -22,11 +22,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.tascalate.asmx.ClassReader;
+import net.tascalate.asmx.Type;
+
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import net.tascalate.javaflow.asmx.ClassReader;
-import net.tascalate.javaflow.asmx.Type;
 
 class AsmxContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     private final Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();

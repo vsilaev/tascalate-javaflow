@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 module net.tascalate.javaflow.providers.asmx {
-    requires net.tascalate.javaflow.asmx;
+    requires net.tascalate.asmx;
+    requires net.tascalate.asmx.tree;
+    requires net.tascalate.asmx.analysis;
 
     requires transitive net.tascalate.javaflow.spi;
 

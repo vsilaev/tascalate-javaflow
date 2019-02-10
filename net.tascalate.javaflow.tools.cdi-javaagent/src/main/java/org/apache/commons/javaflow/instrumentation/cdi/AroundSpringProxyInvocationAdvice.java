@@ -15,9 +15,9 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
-import net.tascalate.javaflow.asmx.MethodVisitor;
-import net.tascalate.javaflow.asmx.Type;
-import net.tascalate.javaflow.asmx.commons.Method;
+import net.tascalate.asmx.MethodVisitor;
+import net.tascalate.asmx.Type;
+import net.tascalate.asmx.commons.Method;
 
 class AroundSpringProxyInvocationAdvice extends AroundCdiProxyInvocationAdvice {
     protected AroundSpringProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {

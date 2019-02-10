@@ -16,15 +16,15 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import net.tascalate.javaflow.asmx.Opcodes;
-import net.tascalate.javaflow.asmx.tree.AbstractInsnNode;
-import net.tascalate.javaflow.asmx.tree.analysis.AnalyzerException;
-import net.tascalate.javaflow.asmx.tree.analysis.Frame;
-import net.tascalate.javaflow.asmx.tree.analysis.Interpreter;
-import net.tascalate.javaflow.asmx.tree.analysis.Value;
-
 import java.util.LinkedList;
 import java.util.List;
+
+import net.tascalate.asmx.Opcodes;
+import net.tascalate.asmx.tree.AbstractInsnNode;
+import net.tascalate.asmx.tree.analysis.AnalyzerException;
+import net.tascalate.asmx.tree.analysis.Frame;
+import net.tascalate.asmx.tree.analysis.Interpreter;
+import net.tascalate.asmx.tree.analysis.Value;
 
 class MonitoringFrame<V extends Value> extends Frame<V> {
 

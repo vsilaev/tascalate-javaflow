@@ -21,15 +21,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.tascalate.asmx.ClassVisitor;
+import net.tascalate.asmx.FieldVisitor;
+import net.tascalate.asmx.MethodVisitor;
+import net.tascalate.asmx.Type;
+import net.tascalate.asmx.Opcodes;
+
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
-
-import net.tascalate.javaflow.asmx.ClassVisitor;
-import net.tascalate.javaflow.asmx.FieldVisitor;
-import net.tascalate.javaflow.asmx.MethodVisitor;
-import net.tascalate.javaflow.asmx.Type;
-import net.tascalate.javaflow.asmx.Opcodes;
 
 class CdiProxyClassAdapter extends ClassVisitor {
 

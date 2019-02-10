@@ -29,6 +29,11 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>net.tascalate</groupId>
+			<artifactId>net.tascalate.asmx.commons</artifactId>
+			<version>${asmx.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
 			<artifactId>net.tascalate.javaflow.providers.asmx</artifactId>
 			<version>${project.version}</version>

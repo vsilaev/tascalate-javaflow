@@ -15,9 +15,9 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import net.tascalate.javaflow.asmx.AnnotationVisitor;
-import net.tascalate.javaflow.asmx.ClassVisitor;
-import net.tascalate.javaflow.asmx.Opcodes;
+import net.tascalate.asmx.AnnotationVisitor;
+import net.tascalate.asmx.ClassVisitor;
+import net.tascalate.asmx.Opcodes;
 
 class MaybeContinuableAnnotationVisitor extends ClassVisitor {
     private final AsmxContinuableClassInfoResolver environment; 
