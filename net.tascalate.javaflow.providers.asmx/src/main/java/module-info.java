@@ -16,7 +16,7 @@
 module net.tascalate.javaflow.providers.asmx {
     requires net.tascalate.asmx;
     requires net.tascalate.asmx.tree;
-    requires net.tascalate.asmx.analysis;
+    requires net.tascalate.asmx.tree.analysis;
 
     requires transitive net.tascalate.javaflow.spi;
 

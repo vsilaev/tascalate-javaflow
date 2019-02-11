@@ -25,16 +25,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate</groupId>
-			<artifactId>net.tascalate.asmx</artifactId>
-			<version>${asmx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.tascalate</groupId>
-			<artifactId>net.tascalate.asmx.tree</artifactId>
-			<version>${asmx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.tascalate</groupId>
 			<artifactId>net.tascalate.asmx.analysis</artifactId>
 			<version>${asmx.version}</version>
 		</dependency>
