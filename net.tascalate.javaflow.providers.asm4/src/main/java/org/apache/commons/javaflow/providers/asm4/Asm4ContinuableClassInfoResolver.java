@@ -56,8 +56,9 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         try {
             return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
         } finally {
-            if (null != classBytes)
+            if (null != classBytes) {
                 try { classBytes.close(); } catch (IOException exIgnore) {}
+            }
         }
     }
 
@@ -70,9 +71,9 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
 
             if (maybeContinuableClassVisitor.isContinuable()) {
                 classInfo = new ContinuableClassInfoInternal(
-                        maybeContinuableClassVisitor.isProcessed(), 
-                        maybeContinuableClassVisitor.continuableMethods
-                        );
+                    maybeContinuableClassVisitor.isProcessed(), 
+                    maybeContinuableClassVisitor.continuableMethods
+                );
             } else {
                 classInfo = UNSUPPORTED_CLASS_INFO;
             }
