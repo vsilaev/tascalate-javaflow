@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Stack implements Serializable {
 
-	private static final Logger log = LoggerFactory.getLogger(Stack.class);
+    private static final Logger log = LoggerFactory.getLogger(Stack.class);
     private static final long serialVersionUID = 3L;
 
     private long[] pstack;

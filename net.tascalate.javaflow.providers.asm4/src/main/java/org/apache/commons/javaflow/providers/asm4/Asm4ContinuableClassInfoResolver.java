@@ -123,7 +123,7 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
             case UNKNON:
                 markProcessedAnnotation(annotationClassDescriptor);
     
-                final Type type = Type.getType(annotationClassDescriptor);	
+                final Type type = Type.getType(annotationClassDescriptor);
                 try {
                     InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
                     try {

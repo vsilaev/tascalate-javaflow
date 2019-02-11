@@ -57,8 +57,9 @@ class AsmxContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         try {
             return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
         } finally {
-            if (null != classBytes)
+            if (null != classBytes) {
                 try { classBytes.close(); } catch (IOException exIgnore) {}
+            }
         }
     }
 
@@ -71,9 +72,9 @@ class AsmxContinuableClassInfoResolver implements ContinuableClassInfoResolver {
 
             if (maybeContinuableClassVisitor.isContinuable()) {
                 classInfo = new ContinuableClassInfoInternal(
-                        maybeContinuableClassVisitor.isProcessed(), 
-                        maybeContinuableClassVisitor.continuableMethods
-                        );
+                    maybeContinuableClassVisitor.isProcessed(), 
+                    maybeContinuableClassVisitor.continuableMethods
+                );
             } else {
                 classInfo = UNSUPPORTED_CLASS_INFO;
             }
@@ -124,7 +125,7 @@ class AsmxContinuableClassInfoResolver implements ContinuableClassInfoResolver {
             case UNKNON:
                 markProcessedAnnotation(annotationClassDescriptor);
     
-                final Type type = Type.getType(annotationClassDescriptor);	
+                final Type type = Type.getType(annotationClassDescriptor);
                 try {
                     InputStream annotationBytes= resourceLoader.getResourceAsStream(type.getInternalName() + ".class");
                     try {

@@ -37,17 +37,17 @@ public final class ReflectionUtils {
     
     private static final Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
     
-	public interface Matcher {
+    public interface Matcher {
         boolean matches(String pName);
     }
-	    
+
     public interface Indexer {
         void put(Map<String, Object> pMap, String pKey, Object pObject);
     }
-	    
+
     private static Indexer defaultIndexer = new DefaultIndexer();
     private static Matcher defaultMatcher = new DefaultMatcher();
-	    
+
     public static class DefaultMatcher implements Matcher {
         public boolean matches(String pName) {
             return true;

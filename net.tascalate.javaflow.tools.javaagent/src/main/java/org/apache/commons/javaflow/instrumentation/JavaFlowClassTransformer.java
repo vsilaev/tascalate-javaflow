@@ -36,85 +36,87 @@ import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
 public class JavaFlowClassTransformer implements ClassFileTransformer {
-	private static final Logger log = LoggerFactory.getLogger(JavaFlowClassTransformer.class);
-	
-	private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory(); 
-	private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+    private static final Logger log = LoggerFactory.getLogger(JavaFlowClassTransformer.class);
 
-	//@Override
-	public byte[] transform(ClassLoader classLoader, final String className,
-			final Class<?> classBeingRedefined,
-			final ProtectionDomain protectionDomain,
-			final byte[] classfileBuffer) throws IllegalClassFormatException {
+    private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory();
+    private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
-	    if (isSystemClassLoaderParent(classLoader)) {
-	        if (log.isDebugEnabled()) {
-	            log.info("Ignoring class defined by boot or extensions/platform class loader: " + className);
-	        }
-	        return null;
-	    }
-	    
-		classLoader = getSafeClassLoader(classLoader);
-		final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
+    // @Override
+    public byte[] transform(ClassLoader classLoader, 
+                            String className, 
+                            Class<?> classBeingRedefined,
+                            ProtectionDomain protectionDomain, 
+                            final byte[] classfileBuffer) throws IllegalClassFormatException {
 
-		synchronized (resolver) {
-			final ClassNameResolver.Result currentTarget = ClassNameResolver.resolveClassName(className, classBeingRedefined, classfileBuffer);
-			try {
-				// Execute with current class as extra resource (in-memory)
-				// Mandatory for Java8 lambdas and alike
-				return ExtendedClasspathResourceLoader.runWithInMemoryResources(
-					new Callable<byte[]>() {
-						public byte[] call() {
-							resolver.forget(currentTarget.className);
-							final ResourceTransformer transformer = resourceTransformationFactory.createTransformer(resolver);
-							return transformer.transform(classfileBuffer);
-						}
-					}, 
-					currentTarget.asResource()
-				);
-			} catch (final RuntimeException ex) {
-			    if (log.isErrorEnabled()) {
-			        if (VERBOSE_ERROR_REPORTS) {
-			            log.error("Error transforming " + currentTarget.className, ex);
-			        } else {
-			            log.error("Error transforming " + currentTarget.className);
-			        }
-			    }
-				return null;
-			} catch (ClassCircularityError ex) {
-			    if (VERBOSE_ERROR_REPORTS && log.isWarnEnabled()) {
-			        log.warn("Ignoring class circularity error: " + ex.getMessage());
-			    }
-			    return null;
-			} catch (final Error ex) {
-				log.error("Internal error during transforming continuable class", ex);
-				throw ex;
-			}
-		}
-	}
+        if (isSystemClassLoaderParent(classLoader)) {
+            if (log.isDebugEnabled()) {
+                log.info("Ignoring class defined by boot or extensions/platform class loader: " + className);
+            }
+            return null;
+        }
 
-	protected ClassLoader getSafeClassLoader(final ClassLoader classLoader) {
-		return null != classLoader ? classLoader : systemClassLoader; 
-	}
-	
-	protected ContinuableClassInfoResolver getCachedResolver(final ClassLoader classLoader) {
-		synchronized (classLoader2resolver) {
-			final ContinuableClassInfoResolver cachedResolver = classLoader2resolver.get(classLoader);
-			if (null == cachedResolver) {
-				final ContinuableClassInfoResolver newResolver = resourceTransformationFactory.createResolver(new ExtendedClasspathResourceLoader(classLoader));
-				classLoader2resolver.put(classLoader, newResolver);
-				return newResolver;
-			} else {
-				return cachedResolver;
-			}
-		}
-	}
-	
-	private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
-	    return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
-	}
+        classLoader = getSafeClassLoader(classLoader);
+        final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
 
-	private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
-	private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
+        synchronized (resolver) {
+            final ClassNameResolver.Result currentTarget = ClassNameResolver.resolveClassName(
+                className, classBeingRedefined, classfileBuffer
+            );
+            try {
+                // Execute with current class as extra resource (in-memory)
+                // Mandatory for Java8 lambdas and alike
+                return ExtendedClasspathResourceLoader.runWithInMemoryResources(new Callable<byte[]>() {
+                    public byte[] call() {
+                        resolver.forget(currentTarget.className);
+                        final ResourceTransformer transformer = resourceTransformationFactory
+                                .createTransformer(resolver);
+                        return transformer.transform(classfileBuffer);
+                    }
+                }, currentTarget.asResource());
+            } catch (RuntimeException ex) {
+                if (log.isErrorEnabled()) {
+                    if (VERBOSE_ERROR_REPORTS) {
+                        log.error("Error transforming " + currentTarget.className, ex);
+                    } else {
+                        log.error("Error transforming " + currentTarget.className);
+                    }
+                }
+                return null;
+            } catch (ClassCircularityError ex) {
+                if (VERBOSE_ERROR_REPORTS && log.isWarnEnabled()) {
+                    log.warn("Ignoring class circularity error: " + ex.getMessage());
+                }
+                return null;
+            } catch (final Error ex) {
+                log.error("Internal error during transforming continuable class", ex);
+                throw ex;
+            }
+        }
+    }
+
+    protected ClassLoader getSafeClassLoader(ClassLoader classLoader) {
+        return null != classLoader ? classLoader : systemClassLoader;
+    }
+
+    protected ContinuableClassInfoResolver getCachedResolver(ClassLoader classLoader) {
+        synchronized (classLoader2resolver) {
+            ContinuableClassInfoResolver cachedResolver = classLoader2resolver.get(classLoader);
+            if (null == cachedResolver) {
+                ContinuableClassInfoResolver newResolver = resourceTransformationFactory.createResolver(
+                    new ExtendedClasspathResourceLoader(classLoader)
+                );
+                classLoader2resolver.put(classLoader, newResolver);
+                return newResolver;
+            } else {
+                return cachedResolver;
+            }
+        }
+    }
+
+    private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
+        return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
+    }
+
+    private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
+    private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
 }
-	

@@ -22,7 +22,7 @@ module net.tascalate.javaflow.tools.cdi_javaagent {
     requires net.tascalate.asmx.commons;
     requires net.tascalate.asmx.tree;
     requires net.tascalate.asmx.tree.analysis;
-	
+
     requires net.tascalate.javaflow.spi;
     requires net.tascalate.javaflow.providers.asmx;
     

@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class StackRecorder extends Stack {
 
-	private static final Logger log = LoggerFactory.getLogger(StackRecorder.class);
+    private static final Logger log = LoggerFactory.getLogger(StackRecorder.class);
     private static final long serialVersionUID = 3L;
 
     private static final ThreadLocal<StackRecorder> threadMap = new ThreadLocal<StackRecorder>();
@@ -98,24 +98,24 @@ public final class StackRecorder extends Stack {
         // flow breaks here, actual return will be executed in resumed continuation
         // return in continuation to be suspended is executed as well but ignored
         if (needCheckExit) {
-        	stackRecorder.parameter.checkExit();
+            stackRecorder.parameter.checkExit();
         }
         return stackRecorder.parameter.value();
     }
 
     public SuspendResult execute(ResumeParameter parameter) {
-    	if (null == parameter) {
-    		throw new IllegalArgumentException("ResumeContext parameter may not be null");
-    	}
+        if (null == parameter) {
+            throw new IllegalArgumentException("ResumeContext parameter may not be null");
+        }
         StackRecorder old = registerThread();
         try {
             isRestoring = !isEmpty(); // start restoring if we have a filled stack
             this.parameter = parameter;
             
             if (isRestoring) {
-            	if (log.isDebugEnabled()) {
-            		log.debug("Restoring state of " + ReflectionUtils.descriptionOfObject(runnable));
-            	}
+                if (log.isDebugEnabled()) {
+                    log.debug("Restoring state of " + ReflectionUtils.descriptionOfObject(runnable));
+                }
             }
             
             log.debug("calling runnable");
@@ -137,26 +137,26 @@ public final class StackRecorder extends Stack {
                 // for this, so throw it away
                 final Object ref = popReference(); 
                 if (runnable != ref) {
-                	throw new IllegalStateException(
-                	        "Stack corruption on suspend (invalid reference). " +
-                	        "Is " + ReflectionUtils.descriptionOfClass(runnable) +
-                	        " instrumented for javaflow?"
-                	);
+                    throw new IllegalStateException(
+                        "Stack corruption on suspend (invalid reference). " +
+                        "Is " + ReflectionUtils.descriptionOfClass(runnable) +
+                        " instrumented for javaflow?"
+                    );
                 }
                 return this.result;
             } else {
-            	if (!isEmpty()) {
-            		throw new IllegalStateException(
-            		        "Stack corruption on exit (non-empty stack). " +
-            		        "Is " + ReflectionUtils.descriptionOfClass(runnable) +
-            		        " instrumented for javaflow?"
-            		);
-            	}
+                if (!isEmpty()) {
+                    throw new IllegalStateException(
+                        "Stack corruption on exit (non-empty stack). " +
+                        "Is " + ReflectionUtils.descriptionOfClass(runnable) +
+                        " instrumented for javaflow?"
+                    );
+                }
                 return SuspendResult.EXIT;    // nothing more to continue
             }
         } catch(ContinuationDeath cd) {
             // this isn't an error, so no need to log
-        	return SuspendResult.EXIT;
+            return SuspendResult.EXIT;
         } catch(Error e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -171,7 +171,7 @@ public final class StackRecorder extends Stack {
     }
 
     public static void exit() {
-    	throw ContinuationDeath.INSTANCE;
+        throw ContinuationDeath.INSTANCE;
     }
     
     /**

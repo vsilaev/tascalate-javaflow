@@ -44,11 +44,11 @@ import org.apache.tools.ant.types.resources.FileResource;
  */
 public class AntRewriteTask extends MatchingTask {
 
-	private RewritingUtils.TransformerType transformerType;
+    private RewritingUtils.TransformerType transformerType;
 
-	private File dstDir;
-	private File srcDir;
-	private Path compileClasspath;
+    private File dstDir;
+    private File srcDir;
+    private Path compileClasspath;
 
     /**
      * Directory to which the transformed files will be written.
@@ -56,10 +56,10 @@ public class AntRewriteTask extends MatchingTask {
      * 
      * @param pFile destination directory
      */
-    public void setDestdir(final File pFile) {
+    public void setDestdir(File pFile) {
         dstDir = pFile;
     }
-	
+
     /**
      * Directory from which the input files are read.
      * This and the inherited MatchingTask forms an implicit
@@ -67,7 +67,7 @@ public class AntRewriteTask extends MatchingTask {
      * 
      * @param pFile source directory
      */
-    public void setSrcDir(final File pFile) {
+    public void setSrcDir(File pFile) {
         srcDir = pFile;
         fileset.setDir(srcDir);
     }
@@ -84,11 +84,11 @@ public class AntRewriteTask extends MatchingTask {
      *      "ASM5". Case insensitive.
      */
     public void setMode(String name) {
-    	try {
-    		RewritingUtils.TransformerType.valueOf(name.toUpperCase());
-    	} catch (final RuntimeException ex) {
-    		throw new BuildException("Unrecognized mode: " + name);
-    	}
+        try {
+            RewritingUtils.TransformerType.valueOf(name.toUpperCase());
+        } catch (RuntimeException ex) {
+            throw new BuildException("Unrecognized mode: " + name);
+        }
     }
     
     
@@ -97,7 +97,7 @@ public class AntRewriteTask extends MatchingTask {
      *
      * @param classpath an Ant Path object containing the compilation classpath.
      */
-    public void setClasspath(final Path classpath) {
+    public void setClasspath(Path classpath) {
         if (compileClasspath == null) {
             compileClasspath = classpath;
         } else {
@@ -128,10 +128,10 @@ public class AntRewriteTask extends MatchingTask {
      * Adds a reference to a classpath defined elsewhere.
      * @param r a reference to a classpath
      */
-    public void setClasspathRef(final Reference r) {
+    public void setClasspathRef(Reference r) {
         createClasspath().setRefid(r);
     }
-	    
+
     /**
      * Check that all required attributes have been set and nothing
      * silly has been entered.
@@ -143,7 +143,7 @@ public class AntRewriteTask extends MatchingTask {
         checkDir(dstDir,"dstDir");
     }
 
-    private void checkDir(final File pDir, final String pDescription) {
+    private void checkDir(File pDir, String pDescription) {
         if (pDir == null) {
             throw new BuildException("no " + pDescription + " directory is specified", getLocation());
         }
@@ -154,30 +154,30 @@ public class AntRewriteTask extends MatchingTask {
             throw new BuildException(pDescription + " directory \"" + pDir + "\" is not a directory", getLocation());
         }
     }
-	
+
     public void execute() throws BuildException {
-        final DirectoryScanner ds = fileset.getDirectoryScanner(getProject());
-        final String[] fileNames = ds.getIncludedFiles();
+        DirectoryScanner ds = fileset.getDirectoryScanner(getProject());
+        String[] fileNames = ds.getIncludedFiles();
         try {
-        	createClasspath();
+            createClasspath();
 
-        	final List<URL> classPath = new ArrayList<URL>();
-        	for (final Iterator<Resource> i = compileClasspath.iterator(); i.hasNext();) {
-        		final FileResource resource = (FileResource)i.next();
-        		classPath.add( resource.getFile().toURI().toURL() );
-        	}
+            List<URL> classPath = new ArrayList<URL>();
+            for (Iterator<Resource> i = compileClasspath.iterator(); i.hasNext();) {
+                FileResource resource = (FileResource)i.next();
+                classPath.add( resource.getFile().toURI().toURL() );
+            }
 
-        	final List<URL> classPathByDir = new ArrayList<URL>(classPath);
-        	classPathByDir.add(srcDir.toURI().toURL());
-        	
-            final ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
-                	classPathByDir.toArray(new URL[]{}),
-                	transformerType
-                );
-        	
-            for (final String fileName : fileNames) {
-                final File source = new File(srcDir, fileName);
-                final File destination = new File(dstDir, fileName);
+            List<URL> classPathByDir = new ArrayList<URL>(classPath);
+            classPathByDir.add(srcDir.toURI().toURL());
+
+            ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
+                classPathByDir.toArray(new URL[]{}),
+                transformerType
+            );
+
+            for (String fileName : fileNames) {
+                File source = new File(srcDir, fileName);
+                File destination = new File(dstDir, fileName);
                 
                 if (!destination.getParentFile().exists()) {
                     log("Creating dir: " + destination.getParentFile(), Project.MSG_VERBOSE);
@@ -190,7 +190,7 @@ public class AntRewriteTask extends MatchingTask {
                 }
                 
                 if (fileName.endsWith(".class")) {
-                	log("Rewriting " + source + " to " + destination, Project.MSG_VERBOSE);
+                    log("Rewriting " + source + " to " + destination, Project.MSG_VERBOSE);
                     // System.out.println("Rewriting " + source);
 
                     RewritingUtils.rewriteClassFile( source, dirTransformer, destination );
@@ -200,26 +200,26 @@ public class AntRewriteTask extends MatchingTask {
                     || fileName.endsWith(".ear")
                     || fileName.endsWith(".zip")
                     || fileName.endsWith(".war")) {
-	
+
                     log("Rewriting " + source + " to " + destination, Project.MSG_VERBOSE);
 
-                	final List<URL> classPathByJar = new ArrayList<URL>(classPath);
-                	classPathByJar.add(source.toURI().toURL());
-                    final ResourceTransformer jarTransformer = RewritingUtils.createTransformer(
-                    	classPathByJar.toArray(new URL[]{}), 
-                    	transformerType
+                    List<URL> classPathByJar = new ArrayList<URL>(classPath);
+                    classPathByJar.add(source.toURI().toURL());
+                    ResourceTransformer jarTransformer = RewritingUtils.createTransformer(
+                       classPathByJar.toArray(new URL[]{}), 
+                       transformerType
                     );
                     
                     RewritingUtils.rewriteJar(
-                    	new JarInputStream(new FileInputStream(source)),
-                    	jarTransformer,
-                    	new JarOutputStream(new FileOutputStream(destination))
+                        new JarInputStream(new FileInputStream(source)),
+                        jarTransformer,
+                        new JarOutputStream(new FileOutputStream(destination))
                     );
                     
                 }
             }
         } catch (IOException e) {
-	          throw new BuildException(e);
+            throw new BuildException(e);
         }
     }
 }

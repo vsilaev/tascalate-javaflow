@@ -50,11 +50,11 @@ public final class RewritingUtils {
     private final static Logger log = LoggerFactory.getLogger(RewritingUtils.class);
 
     public interface Matcher {
-        boolean isMatching( final String name );
+        boolean isMatching(String name);
     }
     
-    private final static Matcher MATCH_ALL = new Matcher() {
-        public boolean isMatching(final String pName) {
+    private static Matcher MATCH_ALL = new Matcher() {
+        public boolean isMatching(String pName) {
             return true;
         }
     };
@@ -63,45 +63,45 @@ public final class RewritingUtils {
      * @todo multiple transformers
      */
     public static boolean rewriteClassFile(
-            final File pInput,
-            final ResourceTransformer transformer,
-            final File pOutput
+            File pInput,
+            ResourceTransformer transformer,
+            File pOutput
             ) throws IOException {
 
-        final byte[] original = toByteArray(pInput);
+        byte[] original = toByteArray(pInput);
         byte[] transformed = transformer.transform(original);
         if (transformed != original /*Exact equality means not transformed*/ || !pOutput.equals(pInput)) {
-        	final FileOutputStream os = new FileOutputStream(pOutput);
-        	try {
-        		os.write(transformed);
-        	} finally {
-        		os.close();
-        	}
-        	return true;
+            FileOutputStream os = new FileOutputStream(pOutput);
+            try {
+                os.write(transformed);
+            } finally {
+                os.close();
+            }
+            return true;
         } else {
-        	return false;
+            return false;
         }
     }
 
     public static boolean rewriteJar(
-            final JarInputStream pInput,
-            final ResourceTransformer transformer,
-            final JarOutputStream pOutput
+            JarInputStream pInput,
+            ResourceTransformer transformer,
+            JarOutputStream pOutput
             ) throws IOException {
         return rewriteJar(pInput, transformer, pOutput, MATCH_ALL);
     }
 
     public static boolean rewriteJar(
-            final JarInputStream pInput,
-            final ResourceTransformer transformer,
-            final JarOutputStream pOutput,
-            final Matcher pMatcher
+            JarInputStream pInput,
+            ResourceTransformer transformer,
+            JarOutputStream pOutput,
+            Matcher pMatcher
             ) throws IOException {
 
         boolean changed = false;
 
         while(true) {
-            final JarEntry entry = pInput.getNextJarEntry();
+            JarEntry entry = pInput.getNextJarEntry();
 
             if (entry == null) {
                 break;
@@ -112,7 +112,7 @@ public final class RewritingUtils {
                 continue;
             }
 
-            final String name = entry.getName();
+            String name = entry.getName();
 
             pOutput.putNextEntry(new JarEntry(name));
 
@@ -123,8 +123,7 @@ public final class RewritingUtils {
                         log.debug("transforming " + name);
                     }
 
-                    final byte[] original = toByteArray(pInput);
-
+                    byte[] original = toByteArray(pInput);
                     byte[] transformed = transformer.transform(original);
 
                     pOutput.write(transformed);
@@ -192,16 +191,16 @@ public final class RewritingUtils {
     }
 
 
-    public static void main(final String[] args) throws FileNotFoundException, IOException {
-    	final ResourceTransformationFactory factory = createTransformerFactoryInstance();
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        ResourceTransformationFactory factory = createTransformerFactoryInstance();
         for (int i=0; i<args.length; i+=2) {
             System.out.println("rewriting " + args[i]);
             
-            final ResourceTransformer transformer = createTransformer(new URL[]{new File(args[i]).toURI().toURL()}, factory);
+            ResourceTransformer transformer = createTransformer(new URL[]{new File(args[i]).toURI().toURL()}, factory);
             RewritingUtils.rewriteJar(
-            	new JarInputStream(new FileInputStream(args[i])),
-            	transformer,
-            	new JarOutputStream(new FileOutputStream(args[i+1]))
+                new JarInputStream(new FileInputStream(args[i])),
+                transformer,
+                new JarOutputStream(new FileOutputStream(args[i+1]))
             );
         }
 
@@ -209,96 +208,93 @@ public final class RewritingUtils {
         
     }
     
-    public static ResourceTransformer createTransformer(final URL[] extraURL) {
-    	return createTransformer(extraURL, createTransformerFactoryInstance());
+    public static ResourceTransformer createTransformer(URL[] extraURL) {
+        return createTransformer(extraURL, createTransformerFactoryInstance());
     }
 
     
-    public static ResourceTransformer createTransformer(final URL[] extraURL, final TransformerType type) {
-    	return createTransformer(extraURL, createTransformerFactoryInstance(type));
+    public static ResourceTransformer createTransformer(URL[] extraURL, TransformerType type) {
+       return createTransformer(extraURL, createTransformerFactoryInstance(type));
     }
     
-    public static ResourceTransformer createTransformer(final URL[] extraURL, final ResourceTransformationFactory factory) {
-        final URLClassLoader classLoader = new URLClassLoader(
-        		extraURL, 
-        		safeParentClassLoader()
-        );
+    public static ResourceTransformer createTransformer(URL[] extraURL, ResourceTransformationFactory factory) {
+        URLClassLoader classLoader = new URLClassLoader(extraURL, safeParentClassLoader());
         
         final ResourceTransformer transformerDelegate = factory.createTransformer(
-        	factory.createResolver(new ClasspathResourceLoader(classLoader))
+            factory.createResolver(new ClasspathResourceLoader(classLoader))
         );
         
         return new ResourceTransformer() {
-			public byte[] transform(final byte[] original) {
-				final byte[] transformed = transformerDelegate.transform(original);
-				return null != transformed ? transformed : original;
-			}
-		};
+            public byte[] transform(byte[] original) {
+                byte[] transformed = transformerDelegate.transform(original);
+                return null != transformed ? transformed : original;
+            }
+        };
     }
     
-    final private static ClassLoader safeParentClassLoader() {
-    	final ClassLoader ownClassLoader = RewritingUtils.class.getClassLoader();
-    	return null == ownClassLoader ? ClassLoader.getSystemClassLoader() : ownClassLoader;
+    private static ClassLoader safeParentClassLoader() {
+        ClassLoader ownClassLoader = RewritingUtils.class.getClassLoader();
+        return null == ownClassLoader ? ClassLoader.getSystemClassLoader() : ownClassLoader;
     }
     
     public static ResourceTransformationFactory createTransformerFactoryInstance() {
-    	return createTransformerFactoryInstance(null);
+        return createTransformerFactoryInstance(null);
     }
     
-    public static ResourceTransformationFactory createTransformerFactoryInstance(final TransformerType transformerType) {
-    	final Class<? extends ResourceTransformationFactory> transformerFactoryClass;
-    	if (null == transformerType) {
-    		transformerFactoryClass = getDefaultResourceTransformerFactoryClass();
-    	} else {
-    		try {
-				transformerFactoryClass = transformerType.implementaion();
-			} catch (final ClassNotFoundException ex) {
-				throw new RuntimeException(ex);
-			}
-    	}
-		try {
-			// Class.newInstance is deprecated as of Java 9
-			return transformerFactoryClass.getDeclaredConstructor().newInstance();
-		} catch (final InstantiationException ex) {
-			throw new RuntimeException(ex);
-		} catch (final IllegalAccessException ex) {
-			throw new RuntimeException(ex);
-		} catch (InvocationTargetException ex) {
-			throw new RuntimeException(ex);
-		} catch (NoSuchMethodException ex) {
-			throw new RuntimeException(ex);
-		}
+    public static ResourceTransformationFactory createTransformerFactoryInstance(TransformerType transformerType) {
+        Class<? extends ResourceTransformationFactory> transformerFactoryClass;
+        if (null == transformerType) {
+            transformerFactoryClass = getDefaultResourceTransformerFactoryClass();
+        } else {
+            try {
+                transformerFactoryClass = transformerType.implementaion();
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        try {
+            // Class.newInstance is deprecated as of Java 9
+            return transformerFactoryClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException ex) {
+            throw new RuntimeException(ex);
+        } catch (IllegalAccessException ex) {
+            throw new RuntimeException(ex);
+        } catch (InvocationTargetException ex) {
+            throw new RuntimeException(ex);
+        } catch (NoSuchMethodException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
-	public static Class<? extends ResourceTransformationFactory> getDefaultResourceTransformerFactoryClass() {
-		for (final TransformerType transformerType : TransformerType.values()) {
-			try {
-				return transformerType.implementaion();
-			} catch (final ClassNotFoundException ex) {
-				System.err.println(ex);
-			}
-		}
-		throw new RuntimeException("No bytecode transformation class is found for JavaFlow bytecode modifications");
-	}
-	
-	public static enum TransformerType {
-	    ASMX("org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory"),
-		ASM5("org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory"),
-		ASM4("org.apache.commons.javaflow.providers.asm4.Asm4ResourceTransformationFactory"),
-		ASM3("org.apache.commons.javaflow.providers.asm3.Asm3ResourceTransformationFactory"),
-		BCEL("org.apache.commons.javaflow.providers.bcel.BcelResourceTransformationFactory");
-		
-		final private String implementation;
-		
-		private TransformerType(final String implementation) {
-			this.implementation = implementation;
-		}
-		
-		Class<? extends ResourceTransformationFactory> implementaion() throws ClassNotFoundException { 
-			@SuppressWarnings("unchecked")
-			final Class<? extends ResourceTransformationFactory> c = (Class<? extends ResourceTransformationFactory>) 
-				Class.forName(implementation);
-			return c;
-		}
-	}
+    public static Class<? extends ResourceTransformationFactory> getDefaultResourceTransformerFactoryClass() {
+        for (TransformerType transformerType : TransformerType.values()) {
+            try {
+                return transformerType.implementaion();
+            } catch (ClassNotFoundException ex) {
+                System.err.println(ex);
+            }
+        }
+        throw new RuntimeException("No bytecode transformation class is found for JavaFlow bytecode modifications");
+    }
+
+    public static enum TransformerType {
+        ASMX("org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory"),
+        ASM5("org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory"),
+        ASM4("org.apache.commons.javaflow.providers.asm4.Asm4ResourceTransformationFactory"),
+        ASM3("org.apache.commons.javaflow.providers.asm3.Asm3ResourceTransformationFactory"),
+        BCEL("org.apache.commons.javaflow.providers.bcel.BcelResourceTransformationFactory");
+
+        private String implementation;
+
+        private TransformerType(String implementation) {
+            this.implementation = implementation;
+        }
+
+        Class<? extends ResourceTransformationFactory> implementaion() throws ClassNotFoundException { 
+            @SuppressWarnings("unchecked")
+            Class<? extends ResourceTransformationFactory> c = (Class<? extends ResourceTransformationFactory>) 
+            Class.forName(implementation);
+            return c;
+       }
+    }
 }
