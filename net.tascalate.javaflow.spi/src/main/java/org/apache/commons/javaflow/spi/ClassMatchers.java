@@ -22,6 +22,21 @@ import java.util.regex.Pattern;
 public final class ClassMatchers {
     private ClassMatchers() {}
     
+    public static ClassMatcher MATCH_NONE = new ClassMatcher() {
+        @Override
+        public boolean matches(String name, String signature, String superName, String[] interfaces) {
+            return false;
+        }
+    };
+    
+    public static ClassMatcher MATCH_ALL = new ClassMatcher() {
+        @Override
+        public boolean matches(String name, String signature, String superName, String[] interfaces) {
+            return true;
+        }
+    };
+
+    
     public static ClassMatcher whenAll(ClassMatcher... matchers) {
         return whenAll(Arrays.asList(matchers));
     }
