@@ -33,7 +33,7 @@ public class StopException extends RuntimeException {
 
     public static final StopException INSTANCE = new StopException();
 
-    public static boolean __dirtyCheckSkipContinuationsOnClass(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    private static boolean __dirtyCheckSkipContinuationsOnClass(int version, int access, String name, String signature, String superName, String[] interfaces) {
         if (null != interfaces) {
             for (String intf : interfaces) {
                 if (PROXY_MARKER_INTERFACES.contains(intf)) {

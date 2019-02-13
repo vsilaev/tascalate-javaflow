@@ -23,14 +23,15 @@
  */
 package org.apache.commons.javaflow.providers.asm3;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-import org.apache.commons.javaflow.spi.StopException;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+
+import org.apache.commons.javaflow.spi.ContinuableClassInfo;
+import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+import org.apache.commons.javaflow.spi.StopException;
 
 /**
  * ContinuableClassVisitor
@@ -68,7 +69,7 @@ class ContinuableClassVisitor extends ClassAdapter {
 
         if (null == classInfo || 
             classInfo.isClassProcessed() || 
-            StopException.__dirtyCheckSkipContinuationsOnClass(version, access, name, signature, superName, interfaces)) {
+            cciResolver.veto().matches(name, signature, superName, interfaces)) {
             skipEnchancing = true;
             // Must exit by throwing exception, otherwise NPE is possible in nested visitor
             throw StopException.INSTANCE;

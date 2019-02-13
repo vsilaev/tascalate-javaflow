@@ -16,15 +16,15 @@
  */
 package org.apache.commons.javaflow.providers.asm5;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.Interpreter;
 import org.objectweb.asm.tree.analysis.Value;
-
-import java.util.LinkedList;
-import java.util.List;
 
 class MonitoringFrame extends Frame {
 

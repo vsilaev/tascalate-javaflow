@@ -1,0 +1,13 @@
+implements-interface:name=org.apache.webbeans.proxy.OwbInterceptorProxy
+implements-interface:name=org.apache.webbeans.proxy.OwbNormalScopeProxy
+implements-interface:name=org.jboss.weld.bean.prox.ProxyObject
+implements-interface:name=org.jboss.as.ee.component.serialization.WriteReplaceInterface
+# possible values are:
+# implements-interface:name-part
+# implements-interface:name-pattern
+# extends-class:name
+# extends-class:name-part
+# extends-class:name-pattern
+# class:name
+# class:name-part
+# class:name-pattern

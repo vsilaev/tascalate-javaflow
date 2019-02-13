@@ -23,6 +23,8 @@
  */
 package org.apache.commons.javaflow.providers.asm4;
 
+import static org.objectweb.asm.Opcodes.*;
+
 import java.util.List;
 
 import org.objectweb.asm.Handle;
@@ -35,8 +37,6 @@ import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
-
-import static org.objectweb.asm.Opcodes.*;
 
 class ContinuableMethodVisitor extends MethodVisitor {
     private static final String STACK_RECORDER = "org/apache/commons/javaflow/core/StackRecorder";

@@ -17,16 +17,6 @@ package org.apache.commons.javaflow.spi;
 
 import java.io.IOException;
 
-public interface ContinuableClassInfoResolver {
-    ContinuableClassInfo forget(String className);
-
-    ContinuableClassInfo resolve(String className) throws IOException;
-
-    ContinuableClassInfo resolve(String className, byte[] classBytes);
-
-    boolean isContinuableAnnotation(String annotationClassDescriptor);
-    
-    ClassMatcher veto();
-
-    ResourceLoader resourceLoader();
+public interface VetoableResourceLoader extends ResourceLoader {
+    ClassMatcher createVeto() throws IOException;
 }

@@ -82,8 +82,8 @@ public final class ClassMatchers {
         };
     }
     
-    public static ClassMatcher byClassName(String interfaceName, final boolean namePart) {
-        final String cn = className(interfaceName);
+    public static ClassMatcher byClassName(String className, final boolean namePart) {
+        final String cn = className(className);
         return new ClassMatcher() {
             @Override
             public boolean matches(String name, String signature, String superName, String[] interfaces) {

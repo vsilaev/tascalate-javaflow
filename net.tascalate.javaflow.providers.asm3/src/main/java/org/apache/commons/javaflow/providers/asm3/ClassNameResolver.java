@@ -18,9 +18,10 @@ package org.apache.commons.javaflow.providers.asm3;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.javaflow.spi.StopException;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
+
+import org.apache.commons.javaflow.spi.StopException;
 
 public class ClassNameResolver {
     public static class Result {

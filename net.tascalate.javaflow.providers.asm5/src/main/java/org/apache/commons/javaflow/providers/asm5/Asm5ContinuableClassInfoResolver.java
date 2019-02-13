@@ -22,20 +22,26 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Type;
+
+import org.apache.commons.javaflow.spi.ClassMatcher;
+import org.apache.commons.javaflow.spi.ClassMatchers;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Type;
+import org.apache.commons.javaflow.spi.VetoableResourceLoader;
 
 class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     private final Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();
     private final Set<String> processedAnnotations = new HashSet<String>();
     private final Set<String> continuableAnnotations = new HashSet<String>();
     private final ResourceLoader resourceLoader;
-
-    Asm5ContinuableClassInfoResolver(ResourceLoader classLoader) {
-        this.resourceLoader = classLoader;
+    private final ClassMatcher veto;
+    
+    Asm5ContinuableClassInfoResolver(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+        this.veto = createVeto(resourceLoader);
         markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE.getDescriptor());
     }
 
@@ -60,6 +66,10 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
                 try { classBytes.close(); } catch (IOException exIgnore) {}
             }
         }
+    }
+    
+    public ClassMatcher veto() {
+        return veto;
     }
 
     private ContinuableClassInfo resolveContinuableClassInfo(String classInternalName, ClassReader reader) {
@@ -139,6 +149,18 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
                 }
             default:
                 throw new RuntimeException("Unknown annotation kind");
+        }
+    }
+    
+    private static ClassMatcher createVeto(ResourceLoader resourceLoader) {
+        if (resourceLoader instanceof VetoableResourceLoader) {
+            try {
+                return ((VetoableResourceLoader)resourceLoader).createVeto();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        } else {
+            return ClassMatchers.MATCH_NONE;
         }
     }
 

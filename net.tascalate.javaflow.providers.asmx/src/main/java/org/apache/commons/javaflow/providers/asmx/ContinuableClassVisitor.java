@@ -66,9 +66,9 @@ class ContinuableClassVisitor extends ClassVisitor {
         className = name;
         classInfo = cciResolver.resolve(name, originalBytes);
 
-        if (null == classInfo || 
+        if (null == classInfo ||  
             classInfo.isClassProcessed() || 
-            StopException.__dirtyCheckSkipContinuationsOnClass(version, access, name, signature, superName, interfaces)) {
+            cciResolver.veto().matches(name, signature, superName, interfaces)) {
             skipEnchancing = true;
             // Must exit by throwing exception, otherwise NPE is possible in nested visitor
             throw StopException.INSTANCE;

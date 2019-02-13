@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -52,6 +50,9 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
+
+import org.apache.commons.javaflow.spi.ContinuableClassInfo;
+import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 
 class ContinuableMethodNode extends MethodNode implements Opcodes {
     private final InheritanceLookup inheritanceLookup;

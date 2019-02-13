@@ -25,8 +25,12 @@ package org.apache.commons.javaflow.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
-public class ClasspathResourceLoader implements ResourceLoader {
+public class ClasspathResourceLoader implements VetoableResourceLoader {
 
     private final ClassLoader classLoader;
 
@@ -40,6 +44,20 @@ public class ClasspathResourceLoader implements ResourceLoader {
             throw new IOException("Unable to find resource " + name);
         }
         return result;
+    }
+    
+    public ClassMatcher createVeto() throws IOException {
+        List<ClassMatcher> matchers = new ArrayList<ClassMatcher>();
+        Enumeration<URL> allResources = classLoader.getResources("/META-INF/net.tascalate.javaflow.veto.cmf");
+        ClassMatcherFileParser parser = new ClassMatcherFileParser();
+        while (allResources.hasMoreElements()) {
+            URL resource = allResources.nextElement();
+            ClassMatcher matcher = parser.parse(resource);
+            if (null != matcher && ClassMatchers.MATCH_NONE != matcher) {
+                matchers.add(matcher);
+            }
+        }
+        return matchers.isEmpty() ? ClassMatchers.MATCH_NONE : ClassMatchers.whenAny(matchers);
     }
     
     /**

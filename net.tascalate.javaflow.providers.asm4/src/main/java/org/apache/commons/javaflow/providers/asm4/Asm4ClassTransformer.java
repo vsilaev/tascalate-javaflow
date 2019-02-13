@@ -23,11 +23,12 @@
  */
 package org.apache.commons.javaflow.providers.asm4;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.StopException;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 
 /**
  * AsmClassTransformer
