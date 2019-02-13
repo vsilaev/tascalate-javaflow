@@ -48,7 +48,7 @@ public class ClasspathResourceLoader implements VetoableResourceLoader {
     
     public ClassMatcher createVeto() throws IOException {
         List<ClassMatcher> matchers = new ArrayList<ClassMatcher>();
-        Enumeration<URL> allResources = classLoader.getResources("/META-INF/net.tascalate.javaflow.veto.cmf");
+        Enumeration<URL> allResources = classLoader.getResources("META-INF/net.tascalate.javaflow.veto.cmf");
         ClassMatcherFileParser parser = new ClassMatcherFileParser();
         while (allResources.hasMoreElements()) {
             URL resource = allResources.nextElement();

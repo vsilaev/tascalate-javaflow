@@ -1,7 +1,8 @@
-implements-interface:name=org.apache.webbeans.proxy.OwbInterceptorProxy
-implements-interface:name=org.apache.webbeans.proxy.OwbNormalScopeProxy
-implements-interface:name=org.jboss.weld.bean.prox.ProxyObject
-implements-interface:name=org.jboss.as.ee.component.serialization.WriteReplaceInterface
+implements-interface:name=org/apache/webbeans/proxy/OwbInterceptorProxy
+implements-interface:name=org/apache/webbeans/proxy/OwbNormalScopeProxy
+implements-interface:name=org/jboss/weld/bean/proxy/ProxyObject
+implements-interface:name=org/jboss/as/ee/component/serialization/WriteReplaceInterface
+class:name-pattern=.*\$\$EnhancerByCGLIB\$\$.*
 # possible values are:
 # implements-interface:name-part
 # implements-interface:name-pattern

@@ -43,7 +43,7 @@ class ClassMatcherFileParser {
                     continue;
                 }
                 String kind    = s.substring(0, columnPos).trim();
-                String variant = s.substring(columnPos + 1).trim();
+                String variant = s.substring(columnPos + 1, equalsPos).trim();
                 String target  = s.substring(equalsPos + 1).trim();
                 if (target.length() == 0) {
                     // Invalid class name

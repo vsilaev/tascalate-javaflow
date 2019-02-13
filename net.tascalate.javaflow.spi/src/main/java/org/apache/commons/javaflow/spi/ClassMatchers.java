@@ -93,7 +93,7 @@ public final class ClassMatchers {
     }    
     
     public static ClassMatcher byClassNamePattern(final String classNamePattern) {
-        final Pattern pattern = Pattern.compile("^" + escapeDots(className(classNamePattern)) + "$");
+        final Pattern pattern = Pattern.compile("^" + classNamePattern + "$");
         return new ClassMatcher() {
             @Override
             public boolean matches(String name, String signature, String superName, String[] interfaces) {
@@ -143,13 +143,7 @@ public final class ClassMatchers {
         };
     }
     
-    private static String escapeDots(String s) {
-        return s != null ? MATCH_DOTS.matcher(s).replaceAll("\\.") : null;
-    }
-    
     private static String className(String internalClassName) {
-        return internalClassName != null ? internalClassName.replace('/', '.') : null;
+        return internalClassName != null ? internalClassName.replace('.', '/') : null;
     }
-    
-    private static final Pattern MATCH_DOTS = Pattern.compile("\\.");
 }

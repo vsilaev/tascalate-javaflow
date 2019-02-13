@@ -15,10 +15,6 @@
  */
 package org.apache.commons.javaflow.spi;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class StopException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
@@ -32,26 +28,4 @@ public class StopException extends RuntimeException {
     }
 
     public static final StopException INSTANCE = new StopException();
-
-    private static boolean __dirtyCheckSkipContinuationsOnClass(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        if (null != interfaces) {
-            for (String intf : interfaces) {
-                if (PROXY_MARKER_INTERFACES.contains(intf)) {
-                    return true;
-                }
-            }
-        }
-        String lname = name.toLowerCase();
-        if (lname.contains("$$enhancer") && lname.contains("cglib")) {
-            return true;
-        }
-        return false;
-    }
-
-    private static final Set<String> PROXY_MARKER_INTERFACES = new HashSet<String>(Arrays.asList(
-        "org/apache/webbeans/proxy/OwbInterceptorProxy",
-        "org/apache/webbeans/proxy/OwbNormalScopeProxy",
-        "org/jboss/weld/bean/proxy/ProxyObject",
-        "org/jboss/as/ee/component/serialization/WriteReplaceInterface"
-    ));
 }
