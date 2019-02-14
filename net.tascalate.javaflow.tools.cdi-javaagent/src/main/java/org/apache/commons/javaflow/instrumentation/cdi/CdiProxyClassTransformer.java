@@ -103,6 +103,7 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         synchronized (classLoader2resolver) {
             ContinuableClassInfoResolver cachedResolver = classLoader2resolver.get(classLoader);
             if (null == cachedResolver) {
+                log.debug("Create classInfoResolver for class loader " + classLoader);
                 ContinuableClassInfoResolver newResolver = resourceTransformationFactory
                     .createResolver(new ExtendedClasspathResourceLoader(classLoader));
                 classLoader2resolver.put(classLoader, newResolver);

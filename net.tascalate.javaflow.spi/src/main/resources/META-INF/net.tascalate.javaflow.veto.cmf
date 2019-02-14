@@ -4,6 +4,7 @@ implements-interface:name=org/jboss/weld/bean/proxy/ProxyObject
 implements-interface:name=org/jboss/as/ee/component/serialization/WriteReplaceInterface
 class:name-pattern=.*\$\$EnhancerByCGLIB\$\$.*
 # possible values are:
+# implements-interface:name
 # implements-interface:name-part
 # implements-interface:name-pattern
 # extends-class:name
@@ -12,3 +13,4 @@ class:name-pattern=.*\$\$EnhancerByCGLIB\$\$.*
 # class:name
 # class:name-part
 # class:name-pattern
+# Classes should be named in internal format, i.e. com/company/myapp/MyClass

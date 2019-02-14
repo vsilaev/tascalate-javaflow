@@ -24,16 +24,17 @@ import java.util.Set;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.FieldVisitor;
 import net.tascalate.asmx.MethodVisitor;
-import net.tascalate.asmx.Type;
-import net.tascalate.asmx.Opcodes;
 
+import org.apache.commons.javaflow.instrumentation.cdi.owb.OwbProxyClassProcessor;
+import org.apache.commons.javaflow.instrumentation.cdi.spring.SpringProxyClassProcessor;
+import org.apache.commons.javaflow.instrumentation.cdi.weld.WeldProxyClassProcessor;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
 
-class CdiProxyClassAdapter extends ClassVisitor {
+class CdiProxyClassAdapter extends ExtendedClassVisitor {
 
-    static enum CdiEnvironmentType {
+    static enum ContainerType {
         WELD("org/jboss/weld/bean/proxy/ProxyObject") {
             
             @Override
@@ -44,16 +45,18 @@ class CdiProxyClassAdapter extends ClassVisitor {
             }
             
             @Override
-            MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc) {
-                return new AroundWeldProxyInvocationAdvice(ca.api, mv, acc, ca.className, name, desc);
-            }
+            ProxyClassProcessor createProcessor(int api, String className, ContinuableClassInfo classInfo) {
+                return new WeldProxyClassProcessor(api, className, classInfo);
+            }            
+
         }, 
         SPRING("org/springframework/aop/framework/Advised") {
             
             @Override
-            MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc) {
-                return new AroundSpringProxyInvocationAdvice(ca.api, mv, acc, ca.className, name, desc);
+            ProxyClassProcessor createProcessor(int api, String className, ContinuableClassInfo classInfo) {
+                return new SpringProxyClassProcessor(api, className, classInfo);
             }
+            
         }, 
         OWB(
             "org/apache/webbeans/proxy/OwbInterceptorProxy",
@@ -61,51 +64,39 @@ class CdiProxyClassAdapter extends ClassVisitor {
             ) {
             
             @Override
-            MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc) {
-                if (null != ca.owbProxiedInstanceType) {
-                    return new AroundOwbInterceptorProxyAdvice(ca.api, mv, acc, ca.className, name, desc, ca.owbProxiedInstanceType); 
-                } else if (null != ca.owbProxiedInstanceProviderType) {
-                    return new AroundOwbScopeProxyAdvice(ca.api, mv, acc, ca.className, name, desc, ca.owbProxiedInstanceProviderType); 
-                } else {
-                    return mv;
-                }
-            }            
+            ProxyClassProcessor createProcessor(int api, String className, ContinuableClassInfo classInfo) {
+                return new OwbProxyClassProcessor(api, className, classInfo);
+            }
+            
         }
         ;
 
         private Set<String> markerInterfaces;
         
-        private CdiEnvironmentType(String... markerInterfaces) {
+        private ContainerType(String... markerInterfaces) {
             this.markerInterfaces = 
                 Collections.unmodifiableSet( new HashSet<String>(Arrays.asList(markerInterfaces)) );
         }
         
-        abstract MethodVisitor createAdviceAdapter(CdiProxyClassAdapter ca, MethodVisitor mv, int acc, String name, String desc);
         boolean accept(String className, String interfaceName) {
             return markerInterfaces.contains(interfaceName);
         }
+        
+        abstract ProxyClassProcessor createProcessor(int api, String className, ContinuableClassInfo classInfo);
     }
     
-    String className;
-    Type owbProxiedInstanceType;
-    Type owbProxiedInstanceProviderType;
-    
-    private CdiEnvironmentType cdiEnvironmentType;
-    private ContinuableClassInfo classInfo;
-
     private final ContinuableClassInfoResolver cciResolver;
+    private ProxyClassProcessor processor;
 
     CdiProxyClassAdapter(ClassVisitor delegate, ContinuableClassInfoResolver cciResolver) {
-        super(Opcodes.ASM7, delegate);
+        super(delegate);
         this.cciResolver = cciResolver;
     }
 
-
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        className = name;
-        CdiEnvironmentType selectedType = null;
-        CdiEnvironmentType[] cdiEnvironmentTypes = CdiEnvironmentType.values();
+        ContainerType selectedType = null;
+        ContainerType[] cdiEnvironmentTypes = ContainerType.values();
         outerLoop:
         for (final String interfaze : interfaces) {
             for (int i = cdiEnvironmentTypes.length - 1; i >= 0; i--) {
@@ -123,8 +114,7 @@ class CdiProxyClassAdapter extends ClassVisitor {
             throw StopException.INSTANCE;
         }
         
-        cdiEnvironmentType = selectedType;
-
+        ContinuableClassInfo classInfo;
         try {
             classInfo = cciResolver.resolve(superName);
             if (null == classInfo) {
@@ -133,34 +123,23 @@ class CdiProxyClassAdapter extends ClassVisitor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        
+        processor = selectedType.createProcessor(api, name, classInfo);
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
-    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        if (AroundOwbInterceptorProxyAdvice.FIELD_PROXIED_INSTANCE.equals(name)) {
-            owbProxiedInstanceType = Type.getType(desc);
-        }
-        if (AroundOwbScopeProxyAdvice.FIELD_INSTANCE_PROVIDER.equals(name)) {
-            owbProxiedInstanceProviderType = Type.getType(desc);
-        }
-        return super.visitField(access, name, desc, signature, value);
+    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        return processor.visitField(this, access, name, descriptor, signature, value);
     }
-
+    
     @Override
-    public MethodVisitor visitMethod(int acc, String name, String desc, String signature, String[] exceptions) {
-        MethodVisitor mv = cv.visitMethod(acc, name, desc, signature, exceptions);
-        if (isContinuableMethodProxy(acc, name, desc, signature, exceptions) && null != cdiEnvironmentType) {
-            mv = cdiEnvironmentType.createAdviceAdapter(this, mv, acc, name, desc);
-        }
-        return mv;
+    public void visitEnd() {
+        processor.visitEnd(this);
     }
-
-    private boolean isContinuableMethodProxy(int acc, String name, String desc, String signature, String[] exceptions) {
-        int idx = name.lastIndexOf("$$super");
-        if (idx > 0) {
-            name = name.substring(0, idx);
-        }
-        return ! "<init>".equals(name) && classInfo.isContinuableMethod(acc, name, desc, signature);
+    
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        return processor.visitMethod(this, access, name, descriptor, signature, exceptions);
     }
 }

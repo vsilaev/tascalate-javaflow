@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.instrumentation.cdi;
+package org.apache.commons.javaflow.instrumentation.cdi.common;
 
 import net.tascalate.asmx.Label;
 import net.tascalate.asmx.MethodVisitor;
@@ -21,13 +21,13 @@ import net.tascalate.asmx.Opcodes;
 import net.tascalate.asmx.Type;
 import net.tascalate.asmx.commons.AdviceAdapter;
 
-abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
+abstract public class ProxiedMethodAdvice extends AdviceAdapter {
     final protected String className;
 
     private Label startFinally;
 
-    protected AroundCdiProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
-        super(api, mv, acc, methodName, desc);
+    protected ProxiedMethodAdvice(int api, MethodVisitor mv, int access, String className, String methodName, String descriptor) {
+        super(api, mv, access, methodName, descriptor);
         this.className = className;
     }
 
@@ -35,7 +35,7 @@ abstract class AroundCdiProxyInvocationAdvice extends AdviceAdapter {
     
     @Override
     protected void onMethodEnter() {
-        loadProxiedInstance();        
+        loadProxiedInstance();
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC, 
             INTERCEPTOR_SUPPORT_TYPE.getInternalName(), 

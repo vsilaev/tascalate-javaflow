@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.instrumentation.cdi;
+package org.apache.commons.javaflow.instrumentation.cdi.spring;
 
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Type;
 import net.tascalate.asmx.commons.Method;
 
-class AroundSpringProxyInvocationAdvice extends AroundCdiProxyInvocationAdvice {
-    protected AroundSpringProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
+import org.apache.commons.javaflow.instrumentation.cdi.common.ProxiedMethodAdvice;
+
+class SpringProxiedMethodAdvice extends ProxiedMethodAdvice {
+    protected SpringProxiedMethodAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
         super(api, mv, acc, className, methodName, desc);
     }
 

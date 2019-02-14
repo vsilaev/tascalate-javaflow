@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.instrumentation.cdi;
+package org.apache.commons.javaflow.instrumentation.cdi.owb;
 
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Type;
 
-class AroundOwbInterceptorProxyAdvice extends AroundCdiProxyInvocationAdvice {
+import org.apache.commons.javaflow.instrumentation.cdi.common.ProxiedMethodAdvice;
+
+class OwbInterceptorProxyMethodAdvice extends ProxiedMethodAdvice {
 
     final private Type proxiedInstanceType;
 
-    AroundOwbInterceptorProxyAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc, Type proxiedInstanceType) {
+    OwbInterceptorProxyMethodAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc, Type proxiedInstanceType) {
         super(api, mv, acc, className, methodName, desc);
         this.proxiedInstanceType = proxiedInstanceType;
     }

@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.instrumentation.cdi;
+package org.apache.commons.javaflow.instrumentation.cdi.spring;
 
 import net.tascalate.asmx.MethodVisitor;
-import net.tascalate.asmx.Type;
-import net.tascalate.asmx.commons.Method;
 
-class AroundWeldProxyInvocationAdvice extends AroundCdiProxyInvocationAdvice {
-    protected AroundWeldProxyInvocationAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc) {
-        super(api, mv, acc, className, methodName, desc);
+import org.apache.commons.javaflow.spi.ContinuableClassInfo;
+
+import org.apache.commons.javaflow.instrumentation.cdi.ProxyClassProcessor;
+
+public class SpringProxyClassProcessor extends ProxyClassProcessor {
+    
+    public SpringProxyClassProcessor(int api, String className, ContinuableClassInfo classInfo) {
+        super(api, className, classInfo);
     }
-
+    
     @Override
-    protected void loadProxiedInstance() {
-        loadThis();
-        invokeVirtual(Type.getObjectType(className), GET_TARGET_INSTANCE);
+    protected MethodVisitor createAdviceAdapter(MethodVisitor mv, int acc, String name, String desc) {
+        return new SpringProxiedMethodAdvice(api, mv, acc, className, name, desc);
     }
-
-    private static final Method GET_TARGET_INSTANCE = Method.getMethod("java.lang.Object getTargetInstance()");
+    
 }
