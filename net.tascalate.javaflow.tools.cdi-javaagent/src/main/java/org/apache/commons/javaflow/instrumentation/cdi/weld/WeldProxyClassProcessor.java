@@ -17,12 +17,14 @@ package org.apache.commons.javaflow.instrumentation.cdi.weld;
 
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Opcodes;
+import net.tascalate.asmx.Type;
 import net.tascalate.asmx.commons.Method;
 
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 
 import org.apache.commons.javaflow.instrumentation.cdi.ExtendedClassVisitor;
 import org.apache.commons.javaflow.instrumentation.cdi.ProxyClassProcessor;
+import org.apache.commons.javaflow.instrumentation.cdi.common.ProxiedMethodAdvice;
 
 public class WeldProxyClassProcessor extends ProxyClassProcessor {
     
@@ -34,7 +36,7 @@ public class WeldProxyClassProcessor extends ProxyClassProcessor {
     
     @Override
     protected MethodVisitor visitMethod(ExtendedClassVisitor cv, int access, String name, String descriptor, String signature, String[] exceptions) {
-        Method m = WeldProxiedMethodAdvice.GET_TARGET_INSTANCE; 
+        Method m = GET_TARGET_INSTANCE; 
         // True if NEW weld_getTargetInstance() is present
         hasTargetInstanceMethod |= m.getName().equals(name) && m.getDescriptor().equals(descriptor);
         return super.visitMethod(cv, access, name, descriptor, signature, exceptions);
@@ -42,7 +44,13 @@ public class WeldProxyClassProcessor extends ProxyClassProcessor {
     
     @Override
     protected MethodVisitor createAdviceAdapter(MethodVisitor mv, int access, String name, String descriptor) {
-        return new WeldProxiedMethodAdvice(api, mv, access, className, name, descriptor);
+        return new ProxiedMethodAdvice(api, mv, access, className, name, descriptor) {
+            @Override
+            protected void loadProxiedInstance() {
+                loadThis();
+                invokeVirtual(Type.getObjectType(className), GET_TARGET_INSTANCE);
+            }
+        };
     }
     
     @Override
@@ -50,7 +58,7 @@ public class WeldProxyClassProcessor extends ProxyClassProcessor {
         if (!hasTargetInstanceMethod) {
             // If NEW weld_getTargetInstance() is missing
             // then generate it and delegate call to OLD getTargetInstance()
-            Method m = WeldProxiedMethodAdvice.GET_TARGET_INSTANCE; 
+            Method m = GET_TARGET_INSTANCE; 
             MethodVisitor mv = cv.visitMethod(Opcodes.ACC_SYNTHETIC + Opcodes.ACC_FINAL, m.getName(), m.getDescriptor(), null, null);
             mv.visitCode();
             mv.visitVarInsn(Opcodes.ALOAD, 0);
@@ -65,4 +73,6 @@ public class WeldProxyClassProcessor extends ProxyClassProcessor {
         }
         super.visitEnd(cv);
     }
+    
+    private static final Method GET_TARGET_INSTANCE = Method.getMethod("java.lang.Object weld_getTargetInstance()");
 }

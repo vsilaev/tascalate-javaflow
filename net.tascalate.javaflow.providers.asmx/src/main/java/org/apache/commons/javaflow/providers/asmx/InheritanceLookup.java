@@ -49,20 +49,26 @@ import org.apache.commons.javaflow.spi.ResourceLoader;
  * @author Eric Bruneton
  * @author vsilaev
  */
-class InheritanceLookup {
+public class InheritanceLookup {
     
     private final ResourceLoader loader;
     private final Map<Key, String> lookupCache = new HashMap<Key, String>();
     
-    InheritanceLookup(ResourceLoader loader) {
+    public InheritanceLookup(ResourceLoader loader) {
         this.loader = loader;
     }
     
-    Type getCommonSuperType(Type type1, Type type2) {
-        return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
+    public boolean isSuperClass(String type1, String type2) {
+        String commonSuperClass = getCommonSuperClass(type1, type2);
+        return type1.equals(commonSuperClass);
     }
     
-    String getCommonSuperClass(String type1, String type2) {
+    public boolean isSubClass(String type1, String type2) {
+        String commonSuperClass = getCommonSuperClass(type1, type2);
+        return type2.equals(commonSuperClass);
+    }
+
+    public String getCommonSuperClass(String type1, String type2) {
         Key key = new Key(type1, type2);
         String result;
         synchronized (lookupCache) {
@@ -75,6 +81,20 @@ class InheritanceLookup {
         return result;
     }
 
+    public boolean isClassAvailable(String type) {
+        try {
+            InputStream in = loader.getResourceAsStream(type + ".class");
+            try { in.close(); } catch (IOException ex) {}
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+    
+    Type getCommonSuperType(Type type1, Type type2) {
+        return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
+    }
+    
     private String calculateCommonSuperClass(final String type1, final String type2) {
         try {
             ClassReader info1 = typeInfo(type1);

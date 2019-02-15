@@ -32,9 +32,11 @@ import net.tascalate.asmx.ClassWriter;
 
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
+import org.apache.commons.javaflow.providers.asmx.InheritanceLookup;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
+import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.StopException;
 
@@ -60,7 +62,9 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         }
 
         classLoader = getSafeClassLoader(classLoader);
-        final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
+        Object[] helpers = getCachedHelpers(classLoader);
+        final ContinuableClassInfoResolver resolver = (ContinuableClassInfoResolver)helpers[0];
+        final InheritanceLookup lookup = (InheritanceLookup)helpers[1];
         synchronized (resolver) {
             final ClassNameResolver.Result currentTarget = ClassNameResolver.resolveClassName(className, classBeingRedefined, classfileBuffer);
             try {
@@ -71,7 +75,7 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
                         public byte[] call() {
                             ClassReader reader = new ClassReader(classfileBuffer);
                             ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
-                            reader.accept(new CdiProxyClassAdapter(writer, resolver), ClassReader.EXPAND_FRAMES);
+                            reader.accept(new CdiProxyClassAdapter(writer, resolver, lookup), ClassReader.EXPAND_FRAMES);
                             return writer.toByteArray();
                         }
                     }, 
@@ -99,17 +103,19 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         return null != classLoader ? classLoader : systemClassLoader; 
     }
 
-    protected ContinuableClassInfoResolver getCachedResolver(ClassLoader classLoader) {
+    protected Object[] getCachedHelpers(ClassLoader classLoader) {
         synchronized (classLoader2resolver) {
-            ContinuableClassInfoResolver cachedResolver = classLoader2resolver.get(classLoader);
-            if (null == cachedResolver) {
+            Object[] cachedHelpers = classLoader2resolver.get(classLoader);
+            if (null == cachedHelpers) {
                 log.debug("Create classInfoResolver for class loader " + classLoader);
-                ContinuableClassInfoResolver newResolver = resourceTransformationFactory
-                    .createResolver(new ExtendedClasspathResourceLoader(classLoader));
-                classLoader2resolver.put(classLoader, newResolver);
-                return newResolver;
+                ResourceLoader loader = new ExtendedClasspathResourceLoader(classLoader); 
+                ContinuableClassInfoResolver cciResolver = resourceTransformationFactory.createResolver(loader);
+                InheritanceLookup inheritanceLookup = new InheritanceLookup(loader);
+                Object[] newHelpers = new Object[] {cciResolver, inheritanceLookup};
+                classLoader2resolver.put(classLoader, newHelpers);
+                return newHelpers;
             } else {
-                return cachedResolver;
+                return cachedHelpers;
             }
         }
     }
@@ -118,6 +124,6 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
     }
 
-    private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
+    private static final Map<ClassLoader, Object[]> classLoader2resolver = new WeakHashMap<ClassLoader, Object[]>();
     private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
 }

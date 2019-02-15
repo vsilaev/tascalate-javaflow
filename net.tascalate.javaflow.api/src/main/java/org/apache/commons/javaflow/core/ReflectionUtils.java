@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -168,33 +167,4 @@ public final class ReflectionUtils {
     public static final String descriptionOfClass(Object o) {
         return getClassName(o) + "/" + getClassLoaderName(o);
     }
-
-
-    public static Class<?> defineClass(ClassLoader cl, byte[] b) {
-        try {
-            return (Class<?>) defineClassMethod.invoke(cl, null, b, 0, b.length);
-        } catch (InvocationTargetException ex) {
-            log.error("Could not define class", ex.getTargetException());
-            throw new RuntimeException(ex.getTargetException());
-        } catch (Exception ex) {
-            log.error("Could not invoke method \"defineClass\"", ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private static final Method defineClassMethod;
-
-    static {
-        // defineClass(String name, byte[] b, int off, int len)
-        try {
-            defineClassMethod = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class,
-                    int.class, int.class);
-            defineClassMethod.setAccessible(true);
-        } catch (NoSuchMethodException ex) {
-            throw new IllegalStateException("Could not find method \"defineClass\"", ex);
-        } catch (SecurityException ex) {
-            throw new IllegalStateException("Could not find method \"defineClass\"", ex);
-        }
-    }
-
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.instrumentation.cdi.spring;
+package org.apache.commons.javaflow.instrumentation.cdi.cproxy;
 
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Type;
@@ -24,28 +24,25 @@ import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.instrumentation.cdi.ProxyClassProcessor;
 import org.apache.commons.javaflow.instrumentation.cdi.common.ProxiedMethodAdvice;
 
-public class SpringProxyClassProcessor extends ProxyClassProcessor {
+public class CustomProxyClassProcessor extends ProxyClassProcessor {
     
-    public SpringProxyClassProcessor(int api, String className, ContinuableClassInfo classInfo) {
+    public CustomProxyClassProcessor(int api, String className, ContinuableClassInfo classInfo) {
         super(api, className, classInfo);
     }
     
     @Override
-    protected MethodVisitor createAdviceAdapter(MethodVisitor mv, int acc, String name, String desc) {
-        return new ProxiedMethodAdvice(api, mv, acc, className, name, desc) {
+    protected MethodVisitor createAdviceAdapter(MethodVisitor mv, int access, final String name, final String descriptor) {
+        return new ProxiedMethodAdvice(api, mv, access, className, name, descriptor) {
             @Override
             protected void loadProxiedInstance() {
                 loadThis();
-                invokeVirtual(Type.getObjectType(className), GET_TARGET_SOURCE);
-                /*
-                 * May be used instead of above
-                invokeInterface(Type.getType("org/springframework/aop/framework/Advised"), GET_TARGET_SOURCE);
-                */
-                invokeInterface(Type.getObjectType("org/springframework/aop/TargetSource"), GET_TARGET);                
+                push(name);
+                push(descriptor);
+                invokeInterface(CUSTOM_CONTINUABLE_PROXY_TYPE, GET_INVOCATION_HANDLER);
             }
         };
     }
     
-    private static final Method GET_TARGET_SOURCE = Method.getMethod("org.springframework.aop.TargetSource getTargetSource()");
-    private static final Method GET_TARGET = Method.getMethod("java.lang.Object getTarget()");    
+    private static final Type CUSTOM_CONTINUABLE_PROXY_TYPE = Type.getObjectType("org/apache/commons/javaflow/core/CustomContinuableProxy");
+    private static final Method GET_INVOCATION_HANDLER = Method.getMethod("java.lang.Object getInvocationHandler(java.lang.String, java.lang.String)");
 }
