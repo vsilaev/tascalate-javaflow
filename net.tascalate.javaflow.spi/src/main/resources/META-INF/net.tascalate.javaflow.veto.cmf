@@ -1,3 +1,5 @@
+implements-interface:name=org/apache/commons/javaflow/core/ContinuableProxy
+implements-interface:name=org/apache/commons/javaflow/core/CustomContinuableProxy
 implements-interface:name=org/apache/webbeans/proxy/OwbInterceptorProxy
 implements-interface:name=org/apache/webbeans/proxy/OwbNormalScopeProxy
 implements-interface:name=org/jboss/weld/bean/proxy/ProxyObject
