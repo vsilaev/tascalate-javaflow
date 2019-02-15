@@ -19,7 +19,7 @@ import java.lang.reflect.Proxy;
 
 /**
  * Generic interface for continuable dynamic proxy classes.
- * Unlike standard Java {@link Proxy} or CGLib Proxy where it's possible to resolve proxy -> handler 
+ * Unlike standard Java {@link Proxy} or CGLib Proxy where it's possible to resolve proxy -&gt; handler 
  * dependency via API, custom continuable proxies should provide implementation of this interface to get 
  * corresponding "handler" from the proxied object, in the same manner as {@link Proxy#getInvocationHandler(Object)}. 
  * 
