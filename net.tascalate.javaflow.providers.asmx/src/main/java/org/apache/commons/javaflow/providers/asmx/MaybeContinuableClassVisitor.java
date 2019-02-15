@@ -74,7 +74,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+    public MethodVisitor visitMethod(int access, final String name, final String desc, String signature, String[] exceptions) {
         if (isAnnotation) {
             return null;
         }
@@ -82,8 +82,8 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         boolean isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0;
         boolean isPackagePrivate = (access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED)) == 0;
         if (isSynthetic) {
-            boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
-            boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
+            final boolean isAccessor = isPackagePrivate && name.startsWith("access$") && (access & Opcodes.ACC_STATIC) != 0;
+            final boolean isBridge = (access & Opcodes.ACC_BRIDGE) != 0;
             if (isAccessor || isBridge) {
                 return new MethodVisitor(this.api) {
                     @Override

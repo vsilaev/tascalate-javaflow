@@ -42,7 +42,7 @@ public class ClassNameResolver {
         String resolvedClassName = className != null ? className :
             classBeingRedefined != null ? classBeingRedefined.getName().replace('.', '/') : null;
 
-        String[] classNameFromBytes = {null}; 
+        final String[] classNameFromBytes = {null}; 
         if (null == resolvedClassName) {
             try {
                 ClassReader cv = new ClassReader(classfileBuffer);

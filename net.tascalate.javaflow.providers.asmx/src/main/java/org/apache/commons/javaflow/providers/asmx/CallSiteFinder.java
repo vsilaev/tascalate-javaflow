@@ -65,7 +65,7 @@ class CallSiteFinder {
     }
 
     List<Result> findMatchingCallSites(InsnList instructions, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
-        List<Result> result = new ArrayList<>();
+        List<Result> result = new ArrayList<Result>();
         for (Iterator<AbstractInsnNode> i = instructions.iterator(); i.hasNext(); ) {
             AbstractInsnNode ins = i.next();
             if (ins instanceof MethodInsnNode) {
@@ -82,14 +82,14 @@ class CallSiteFinder {
 
     @SuppressWarnings("unchecked")
     static List<LocalVariableAnnotationNode> annotationsList(List<?> v) {
-        return null == v ? Collections.emptyList() : (List<LocalVariableAnnotationNode>)v;
+        return null == v ? Collections.<LocalVariableAnnotationNode>emptyList() : (List<LocalVariableAnnotationNode>)v;
     }
 
     static Map<Integer, List<AnnotationNode>> annotationsList(List<?>[] v) {
         if (v == null) {
             return Collections.emptyMap();
         }
-        Map<Integer, List<AnnotationNode>> result = new HashMap<>();
+        Map<Integer, List<AnnotationNode>> result = new HashMap<Integer, List<AnnotationNode>>();
         int i = 0;
         for (List<?> list : v) {
             @SuppressWarnings("unchecked")
@@ -126,7 +126,7 @@ class CallSiteFinder {
                     return new Result(v, m, annotations);
                 } else if (n instanceof FieldInsnNode) {
                     // static/instance field
-                    return new Result(n, m, Collections.emptySet());
+                    return new Result(n, m, Collections.<String>emptySet());
                 } else {
                     // Not interested in other types like directly reused return value from chained calls
                     break;
@@ -139,7 +139,7 @@ class CallSiteFinder {
     }
 
     private Set<String> getVarAnnotations(List<LocalVariableAnnotationNode> varAnnotations, VarInsnNode v) {
-        Set<String> result = new TreeSet<>();
+        Set<String> result = new TreeSet<String>();
         for (LocalVariableAnnotationNode n : varAnnotations) {
             int idx = n.index.indexOf(v.var);
             if (idx < 0) {
@@ -173,7 +173,7 @@ class CallSiteFinder {
     }
 
     private Set<String> getParamAnnotations(Map<Integer, List<AnnotationNode>> paramAnnotations, int varIdx) {
-        Set<String> result = new TreeSet<>();
+        Set<String> result = new TreeSet<String>();
         List<AnnotationNode> annos = paramAnnotations.get(varIdx);
         if (null != annos) {
             for (AnnotationNode n : annos) {

@@ -149,7 +149,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
             analyzer = new Analyzer<BasicValue>(new FastClassVerifier(inheritanceLookup)) {
                 @Override
                 protected Frame<BasicValue> newFrame(int nLocals, int nStack) {
-                    return new MonitoringFrame<>(nLocals, nStack);
+                    return new MonitoringFrame<BasicValue>(nLocals, nStack);
                 }
 
                 @Override
@@ -167,8 +167,8 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
     }
 
     private void checkCallSites() {
-        List<LocalVariableAnnotationNode> varAnnotations = new ArrayList<>();
-        Map<Integer, List<AnnotationNode>> paramAnnotations = new HashMap<>();
+        List<LocalVariableAnnotationNode> varAnnotations = new ArrayList<LocalVariableAnnotationNode>();
+        Map<Integer, List<AnnotationNode>> paramAnnotations = new HashMap<Integer, List<AnnotationNode>>();
 
         varAnnotations.addAll(CallSiteFinder.annotationsList(visibleLocalVariableAnnotations));
         varAnnotations.addAll(CallSiteFinder.annotationsList(invisibleLocalVariableAnnotations));
@@ -215,7 +215,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
 
     private void moveNew() throws AnalyzerException {
         SourceInterpreter i = new SourceInterpreter();
-        Analyzer<SourceValue> a = new Analyzer<>(i);
+        Analyzer<SourceValue> a = new Analyzer<SourceValue>(i);
         a.analyze(className, this);
 
         HashMap<AbstractInsnNode, MethodInsnNode> movable = new HashMap<AbstractInsnNode, MethodInsnNode>();
