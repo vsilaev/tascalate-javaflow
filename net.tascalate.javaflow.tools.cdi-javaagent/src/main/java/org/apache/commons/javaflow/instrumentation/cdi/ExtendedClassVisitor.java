@@ -26,11 +26,13 @@ public abstract class ExtendedClassVisitor extends ClassVisitor {
         super(Opcodes.ASM7, delegate);
     }
     
-    public final FieldVisitor defaultVisitField(int access, String name, String descriptor, String signature, Object value) {
+    @SuppressWarnings("exports")
+	public final FieldVisitor defaultVisitField(int access, String name, String descriptor, String signature, Object value) {
         return super.visitField(access, name, descriptor, signature, value);
     }
     
-    public final MethodVisitor defaultVisitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+    @SuppressWarnings("exports")
+	public final MethodVisitor defaultVisitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
     
