@@ -20,6 +20,7 @@ import java.lang.instrument.IllegalClassFormatException;
 
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -41,7 +42,6 @@ import org.apache.commons.javaflow.spi.StopException;
 
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
-import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
 
 public class CdiProxyClassTransformer implements ClassFileTransformer {
     private static final Logger log = LoggerFactory.getLogger(CdiProxyClassTransformer.class);
@@ -52,9 +52,9 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     // @Override
     public byte[] transform(
             ClassLoader classLoader, 
-            final String className, 
-            final Class<?> classBeingRedefined,
-            final ProtectionDomain protectionDomain, 
+            String className, 
+            Class<?> classBeingRedefined,
+            ProtectionDomain protectionDomain, 
             final byte[] classfileBuffer) throws IllegalClassFormatException {
         
         if (isSystemClassLoaderParent(classLoader)) {
@@ -64,14 +64,18 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
             return null;
         }
 
+        // Ensure classLoader is not null (null for boot class loader)
         classLoader = getSafeClassLoader(classLoader);
+        // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
+        className = ClassHierarchy.resolveClassName(className, classBeingRedefined, classfileBuffer);
+        
         Object[] helpers = getCachedHelpers(classLoader);
         final ContinuableClassInfoResolver resolver = (ContinuableClassInfoResolver)helpers[0];
         final ClassHierarchy hierarchy = (ClassHierarchy)helpers[1];
         @SuppressWarnings("unchecked")
         final List<ProxyType> proxyTypes = (List<ProxyType>)helpers[2];
+        
         synchronized (resolver) {
-            final ClassNameResolver.Result currentTarget = ClassNameResolver.resolveClassName(className, classBeingRedefined, classfileBuffer);
             try {
                 // Execute with current class as extra resource (in-memory)
                 // Mandatory for Java8 lambdas and alike
@@ -85,16 +89,16 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
                             return writer.toByteArray();
                         }
                     }, 
-                    currentTarget.asResource()
+                    Collections.singletonMap(className + ".class", classfileBuffer)
                 );
             } catch (StopException ex) {
                 return null;
             } catch (RuntimeException ex) {
                 if (log.isErrorEnabled()) {
                     if (VERBOSE_ERROR_REPORTS) {
-                        log.error("Error transforming " + currentTarget.className, ex);
+                        log.error("Error transforming " + className, ex);
                     } else {
-                        log.error("Error transforming " + currentTarget.className);
+                        log.error("Error transforming " + className);
                     }
                 }
                 return null;

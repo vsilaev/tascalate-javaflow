@@ -78,6 +78,18 @@ public class ClassHierarchy {
         return result;
     }
     
+    public static String resolveClassName(String className, Class<?> classBeingRedefined, byte[] classfileBuffer) {
+        String resolvedClassName = className != null ? className :
+            classBeingRedefined != null ? classBeingRedefined.getName().replace('.', '/') : null;
+
+        if (null == resolvedClassName) {
+            ClassReader cv = new ClassReader(classfileBuffer);
+            return cv.getClassName();
+        } else {
+            return resolvedClassName;
+        }
+    }
+    
     Type getCommonSuperType(Type type1, Type type2) {
         return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
     }

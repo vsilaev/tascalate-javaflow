@@ -19,7 +19,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 
 import java.security.ProtectionDomain;
-
+import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
@@ -27,13 +27,14 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
-import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
+
+import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
+import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 
 public class JavaFlowClassTransformer implements ClassFileTransformer {
     private static final Logger log = LoggerFactory.getLogger(JavaFlowClassTransformer.class);
@@ -55,30 +56,34 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
             return null;
         }
 
+        // Ensure classLoader is not null (null for boot class loader)
         classLoader = getSafeClassLoader(classLoader);
+        // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
+        className = ClassHierarchy.resolveClassName(className, classBeingRedefined, classfileBuffer);
         final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
 
         synchronized (resolver) {
-            final ClassNameResolver.Result currentTarget = ClassNameResolver.resolveClassName(
-                className, classBeingRedefined, classfileBuffer
-            );
             try {
                 // Execute with current class as extra resource (in-memory)
                 // Mandatory for Java8 lambdas and alike
-                return ExtendedClasspathResourceLoader.runWithInMemoryResources(new Callable<byte[]>() {
-                    public byte[] call() {
-                        resolver.forget(currentTarget.className);
-                        final ResourceTransformer transformer = resourceTransformationFactory
-                                .createTransformer(resolver);
-                        return transformer.transform(classfileBuffer);
-                    }
-                }, currentTarget.asResource());
+                final String cn = className;
+                return ExtendedClasspathResourceLoader.runWithInMemoryResources(
+                    new Callable<byte[]>() {
+                        public byte[] call() {
+                            resolver.forget(cn);
+                            final ResourceTransformer transformer = resourceTransformationFactory
+                                    .createTransformer(resolver);
+                            return transformer.transform(classfileBuffer);
+                        }
+                    }, 
+                    Collections.singletonMap(className + ".class", classfileBuffer)
+                );
             } catch (RuntimeException ex) {
                 if (log.isErrorEnabled()) {
                     if (VERBOSE_ERROR_REPORTS) {
-                        log.error("Error transforming " + currentTarget.className, ex);
+                        log.error("Error transforming " + className, ex);
                     } else {
-                        log.error("Error transforming " + currentTarget.className);
+                        log.error("Error transforming " + className);
                     }
                 }
                 return null;
