@@ -17,9 +17,9 @@ public class InheritanceLookupTest {
         ClassHierarchy lookup = new ClassHierarchy(new ClasspathResourceLoader(ClassLoader.getSystemClassLoader()));
         
         ClassHierarchy.TypeInfo info1 = lookup.getTypeInfo("java/util/LinkedList");
-        assertTrue(info1.implementationOf(lookup.getTypeInfo("java/lang/Object")));
-        assertTrue(info1.implementationOf(lookup.getTypeInfo("java/util/AbstractCollection")));
-        assertTrue(info1.implementationOf(lookup.getTypeInfo("java/util/Queue")));
+        assertTrue(info1.isSubclassOf(lookup.getTypeInfo("java/lang/Object")));
+        assertTrue(info1.isSubclassOf(lookup.getTypeInfo("java/util/AbstractCollection")));
+        assertTrue(info1.isSubclassOf(lookup.getTypeInfo("java/util/Queue")));
         
         assertEquals("java/util/AbstractCollection", lookup.getCommonSuperClass("java/util/LinkedList", "java/util/HashSet"));
         assertEquals("java/util/Collection", lookup.getCommonSuperClass("java/util/List", "java/util/Set"));

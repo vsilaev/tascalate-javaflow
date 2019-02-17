@@ -21,6 +21,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +38,6 @@ import org.apache.commons.javaflow.spi.ResourceLoader;
  * A class that computes the common super class of two classes without
  * actually loading them with a ClassLoader.
  * 
- * @author Eric Bruneton
  * @author vsilaev
  */
 public class ClassHierarchy {
@@ -49,6 +49,8 @@ public class ClassHierarchy {
     
     public ClassHierarchy(ResourceLoader loader) {
         this.loader = loader;
+        // OBJECT will never be removed from the cache
+        // WHILE THERE IS A HARD REFERENCE
         typesCache.put(OBJECT, new WeakReference<TypeInfo>(OBJECT));
     }
 
@@ -85,11 +87,11 @@ public class ClassHierarchy {
             TypeInfo info1 = getTypeInfo(type1);
             TypeInfo info2 = getTypeInfo(type2);
             // Fast check without deep loading of info2
-            if (info1.implementationOf(info2)) {
+            if (info1.isSubclassOf(info2)) {
                 return type2;
             }
             // The reverse, now both will be loaded
-            if (info2.implementationOf(info1)) {
+            if (info2.isSubclassOf(info1)) {
                 return type1;
             }
             List<TypeInfo> supers1 = info1.flattenHierarchy();
@@ -158,7 +160,7 @@ public class ClassHierarchy {
             this.name = name;
             this.isInterface = isInterface;
             this.superClassName = superClassName;
-            this.interfaceNames = null != interfaceNames ? interfaceNames : new String[0];
+            this.interfaceNames = null != interfaceNames ? interfaceNames : EMPTY_STRINGS;
         }
         
         synchronized TypeInfo superClass() throws IOException {
@@ -174,18 +176,24 @@ public class ClassHierarchy {
             if (null != interfaceNames) {
                 // Not loaded yet
                 // For flatten we will need a predictable order
-                Arrays.sort(interfaceNames);
+                if (interfaceNames != EMPTY_STRINGS) {
+                    Arrays.sort(interfaceNames);
+                }
                 int size = interfaceNames.length;
-                interfaces = new TypeInfo[size];
-                for (int i = 0; i < size; i++) {
-                    interfaces[i] = getTypeInfo(interfaceNames[i]);
+                if (size == 0) {
+                    interfaces = EMPTY_TYPE_INFOS;
+                } else {
+                    interfaces = new TypeInfo[size];
+                    for (int i = 0; i < size; i++) {
+                        interfaces[i] = getTypeInfo(interfaceNames[i]);
+                    }
                 }
                 interfaceNames = null;
             }
             return interfaces;
         }
         
-        boolean implementationOf(TypeInfo base) throws IOException {
+        boolean isSubclassOf(TypeInfo base) throws IOException {
             String targetName = base.name;
             // Check names first to avoid loading hierarchy
             if (name.equals(targetName)) {
@@ -207,7 +215,7 @@ public class ClassHierarchy {
                 }
             }
             TypeInfo t = superClass();
-            if (null != t && t.implementationOf(base)) {
+            if (null != t && t.isSubclassOf(base)) {
                 return true;
             }
             // If base is interface then check interfaces
@@ -215,7 +223,7 @@ public class ClassHierarchy {
                 TypeInfo[] tt = interfaces();
                 int size = tt.length;
                 for (int i = 0; i < size; i++) {
-                    if (tt[i].implementationOf(base)) {
+                    if (tt[i].isSubclassOf(base)) {
                         return true;
                     }
                 }
@@ -277,7 +285,7 @@ public class ClassHierarchy {
             if ((null == other) || !(other instanceof TypeInfo)) {
                 return false;
             }
-            return name.equals(((TypeInfo)other).name);
+            return this == other || name.equals(((TypeInfo)other).name);
         }
     }
     
@@ -285,6 +293,21 @@ public class ClassHierarchy {
         @Override
         TypeInfo superClass() {
             return null;
+        }
+        
+        @Override
+        TypeInfo[] interfaces() {
+            return EMPTY_TYPE_INFOS;
+        }
+        
+        @Override
+        boolean isSubclassOf(TypeInfo base) {
+            return equals(base);
+        }
+        
+        @Override
+        List<TypeInfo> flattenHierarchy() {
+            return Collections.emptyList();
         }
     };
     
@@ -327,4 +350,7 @@ public class ClassHierarchy {
             return a == null ? b == null : a.equals(b);
         }
     }
+    
+    static final String[] EMPTY_STRINGS = new String[0];
+    static final TypeInfo[] EMPTY_TYPE_INFOS = new TypeInfo[0];
 }
