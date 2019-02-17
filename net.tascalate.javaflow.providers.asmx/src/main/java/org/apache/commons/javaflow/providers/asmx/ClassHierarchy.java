@@ -17,6 +17,8 @@ package org.apache.commons.javaflow.providers.asmx;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,11 +44,12 @@ public class ClassHierarchy {
     
     private final ResourceLoader loader;
     private final Map<Key, String> lookupCache = new HashMap<Key, String>();
-    private final Map<TypeInfo, TypeInfo> typesCache = new WeakHashMap<TypeInfo, TypeInfo>();
+    private final Map<TypeInfo, Reference<TypeInfo>> typesCache 
+        = new WeakHashMap<TypeInfo, Reference<TypeInfo>>();
     
     public ClassHierarchy(ResourceLoader loader) {
         this.loader = loader;
-        typesCache.put(OBJECT, OBJECT);
+        typesCache.put(OBJECT, new WeakReference<TypeInfo>(OBJECT));
     }
 
     public boolean isSubClass(String type1, String type2) {
@@ -72,12 +75,6 @@ public class ClassHierarchy {
         }
         return result;
     }
-
-    /*
-    public boolean isClassAvailable(String type) {
-        return loader.hasResource(type + ".class");
-    }
-    */
     
     Type getCommonSuperType(Type type1, Type type2) {
         return Type.getObjectType(getCommonSuperClass(type1.getInternalName(), type2.getInternalName()));
@@ -113,17 +110,20 @@ public class ClassHierarchy {
     
     TypeInfo getTypeInfo(String type) throws IOException {
         TypeInfo key = new TypeInfo(type, null, null, false);
-        TypeInfo value = typesCache.get(key);
-        if (null == value) {
-            ClassReader info = loadTypeInfo(type);
-            value = new TypeInfo(info.getClassName(), 
-                                 info.getSuperName(), 
-                                 info.getInterfaces(),
-                                 (info.getAccess() & Opcodes.ACC_INTERFACE) != 0);
-            // Same key & values
-            typesCache.put(value, value); 
+        synchronized (typesCache) {
+            Reference<TypeInfo> reference = typesCache.get(key); 
+            TypeInfo value = null != reference ? reference.get() : null;
+            if (null == value) {
+                ClassReader info = loadTypeInfo(type);
+                value = new TypeInfo(info.getClassName(), 
+                                     info.getSuperName(), 
+                                     info.getInterfaces(),
+                                     (info.getAccess() & Opcodes.ACC_INTERFACE) != 0);
+                // Same key & value
+                typesCache.put(value, new WeakReference<TypeInfo>(value)); 
+            }
+            return value;
         }
-        return value;
     }
 
     /**
