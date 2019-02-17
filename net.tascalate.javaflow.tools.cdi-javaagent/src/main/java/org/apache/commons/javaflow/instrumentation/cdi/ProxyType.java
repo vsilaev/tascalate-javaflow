@@ -67,7 +67,7 @@ public enum ProxyType {
         }
     },
     CGLIB("org/apache/commons/javaflow/core/ContinuableProxy") {
-        String cglibProxyBase = "net/sf/cglib/proxy/Proxy$ProxyImpl";
+        private final String cglibProxyBase = "net/sf/cglib/proxy/Proxy$ProxyImpl";
         
         @Override
         boolean accept(ClassHierarchy hierarchy, 
@@ -76,8 +76,7 @@ public enum ProxyType {
                        String superName, 
                        String[] interfaces) {
             // Check that this is CGLib proxy
-            // Otherwise it's a regular Java proxy
-            if (cglibProxyBase.equals(superName) || hierarchy.isSubClass(className, cglibProxyBase)) {
+            if (cglibProxyBase.equals(superName) /*|| hierarchy.isSubClass(className, cglibProxyBase)*/) {
                 return super.accept(hierarchy, className, signature, superName, interfaces);
             } else {
                 return false;
@@ -85,7 +84,7 @@ public enum ProxyType {
         }
         
         boolean isAvailable(ResourceLoader resourceLoader) {
-            return resourceLoader.hasResource(cglibProxyBase) && super.isAvailable(resourceLoader);
+            return resourceLoader.hasResource(cglibProxyBase + ".class") && super.isAvailable(resourceLoader);
         }
         
         @Override
@@ -93,7 +92,22 @@ public enum ProxyType {
             return new CGLibProxyClassProcessor(api, className, classInfo);
         }
     },
-    JAVA("org/apache/commons/javaflow/core/ContinuableProxy" /* SAME AS CGLIB, SHOULD FOLLOW */) {
+    JAVA("org/apache/commons/javaflow/core/ContinuableProxy") {
+        private final String javaProxyBase = "java/lang/reflect/Proxy";
+        
+        @Override
+        boolean accept(ClassHierarchy hierarchy, 
+                       String className, 
+                       String signature, 
+                       String superName, 
+                       String[] interfaces) {
+            // Check that this is Java proxy
+            if (javaProxyBase.equals(superName) /*|| hierarchy.isSubClass(className, cglibProxyBase)*/) {
+                return super.accept(hierarchy, className, signature, superName, interfaces);
+            } else {
+                return false;
+            }
+        }        
         
         @Override
         ProxyClassProcessor createProcessor(int api, String className, ContinuableClassInfo classInfo) {

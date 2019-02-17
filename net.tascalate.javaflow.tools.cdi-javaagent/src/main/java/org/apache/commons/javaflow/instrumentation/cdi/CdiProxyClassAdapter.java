@@ -25,10 +25,12 @@ import net.tascalate.asmx.MethodVisitor;
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 
 class CdiProxyClassAdapter extends ExtendedClassVisitor {
+    private static final Logger log = LoggerFactory.getLogger(CdiProxyClassAdapter.class);
     
     private final ContinuableClassInfoResolver cciResolver;
     private final ClassHierarchy hierarchy;
@@ -74,7 +76,9 @@ class CdiProxyClassAdapter extends ExtendedClassVisitor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+        if (log.isDebugEnabled()) {
+            log.debug("Using " + selectedType + " proxy enhancer for class " + name);
+        }
         processor = selectedType.createProcessor(api, name, classInfo);
         super.visit(version, access, name, signature, superName, interfaces);
     }
