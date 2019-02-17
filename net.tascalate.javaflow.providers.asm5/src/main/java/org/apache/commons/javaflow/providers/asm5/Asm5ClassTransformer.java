@@ -37,11 +37,11 @@ import org.apache.commons.javaflow.spi.StopException;
  */
 class Asm5ClassTransformer implements ResourceTransformer {
 
-    private final InheritanceLookup inheritanceLookup;
+    private final ClassHierarchy classHierarchy;
     private final ContinuableClassInfoResolver cciResolver;
 
-    Asm5ClassTransformer(InheritanceLookup inheritanceLookup, ContinuableClassInfoResolver cciResolver) {
-        this.inheritanceLookup = inheritanceLookup;
+    Asm5ClassTransformer(ClassHierarchy classHierarchy, ContinuableClassInfoResolver cciResolver) {
+        this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
     }
 
@@ -49,12 +49,12 @@ class Asm5ClassTransformer implements ResourceTransformer {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES) {
             @Override
             protected String getCommonSuperClass(final String type1, final String type2) {
-                return inheritanceLookup.getCommonSuperClass(type1, type2);
+                return classHierarchy.getCommonSuperClass(type1, type2);
             }
         };
         ContinuableClassVisitor visitor = new ContinuableClassVisitor(
             cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
-            inheritanceLookup,
+            classHierarchy,
             cciResolver,
             original
         );

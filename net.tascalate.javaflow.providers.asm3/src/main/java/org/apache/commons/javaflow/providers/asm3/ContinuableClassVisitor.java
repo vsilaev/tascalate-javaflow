@@ -40,7 +40,7 @@ import org.apache.commons.javaflow.spi.StopException;
  */
 class ContinuableClassVisitor extends ClassAdapter {
 
-    private final InheritanceLookup inheritanceLookup;
+    private final ClassHierarchy classHierarchy;
     private final ContinuableClassInfoResolver cciResolver;
     private final byte[] originalBytes;
 
@@ -49,11 +49,11 @@ class ContinuableClassVisitor extends ClassAdapter {
     private boolean skipEnchancing = false;
 
     ContinuableClassVisitor(ClassVisitor cv, 
-                            InheritanceLookup inheritanceLookup, 
+                            ClassHierarchy classHierarchy, 
                             ContinuableClassInfoResolver cciResolver, 
                             byte[] originalBytes) {
         super(cv);
-        this.inheritanceLookup = inheritanceLookup;
+        this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
         this.originalBytes = originalBytes;
     }
@@ -109,7 +109,7 @@ class ContinuableClassVisitor extends ClassAdapter {
         } else {
             return new ContinuableMethodNode(
                 access, name, desc, signature, exceptions, 
-                className, inheritanceLookup, cciResolver, mv
+                className, classHierarchy, cciResolver, mv
             );
         }
     }

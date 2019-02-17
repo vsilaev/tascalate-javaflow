@@ -29,10 +29,10 @@ import org.objectweb.asm.tree.analysis.SimpleVerifier;
 import org.objectweb.asm.tree.analysis.Value;
 
 class FastClassVerifier extends SimpleVerifier {
-    private final InheritanceLookup inheritanceLookup;
+    private final ClassHierarchy classHierarchy;
     
-    public FastClassVerifier(InheritanceLookup inheritanceLookup) {
-        this.inheritanceLookup = inheritanceLookup;
+    public FastClassVerifier(ClassHierarchy classHierarchy) {
+        this.classHierarchy = classHierarchy;
     }
     
     @Override
@@ -64,7 +64,7 @@ class FastClassVerifier extends SimpleVerifier {
             et = t; 
             eu = u;
         }
-        Type commonType = inheritanceLookup.getCommonSuperType(et, eu);
+        Type commonType = classHierarchy.getCommonSuperType(et, eu);
         return commonType.equals(et);
 
     }
@@ -90,7 +90,7 @@ class FastClassVerifier extends SimpleVerifier {
                     if (isAssignableFrom(u, t)) {
                         return w;
                     }
-                    return new BasicValue(inheritanceLookup.getCommonSuperType(t, u));
+                    return new BasicValue(classHierarchy.getCommonSuperType(t, u));
                 }
             }
             return BasicValue.UNINITIALIZED_VALUE;
