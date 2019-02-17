@@ -116,11 +116,7 @@ public class ClassHierarchy {
             Reference<TypeInfo> reference = typesCache.get(key); 
             TypeInfo value = null != reference ? reference.get() : null;
             if (null == value) {
-                ClassReader info = loadTypeInfo(type);
-                value = new TypeInfo(info.getClassName(), 
-                                     info.getSuperName(), 
-                                     info.getInterfaces(),
-                                     (info.getAccess() & Opcodes.ACC_INTERFACE) != 0);
+                value = loadTypeInfo(type);
                 // Same key & value
                 typesCache.put(value, new WeakReference<TypeInfo>(value)); 
             }
@@ -137,10 +133,14 @@ public class ClassHierarchy {
      * @throws IOException
      *             if the bytecode of 'type' cannot be loaded.
      */
-    private ClassReader loadTypeInfo(String type) throws IOException {
+    private TypeInfo loadTypeInfo(String type) throws IOException {
         InputStream is = loader.getResourceAsStream(type + ".class");
         try {
-            return new ClassReader(is);
+            ClassReader info = new ClassReader(is);
+            return new TypeInfo(info.getClassName(), 
+                                info.getSuperName(), 
+                                info.getInterfaces(),
+                                (info.getAccess() & Opcodes.ACC_INTERFACE) != 0);            
         } finally {
             is.close();
         }

@@ -18,10 +18,7 @@ package org.apache.commons.javaflow.providers.asm3;
 import java.util.Collections;
 import java.util.Map;
 
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
-
-import org.apache.commons.javaflow.spi.StopException;
 
 public class ClassNameResolver {
     public static class Result {
@@ -42,20 +39,9 @@ public class ClassNameResolver {
         String resolvedClassName = className != null ? className :
             classBeingRedefined != null ? classBeingRedefined.getName().replace('.', '/') : null;
 
-        final String[] classNameFromBytes = {null}; 
         if (null == resolvedClassName) {
-            try {
-                ClassReader cv = new ClassReader(classfileBuffer);
-                cv.accept(new ClassAdapter(MaybeContinuableClassVisitor.NOP) {
-                    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                        classNameFromBytes[0] = name;
-                        throw StopException.INSTANCE;
-                    }
-                }, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-            } catch (StopException exIgnore) {
-
-            }
-            resolvedClassName = classNameFromBytes[0];
+            ClassReader cv = new ClassReader(classfileBuffer);
+            resolvedClassName = cv.getClassName();
         }
         return new Result(resolvedClassName, classfileBuffer);
     }
