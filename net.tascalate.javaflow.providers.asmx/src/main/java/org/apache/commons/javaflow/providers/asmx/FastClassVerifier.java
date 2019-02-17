@@ -28,11 +28,11 @@ import net.tascalate.asmx.tree.analysis.BasicValue;
 import net.tascalate.asmx.tree.analysis.SimpleVerifier;
 
 class FastClassVerifier extends SimpleVerifier {
-    private final InheritanceLookup inheritanceLookup;
+    private final ClassHierarchy classHierarchy;
     
-    FastClassVerifier(InheritanceLookup inheritanceLookup) {
+    FastClassVerifier(ClassHierarchy classHierarchy) {
         super(AsmVersion.CURRENT, null, null, null, false);
-        this.inheritanceLookup = inheritanceLookup;
+        this.classHierarchy = classHierarchy;
     }
     
     @Override
@@ -64,7 +64,7 @@ class FastClassVerifier extends SimpleVerifier {
             et = t; 
             eu = u;
         }
-        Type commonType = inheritanceLookup.getCommonSuperType(et, eu);
+        Type commonType = classHierarchy.getCommonSuperType(et, eu);
         return commonType.equals(et);
 
     }
@@ -90,7 +90,7 @@ class FastClassVerifier extends SimpleVerifier {
                     if (isAssignableFrom(u, t)) {
                         return w;
                     }
-                    return new BasicValue(inheritanceLookup.getCommonSuperType(t, u));
+                    return new BasicValue(classHierarchy.getCommonSuperType(t, u));
                 }
             }
             return BasicValue.UNINITIALIZED_VALUE;

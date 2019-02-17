@@ -26,26 +26,26 @@ import org.apache.commons.javaflow.spi.ResourceTransformer;
 public class AsmxResourceTransformationFactory implements ResourceTransformationFactory {
 
     public ResourceTransformer createTransformer(ContinuableClassInfoResolver cciResolver) {
-        return new AsmxClassTransformer(getOrCreateInheritanceLookup(cciResolver), cciResolver);
+        return new AsmxClassTransformer(getOrCreateClassHierarchy(cciResolver), cciResolver);
     }
 
     public ContinuableClassInfoResolver createResolver(ResourceLoader resourceLoader) {
         return new AsmxContinuableClassInfoResolver(resourceLoader);
     }
     
-    private static InheritanceLookup getOrCreateInheritanceLookup(ContinuableClassInfoResolver cciResolver) {
-        InheritanceLookup result;
-        synchronized (CACHED_INHERITANCE_LOOKUP) {
-            result = CACHED_INHERITANCE_LOOKUP.get(cciResolver);
+    private static ClassHierarchy getOrCreateClassHierarchy(ContinuableClassInfoResolver cciResolver) {
+        ClassHierarchy result;
+        synchronized (CACHED_CLASS_HIERARCHY) {
+            result = CACHED_CLASS_HIERARCHY.get(cciResolver);
             if (null == result) {
-                result = new InheritanceLookup(cciResolver.resourceLoader());
-                CACHED_INHERITANCE_LOOKUP.put(cciResolver, result);
+                result = new ClassHierarchy(cciResolver.resourceLoader());
+                CACHED_CLASS_HIERARCHY.put(cciResolver, result);
             }
         }
         return result;
     }
     
-    private static final Map<ContinuableClassInfoResolver, InheritanceLookup> CACHED_INHERITANCE_LOOKUP = 
-        new WeakHashMap<ContinuableClassInfoResolver, InheritanceLookup>();
+    private static final Map<ContinuableClassInfoResolver, ClassHierarchy> CACHED_CLASS_HIERARCHY = 
+        new WeakHashMap<ContinuableClassInfoResolver, ClassHierarchy>();
 
 }

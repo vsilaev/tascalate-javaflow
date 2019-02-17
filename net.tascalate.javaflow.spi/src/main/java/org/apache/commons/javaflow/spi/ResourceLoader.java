@@ -19,5 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public interface ResourceLoader {
+    boolean hasResource(String name);
     InputStream getResourceAsStream(String name) throws IOException;
 }

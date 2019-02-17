@@ -38,6 +38,10 @@ public class ClasspathResourceLoader implements VetoableResourceLoader {
         this.classLoader = classLoader;
     }
 
+    public boolean hasResource(String name) {
+        return null != classLoader.getResource(name);
+    }
+    
     public InputStream getResourceAsStream(String name) throws IOException {
         InputStream result = classLoader.getResourceAsStream(name);
         if (null == result) {

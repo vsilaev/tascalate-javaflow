@@ -19,7 +19,8 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 
 import java.security.ProtectionDomain;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
@@ -28,17 +29,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.tascalate.asmx.ClassReader;
+import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.ClassWriter;
 
-import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
-import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
-import org.apache.commons.javaflow.providers.asmx.InheritanceLookup;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.StopException;
+
+import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
+import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
+import org.apache.commons.javaflow.providers.asmx.ClassNameResolver;
 
 public class CdiProxyClassTransformer implements ClassFileTransformer {
     private static final Logger log = LoggerFactory.getLogger(CdiProxyClassTransformer.class);
@@ -64,7 +67,9 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         classLoader = getSafeClassLoader(classLoader);
         Object[] helpers = getCachedHelpers(classLoader);
         final ContinuableClassInfoResolver resolver = (ContinuableClassInfoResolver)helpers[0];
-        final InheritanceLookup lookup = (InheritanceLookup)helpers[1];
+        final ClassHierarchy hierarchy = (ClassHierarchy)helpers[1];
+        @SuppressWarnings("unchecked")
+        final List<ProxyType> proxyTypes = (List<ProxyType>)helpers[2];
         synchronized (resolver) {
             final ClassNameResolver.Result currentTarget = ClassNameResolver.resolveClassName(className, classBeingRedefined, classfileBuffer);
             try {
@@ -75,7 +80,8 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
                         public byte[] call() {
                             ClassReader reader = new ClassReader(classfileBuffer);
                             ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
-                            reader.accept(new CdiProxyClassAdapter(writer, resolver, lookup), ClassReader.EXPAND_FRAMES);
+                            ClassVisitor adapter = new CdiProxyClassAdapter(writer, resolver, hierarchy, proxyTypes);  
+                            reader.accept(adapter, ClassReader.EXPAND_FRAMES);
                             return writer.toByteArray();
                         }
                     }, 
@@ -104,15 +110,24 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     }
 
     protected Object[] getCachedHelpers(ClassLoader classLoader) {
-        synchronized (classLoader2resolver) {
-            Object[] cachedHelpers = classLoader2resolver.get(classLoader);
+        synchronized (PER_CLASS_LOADER_HELPERS) {
+            Object[] cachedHelpers = PER_CLASS_LOADER_HELPERS.get(classLoader);
             if (null == cachedHelpers) {
-                log.debug("Create classInfoResolver for class loader " + classLoader);
+                log.debug("Create cached settings for class loader " + classLoader);
+                
                 ResourceLoader loader = new ExtendedClasspathResourceLoader(classLoader); 
-                ContinuableClassInfoResolver cciResolver = resourceTransformationFactory.createResolver(loader);
-                InheritanceLookup inheritanceLookup = new InheritanceLookup(loader);
-                Object[] newHelpers = new Object[] {cciResolver, inheritanceLookup};
-                classLoader2resolver.put(classLoader, newHelpers);
+                ContinuableClassInfoResolver resolver = resourceTransformationFactory.createResolver(loader);
+                ClassHierarchy hierarchy = new ClassHierarchy(loader);
+                
+                List<ProxyType> proxyTypes = new ArrayList<ProxyType>();
+                for (ProxyType proxyType : ProxyType.values()) {
+                    if (proxyType.isAvailable(loader)) {
+                        proxyTypes.add(proxyType);
+                    }
+                }
+                
+                Object[] newHelpers = new Object[] {resolver, hierarchy, proxyTypes};
+                PER_CLASS_LOADER_HELPERS.put(classLoader, newHelpers);
                 return newHelpers;
             } else {
                 return cachedHelpers;
@@ -124,6 +139,6 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
     }
 
-    private static final Map<ClassLoader, Object[]> classLoader2resolver = new WeakHashMap<ClassLoader, Object[]>();
+    private static final Map<ClassLoader, Object[]> PER_CLASS_LOADER_HELPERS = new WeakHashMap<ClassLoader, Object[]>();
     private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
 }

@@ -59,7 +59,7 @@ import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 
 class ContinuableMethodNode extends MethodNode implements Opcodes {
-    private final InheritanceLookup inheritanceLookup;
+    private final ClassHierarchy classHierarchy;
     private final ContinuableClassInfoResolver cciResolver;
     private final String className;
 
@@ -74,13 +74,13 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
 
     ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
                           String className, 
-                          InheritanceLookup inheritanceLookup, 
+                          ClassHierarchy classHierarchy, 
                           ContinuableClassInfoResolver cciResolver, 
                           MethodVisitor mv) {
         
         super(AsmVersion.CURRENT, access, name, desc, signature, exceptions);
         this.className = className;
-        this.inheritanceLookup = inheritanceLookup;
+        this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
         this.mv = mv;
     }
@@ -146,7 +146,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
         try {
             moveNew();
 
-            analyzer = new Analyzer<BasicValue>(new FastClassVerifier(inheritanceLookup)) {
+            analyzer = new Analyzer<BasicValue>(new FastClassVerifier(classHierarchy)) {
                 @Override
                 protected Frame<BasicValue> newFrame(int nLocals, int nStack) {
                     return new MonitoringFrame<BasicValue>(nLocals, nStack);

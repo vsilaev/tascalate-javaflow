@@ -624,13 +624,26 @@ public class ContinuableClassLoader extends URLClassLoader {
             this.delegate = delegate;
         }
 
+        public boolean hasResource(String name) {
+            CurrentClass current = CURRENT_CLASS.get();
+            if (isInMemoryResource(current, name)) {
+                return true;
+            } else {
+                return delegate.hasResource(name);
+            }            
+        }
+        
         public InputStream getResourceAsStream(String name) throws IOException {
             CurrentClass current = CURRENT_CLASS.get();
-            if (null != current && (current.className + ".class").equals(name)) {
+            if (isInMemoryResource(current, name)) {
                 return new FastByteArrayInputStream(current.classData);
             } else {
                 return delegate.getResourceAsStream(name);
             }
+        }
+
+        private static boolean isInMemoryResource(CurrentClass current, String name) {
+            return null != current && (current.className + ".class").equals(name);
         }
     }
 
