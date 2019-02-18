@@ -21,11 +21,16 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import net.tascalate.asmx.ClassReader;
@@ -196,7 +201,7 @@ public class ClassHierarchy {
                     interfaces = EMPTY_TYPE_INFOS;
                 } else {
                     interfaces = new TypeInfo[size];
-                    for (int i = 0; i < size; i++) {
+                    for (int i = size - 1; i >= 0; i--) {
                         interfaces[i] = getTypeInfo(interfaceNames[i]);
                     }
                 }
@@ -218,8 +223,7 @@ public class ClassHierarchy {
                     return true;
                 }
                 if (base.isInterface && null != interfaceNames) {
-                    int size = interfaceNames.length;
-                    for (int i = 0; i < size; i++) {
+                    for (int i = interfaceNames.length - 1; i >= 0; i--) {
                         if (interfaceNames[i].equals(targetName)) {
                             return true;
                         }
@@ -233,8 +237,7 @@ public class ClassHierarchy {
             // If base is interface then check interfaces
             if (base.isInterface) {
                 TypeInfo[] tt = interfaces();
-                int size = tt.length;
-                for (int i = 0; i < size; i++) {
+                for (int i = tt.length - 1; i >= 0; i--) {
                     if (tt[i].isSubclassOf(base)) {
                         return true;
                     }
@@ -244,41 +247,54 @@ public class ClassHierarchy {
         }
         
         List<TypeInfo> flattenHierarchy() throws IOException {
-            List<TypeInfo> bySuperclass = new LinkedList<TypeInfo>();
-            List<TypeInfo> byInterfaces = new LinkedList<TypeInfo>();
-            flattenSuperclassHierarchy(bySuperclass);
-            flattenInterfacesHierarchy(byInterfaces);
-            List<TypeInfo> result = new ArrayList<TypeInfo>(bySuperclass.size() + 
-                                                            byInterfaces.size() +
+            Queue<TypeInfo> superclasses = new LinkedList<TypeInfo>();
+            Deque<InterfaceEntry> interfaces = new LinkedList<InterfaceEntry>(); 
+            flattenHierarchy(superclasses, interfaces, new HashSet<String>(), 0);
+            
+            List<TypeInfo> result = new ArrayList<TypeInfo>(superclasses.size() + 
+                                                            interfaces.size() +
                                                             1);
-            result.addAll(bySuperclass);
-            result.addAll(byInterfaces);
+            result.addAll(superclasses);
+            result.addAll(sortedInterfaces(interfaces));
             result.add(OBJECT);
             return result;
         }
-        
-        private void flattenSuperclassHierarchy(List<TypeInfo> result) throws IOException {
-            TypeInfo t = this;
-            while ((t = t.superClass()) != null) {
-                if (t.superClass() == null) {
-                    // Do not include java.lang.Object
-                    break;
-                }
-                result.add(t);
+       
+        int flattenHierarchy(Queue<TypeInfo> superclasses, 
+                             Deque<InterfaceEntry> interfaces,
+                             Set<String> ivisited,
+                             int depth) throws IOException {
+            
+            int strength;
+            if (isInterface) {
+                strength = 1;
+            } else {
+                strength = 0;
+                superclasses.add(this);
             }
-        }
-        
-        private void flattenInterfacesHierarchy(List<TypeInfo> result) throws IOException {
-            TypeInfo[] tt = interfaces();
-            int size = tt.length;
+            // Process superclass
+            TypeInfo stype = superClass();
+            if (null != stype) {
+                stype.flattenHierarchy(superclasses, interfaces, ivisited, depth + 1);                 
+            }
+            // Process interfaces;
+            TypeInfo[] itypes = interfaces();
+            int size = itypes.length;
             for (int i = size - 1; i >= 0; i--) {
-                TypeInfo t = tt[i];
-                // From bottom to top
-                t.flattenInterfacesHierarchy(result);
-                if (!result.contains(t)) {
+                TypeInfo itype = itypes[i];
+                // From bottom to top, so append children
+                strength += itype.flattenHierarchy(null, interfaces, ivisited, depth + 1);
+            }
+            
+            if (isInterface) {
+                if (!ivisited.contains(name)) {
                     // skip if re-implemented on higher level
-                    result.add(0, t);
+                    interfaces.addFirst(new InterfaceEntry(this, strength, depth));
+                    ivisited.add(name);
                 }
+                return strength;
+            } else {
+                return 0;
             }
         }
         
@@ -319,9 +335,51 @@ public class ClassHierarchy {
         
         @Override
         List<TypeInfo> flattenHierarchy() {
-            return Collections.emptyList();
+            return Collections.<TypeInfo>singletonList(this);
+        }
+        
+        @Override
+        int flattenHierarchy(Queue<TypeInfo> s, Deque<InterfaceEntry> i, Set<String> v, int d) {
+            return 0;
         }
     };
+    
+    private static List<TypeInfo> sortedInterfaces(Collection<InterfaceEntry> entries) {
+        int size = entries.size();
+        InterfaceEntry[] ie = new InterfaceEntry[size];
+        entries.toArray(ie);
+        Arrays.sort(ie);
+        List<TypeInfo> result = new ArrayList<TypeInfo>(size);
+        for (int i = 0; i < size; i++) {
+            result.add(ie[i].typeInfo);
+        }
+        return result;
+    }
+    
+    static class InterfaceEntry implements Comparable<InterfaceEntry> {
+        final TypeInfo typeInfo;
+        final int strength;
+        final int depth;
+        
+        InterfaceEntry(TypeInfo typeInfo, int strength, int depth) {
+            this.typeInfo = typeInfo;
+            this.strength = strength;
+            this.depth    = depth;
+        }
+        
+        @Override
+        public int compareTo(InterfaceEntry other) {
+            int delta = other.strength - this.strength;
+            if (delta != 0) {
+                return delta;
+            }
+            delta = this.depth - other.depth;
+            if (delta != 0) {
+                return delta;
+            }
+            return this.typeInfo.name.compareTo(other.typeInfo.name);
+        }
+    }
     
     static class Key extends AmbivalentDuoKey<String> {
         Key(String a, String b) {
