@@ -20,17 +20,15 @@ import java.io.InputStream;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.WeakHashMap;
 
 import net.tascalate.asmx.ClassReader;
@@ -48,15 +46,17 @@ import org.apache.commons.javaflow.spi.ResourceLoader;
 public class ClassHierarchy {
     
     private final ResourceLoader loader;
-    private final Map<Key, String> lookupCache = new HashMap<Key, String>();
+    private final Map<Key, String> lookupCache = new WeakHashMap<Key, String>();
     private final Map<TypeInfo, Reference<TypeInfo>> typesCache 
         = new WeakHashMap<TypeInfo, Reference<TypeInfo>>();
     
     public ClassHierarchy(ResourceLoader loader) {
         this.loader = loader;
-        // OBJECT will never be removed from the cache
-        // WHILE THERE IS A HARD REFERENCE
-        typesCache.put(OBJECT, new WeakReference<TypeInfo>(OBJECT));
+        // Next will never be removed from the cache
+        // while there is a hard-reference
+        for (TypeInfo ti : SPECIAL_CLASSES) {
+            typesCache.put(ti, new WeakReference<TypeInfo>(ti));
+        }
     }
 
     public boolean isSubClass(String type1, String type2) {
@@ -111,6 +111,7 @@ public class ClassHierarchy {
             if (info2.isSubclassOf(info1)) {
                 return type1;
             }
+            // Generic (worst) case -- flattening hierarchies
             List<TypeInfo> supers1 = info1.flattenHierarchy();
             List<TypeInfo> supers2 = info2.flattenHierarchy();
             // Matching from the most specific to least specific
@@ -192,10 +193,6 @@ public class ClassHierarchy {
         synchronized TypeInfo[] interfaces() throws IOException {
             if (null != interfaceNames) {
                 // Not loaded yet
-                // For flatten we will need a predictable order
-                if (interfaceNames != EMPTY_STRINGS) {
-                    Arrays.sort(interfaceNames);
-                }
                 int size = interfaceNames.length;
                 if (size == 0) {
                     interfaces = EMPTY_TYPE_INFOS;
@@ -248,28 +245,25 @@ public class ClassHierarchy {
         
         List<TypeInfo> flattenHierarchy() throws IOException {
             Queue<TypeInfo> superclasses = new LinkedList<TypeInfo>();
-            Deque<InterfaceEntry> interfaces = new LinkedList<InterfaceEntry>(); 
+            SortedSet<InterfaceEntry> interfaces = new TreeSet<InterfaceEntry>(); 
             flattenHierarchy(superclasses, interfaces, new HashSet<String>(), 0);
             
             List<TypeInfo> result = new ArrayList<TypeInfo>(superclasses.size() + 
                                                             interfaces.size() +
                                                             1);
             result.addAll(superclasses);
-            result.addAll(sortedInterfaces(interfaces));
+            result.addAll(narrow(interfaces));
             result.add(OBJECT);
             return result;
         }
-       
+        
         int flattenHierarchy(Queue<TypeInfo> superclasses, 
-                             Deque<InterfaceEntry> interfaces,
+                             SortedSet<InterfaceEntry> interfaces,
                              Set<String> ivisited,
                              int depth) throws IOException {
             
-            int strength;
-            if (isInterface) {
-                strength = 1;
-            } else {
-                strength = 0;
+            int strength = initialStrength();
+            if (!isInterface) {
                 superclasses.add(this);
             }
             // Process superclass
@@ -289,13 +283,18 @@ public class ClassHierarchy {
             if (isInterface) {
                 if (!ivisited.contains(name)) {
                     // skip if re-implemented on higher level
-                    interfaces.addFirst(new InterfaceEntry(this, strength, depth));
+                    // and first appears on lower (base) level
+                    interfaces.add(new InterfaceEntry(this, strength, depth));
                     ivisited.add(name);
                 }
                 return strength;
             } else {
                 return 0;
             }
+        }
+        
+        int initialStrength() {
+            return isInterface ? 1 : 0;
         }
         
         @Override
@@ -339,19 +338,32 @@ public class ClassHierarchy {
         }
         
         @Override
-        int flattenHierarchy(Queue<TypeInfo> s, Deque<InterfaceEntry> i, Set<String> v, int d) {
+        int flattenHierarchy(Queue<TypeInfo> s, SortedSet<InterfaceEntry> i, Set<String> v, int d) {
             return 0;
         }
     };
     
-    private static List<TypeInfo> sortedInterfaces(Collection<InterfaceEntry> entries) {
+    class SpecialInterfaceInfo extends TypeInfo {
+        SpecialInterfaceInfo(String name, String[] interfaceNames) {
+            super(name, null, interfaceNames, true);
+        }
+        
+        @Override
+        TypeInfo superClass() {
+            return null;
+        }
+        
+        @Override
+        int initialStrength() {
+            return 0;
+        }
+    }
+    
+    private static List<TypeInfo> narrow(SortedSet<InterfaceEntry> entries) {
         int size = entries.size();
-        InterfaceEntry[] ie = new InterfaceEntry[size];
-        entries.toArray(ie);
-        Arrays.sort(ie);
         List<TypeInfo> result = new ArrayList<TypeInfo>(size);
-        for (int i = 0; i < size; i++) {
-            result.add(ie[i].typeInfo);
+        for (InterfaceEntry ie : entries) {
+            result.add(ie.typeInfo);
         }
         return result;
     }
@@ -381,16 +393,16 @@ public class ClassHierarchy {
         }
     }
     
-    static class Key extends AmbivalentDuoKey<String> {
+    static class Key extends SymmetricalPair<String> {
         Key(String a, String b) {
             super(a, b);
         }
     }
     
-    static class AmbivalentDuoKey<T> {
+    static class SymmetricalPair<T> {
         private final T a;
         private final T b;
-        AmbivalentDuoKey(T a, T b) {
+        SymmetricalPair(T a, T b) {
             this.a = a;
             this.b = b;
         }
@@ -411,7 +423,7 @@ public class ClassHierarchy {
                 return false;
             }
             @SuppressWarnings("unchecked")
-            AmbivalentDuoKey<T> that = (AmbivalentDuoKey<T>)other;
+            SymmetricalPair<T> that = (SymmetricalPair<T>)other;
             return same(this.a, that.a) && same(this.b, that.b) ||
                    same(this.a, that.b) && same(this.b, that.a);  
         }
@@ -423,4 +435,21 @@ public class ClassHierarchy {
     
     static final String[] EMPTY_STRINGS = new String[0];
     static final TypeInfo[] EMPTY_TYPE_INFOS = new TypeInfo[0];
+
+    private final TypeInfo[] SPECIAL_CLASSES = {
+        OBJECT,
+        // These "special" technical interfaces are somewhat
+        // messed into interface hierarchies when implemented 
+        // on concrete classes.
+        // So instead of Map you get Serializable, or instead of
+        // Iterable collection you get Serializable or Cloneable.
+        // This is not an error for this class usage, but nevertheless
+        // something annoying - shift them to the end of hierarchy
+        new SpecialInterfaceInfo("java/io/Externalizable", new String[] {"java/io/Serializable"}),
+        new SpecialInterfaceInfo("java/io/Closeable", new String[] {"java/lang/AutoCloseable"}),
+        new SpecialInterfaceInfo("java/io/Serializable", EMPTY_STRINGS),
+        new SpecialInterfaceInfo("java/lang/AutoCloseable", EMPTY_STRINGS),
+        new SpecialInterfaceInfo("java/lang/Cloneable", EMPTY_STRINGS),
+    };
+    
 }
