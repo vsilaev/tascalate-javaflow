@@ -25,7 +25,7 @@ implements-interface:name=org/apache/webbeans/proxy/OwbNormalScopeProxy
 # Interfaces from JBoss Weld CDI container
 implements-interface:name=org/jboss/weld/bean/proxy/ProxyObject
 #
-# Interfaces from JBoss WildFly aoolication server
+# Interfaces from JBoss WildFly application server
 implements-interface:name=org/jboss/as/ee/component/serialization/WriteReplaceInterface
 #
 # CGLib generated classes, default naming strategy
