@@ -15,6 +15,7 @@
 
 	<properties>
 		<license.header>../HEADER-ORIGINAL.txt</license.header>
+		<java-agent.class>org.apache.commons.javaflow.instrumentation.JavaFlowInstrumentationAgent</java-agent.class>
 	</properties>
 
 	<dependencies>
@@ -44,6 +45,20 @@
 			<plugin>
 				<groupId>org.moditect</groupId>
 				<artifactId>moditect-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Premain-Class>${java-agent.class}</Premain-Class>
+							<Agent-Class>${java-agent.class}</Agent-Class>
+							<Can-Redefine-Classes>false</Can-Redefine-Classes>
+							<Can-Retransform-Classes>true</Can-Retransform-Classes>
+						</manifestEntries>
+					</archive>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -85,10 +100,6 @@
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
-										<Premain-Class>org.apache.commons.javaflow.instrumentation.JavaFlowInstrumentationAgent</Premain-Class>
-										<Agent-Class>org.apache.commons.javaflow.instrumentation.JavaFlowInstrumentationAgent</Agent-Class>
-										<Can-Redefine-Classes>false</Can-Redefine-Classes>
-										<Can-Retransform-Classes>true</Can-Retransform-Classes>
 										<Automatic-Module-Name>net.tascalate.javaflow.tools.javaagent.shaded</Automatic-Module-Name>
 										<Multi-Release>false</Multi-Release>
 									</manifestEntries>
