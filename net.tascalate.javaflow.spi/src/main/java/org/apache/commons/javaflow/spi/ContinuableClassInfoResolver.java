@@ -18,6 +18,8 @@ package org.apache.commons.javaflow.spi;
 import java.io.IOException;
 
 public interface ContinuableClassInfoResolver {
+    String readClassName(byte[] classBytes);
+    
     ContinuableClassInfo forget(String className);
 
     ContinuableClassInfo resolve(String className) throws IOException;

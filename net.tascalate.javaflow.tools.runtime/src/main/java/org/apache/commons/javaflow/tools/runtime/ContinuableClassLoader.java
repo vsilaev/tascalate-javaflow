@@ -25,8 +25,9 @@ package org.apache.commons.javaflow.tools.runtime;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -57,7 +58,7 @@ import org.apache.commons.javaflow.spi.ResourceTransformer;
  * the continuation-enabled portion of your application into a separate jar
  * file.
  */
-public class ContinuableClassLoader extends URLClassLoader {
+public class ContinuableClassLoader extends ClassLoader {
 
     private final static Logger log = LoggerFactory.getLogger(ContinuableClassLoader.class);
 
@@ -82,11 +83,7 @@ public class ContinuableClassLoader extends URLClassLoader {
             this.transformationFactory = transformationFactory;
         }
 
-        abstract public L create(URL... urls);
-
-        final public L create() {
-            return create(EMPTY_URL_ARRAY);
-        }
+        abstract public L create();
 
         /**
          * Set parent class loader
@@ -150,7 +147,7 @@ public class ContinuableClassLoader extends URLClassLoader {
          * @return this builder
          */
         public B addSystemPackageRoot(String packageRoot) {
-            systemPackages.add(appendDot(packageRoot));
+            systemPackages.add(packageRoot);
             return self();
         }
 
@@ -167,19 +164,13 @@ public class ContinuableClassLoader extends URLClassLoader {
          * @return this builder
          */
         public B addLoaderPackageRoot(String packageRoot) {
-            loaderPackages.add(appendDot(packageRoot));
+            loaderPackages.add(packageRoot);
             return self();
         }
 
         @SuppressWarnings("unchecked")
         final private B self() {
             return (B) this;
-        }
-
-        private static String appendDot(String str) {
-            if (str.endsWith("."))
-                str += '.';
-            return str;
         }
     }
 
@@ -197,9 +188,11 @@ public class ContinuableClassLoader extends URLClassLoader {
         }
 
         @Override
-        public ContinuableClassLoader create(URL... urls) {
-            return new ContinuableClassLoader(urls, parent, transformationFactory, parentFirst, isolated,
-                    systemPackages, loaderPackages);
+        public ContinuableClassLoader create() {
+            return new ContinuableClassLoader(
+                parent, transformationFactory, 
+                parentFirst, isolated, systemPackages, loaderPackages
+            );
         }
     }
 
@@ -237,7 +230,7 @@ public class ContinuableClassLoader extends URLClassLoader {
     protected final AccessControlContext acc;
 
     /**
-     * Creates a classloader solely to define classes dynamically.
+     * Creates a classloader to define classes dynamically.
      *
      * @param parent
      *            The parent classloader to which unsatisfied loading attempts
@@ -249,32 +242,12 @@ public class ContinuableClassLoader extends URLClassLoader {
      *            to perform the byte-code enhancement. May not be null.
      */
     public ContinuableClassLoader(ClassLoader parent, ResourceTransformationFactory transformationFactory) {
-        this(EMPTY_URL_ARRAY, parent, transformationFactory, true, false, null, null);
+        this(parent, transformationFactory, true, false, null, null);
     }
 
     /**
-     * Creates a classloader by using the classpath given.
+     * Creates a classloader by using settings given.
      *
-     * @param urls
-     *            The URLs from which to load classes and resources
-     * @param parent
-     *            The parent classloader to which unsatisfied loading attempts
-     *            are delegated. May be <code>null</code>, in which case the
-     *            {@link ClassLoader#getSystemClassLoader() system classloader}
-     *            is used as the parent.
-     * @param transformationFactory
-     *            This factory is used to create necessary resolver/transformer
-     *            to perform the byte-code enhancement. May not be null.
-     */
-    public ContinuableClassLoader(URL[] urls, ClassLoader parent, ResourceTransformationFactory transformationFactory) {
-        this(urls, parent, transformationFactory, true, false, null, null);
-    }
-
-    /**
-     * Creates a classloader by using the classpath given.
-     *
-     * @param urls
-     *            The URLs from which to load classes and resources
      * @param parent
      *            The parent classloader to which unsatisfied loading attempts
      *            are delegated. May be <code>null</code>, in which case the
@@ -298,15 +271,14 @@ public class ContinuableClassLoader extends URLClassLoader {
      *            regardless of whether the parent class loader is being
      *            searched first or not.
      */
-    public ContinuableClassLoader(URL[] urls, 
-                                  ClassLoader parent, 
+    public ContinuableClassLoader(ClassLoader parent, 
                                   ResourceTransformationFactory transformationFactory,
                                   boolean parentFirst, 
                                   boolean isolated, 
                                   List<String> systemPackages, 
                                   List<String> loaderPackages) {
         
-        super(urls, fixNullParent(parent));
+        super(fixNullParent(parent));
         
         if (transformationFactory == null)
             throw new IllegalArgumentException();
@@ -319,8 +291,8 @@ public class ContinuableClassLoader extends URLClassLoader {
         this.acc = AccessController.getContext();
         this.parentFirst = parentFirst;
         this.isolated = isolated;
-        this.systemPackages = readOnlyList(systemPackages);
-        this.loaderPackages = readOnlyList(loaderPackages);
+        this.systemPackages = dotEndingPackageNames(systemPackages);
+        this.loaderPackages = dotEndingPackageNames(loaderPackages);
     }
 
     public static Builder builder(ResourceTransformationFactory transformationFactory) {
@@ -334,7 +306,7 @@ public class ContinuableClassLoader extends URLClassLoader {
      * This ensures that any classes which are loaded by the returned class will
      * use this classloader.
      *
-     * @param classname
+     * @param className
      *            The name of the class to be loaded. Must not be
      *            <code>null</code>.
      *
@@ -344,13 +316,13 @@ public class ContinuableClassLoader extends URLClassLoader {
      *                if the requested class does not exist on this loader's
      *                classpath.
      */
-    public Class<?> forceLoadClass(String classname) throws ClassNotFoundException {
-        log.debug("force loading " + classname);
+    public Class<?> forceLoadClass(String className) throws ClassNotFoundException {
+        log.debug("force loading " + className);
 
-        Class<?> theClass = findLoadedClass(classname);
+        Class<?> theClass = findLoadedClass(className);
 
         if (theClass == null) {
-            theClass = findClass(classname);
+            theClass = findClass(className);
         }
 
         return theClass;
@@ -385,7 +357,7 @@ public class ContinuableClassLoader extends URLClassLoader {
         }
 
         for (String packageName : loaderPackages) {
-            if (resourceName.startsWith(packageName)) {
+            if (resourceName.startsWith(packageName )) {
                 useParentFirst = false;
                 break;
             }
@@ -403,7 +375,7 @@ public class ContinuableClassLoader extends URLClassLoader {
      * failure to load the class in this loader will result in a
      * ClassNotFoundException.
      *
-     * @param classname
+     * @param className
      *            The name of the class to be loaded. Must not be
      *            <code>null</code>.
      * @param resolve
@@ -418,61 +390,80 @@ public class ContinuableClassLoader extends URLClassLoader {
      *                classpath.
      */
     @Override
-    protected synchronized Class<?> loadClass(String classname, boolean resolve) throws ClassNotFoundException {
+    protected Class<?> loadClass(String className, boolean resolve) throws ClassNotFoundException {
         // 'sync' is needed - otherwise 2 threads can load the same class
         // twice, resulting in LinkageError: duplicated class definition.
         // findLoadedClass avoids that, but without sync it won't work.
-
-        Class<?> theClass = findLoadedClass(classname);
-        if (theClass != null) {
+        Object lock = safeGetClassLoadingLock(className);
+        synchronized (lock) {
+            Class<?> theClass = findLoadedClass(className);
+            if (theClass != null) {
+                return theClass;
+            }
+    
+            if (isParentFirst(className)) {
+                try {
+                    theClass = getParent().loadClass(className);
+                    log.debug("Class " + className + " loaded from parent loader " + "(parentFirst)");
+                } catch (ClassNotFoundException cnfe) {
+                    theClass = findClass(className);
+                    log.debug("Class " + className + " loaded from own loader " + "(parentFirst)");
+                }
+            } else {
+                try {
+                    theClass = findClass(className);
+                    log.debug("Class " + className + " loaded from own loader");
+                } catch (ClassNotFoundException cnfe) {
+                    if (isolated) {
+                        throw cnfe;
+                    }
+                    theClass = getParent().loadClass(className);
+                    log.debug("Class " + className + " loaded from parent loader");
+                }
+            }
+    
+            if (resolve) {
+                resolveClass(theClass);
+            }
+    
             return theClass;
         }
-
-        if (isParentFirst(classname)) {
-            try {
-                theClass = getParent().loadClass(classname);
-                log.debug("Class " + classname + " loaded from parent loader " + "(parentFirst)");
-            } catch (ClassNotFoundException cnfe) {
-                theClass = findClass(classname);
-                log.debug("Class " + classname + " loaded from ant loader " + "(parentFirst)");
-            }
-        } else {
-            try {
-                theClass = findClass(classname);
-                log.debug("Class " + classname + " loaded from ant loader");
-            } catch (ClassNotFoundException cnfe) {
-                if (isolated) {
-                    throw cnfe;
-                }
-                theClass = getParent().loadClass(classname);
-                log.debug("Class " + classname + " loaded from parent loader");
-            }
-        }
-
-        if (resolve) {
-            resolveClass(theClass);
-        }
-
-        return theClass;
     }
-
+    
+    public Class<?> defineClassFromData(byte[] classData, String className) {
+        return defineClassFromData(classData, className, null);
+    }
+    
     /**
      * Define a class given its bytes
      *
      * @param classData
      *            the bytecode data for the class
-     * @param classname
+     * @param className
      *            the name of the class
+     * @param protectionDomain
+     *            the protection domain of the class
      *
      * @return the Class instance created from the given data
      */
-    public Class<?> defineClassFromData(final byte[] classData, final String classname) {
+    public Class<?> defineClassFromData(final byte[] classData, 
+                                        final String className, 
+                                        final ProtectionDomain protectionDomain) {
         return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
             public Class<?> run() {
+                String classNameFromData = 
+                    cciResolver.readClassName(classData).replace('/', '.');
+                
+                if (null != className && !className.equals(classNameFromData)) {
+                    throw new IllegalArgumentException(
+                        "Supplied class name (" + className + ") " +
+                        "does not much class name in data (" + classNameFromData + ")."
+                    );
+                }
                 // define a package if necessary.
-                int i = classname.lastIndexOf('.');
+                int i = classNameFromData.lastIndexOf('.');
                 if (i > 0) {
-                    final String packageName = classname.substring(0, i);
+                    final String packageName = classNameFromData.substring(0, i);
                     @SuppressWarnings("deprecation")
                     final Package pkg = getPackage(packageName);
                     if (pkg == null) {
@@ -483,18 +474,23 @@ public class ContinuableClassLoader extends URLClassLoader {
                 ResourceTransformer transformer = transforationFactory.createTransformer(cciResolver);
                 byte[] transfomred;
                 CurrentClass prevClass = CURRENT_CLASS.get();
-                CURRENT_CLASS.set(new CurrentClass(classname, classData));
+                CURRENT_CLASS.set(new CurrentClass(classNameFromData, classData));
                 try {
-                    transfomred = transformer.transform(classData);
+                    synchronized (cciResolver) {
+                        transfomred = transformer.transform(classData);                        
+                    }
                 } finally {
-                    CURRENT_CLASS.set(prevClass);
+                    if (null != prevClass) {
+                        CURRENT_CLASS.set(prevClass);
+                    } else {
+                        CURRENT_CLASS.remove();
+                    }
                 }
 
                 if (null == transfomred)
                     transfomred = classData;
 
-                ProtectionDomain domain = this.getClass().getProtectionDomain();
-                return defineClass(null, transfomred, 0, transfomred.length, domain);
+                return defineClass(null, transfomred, 0, transfomred.length, protectionDomain);
             }
         }, acc);
     }
@@ -505,7 +501,7 @@ public class ContinuableClassLoader extends URLClassLoader {
      * @param stream
      *            The stream from which the class is to be read. Must not be
      *            <code>null</code>.
-     * @param classname
+     * @param className
      *            The name of the class in the stream. Must not be
      *            <code>null</code>.
      *
@@ -517,7 +513,7 @@ public class ContinuableClassLoader extends URLClassLoader {
      *                if there is a security problem while reading the class
      *                from the stream.
      */
-    private Class<?> getClassFromStream(InputStream stream, String classname) throws IOException, SecurityException {
+    private Class<?> getClassFromStream(InputStream stream, String className) throws IOException, SecurityException {
 
         FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
         try {
@@ -530,7 +526,7 @@ public class ContinuableClassLoader extends URLClassLoader {
             }
 
             byte[] classData = baos.unsafeBytes();
-            return defineClassFromData(classData, classname);
+            return defineClassFromData(classData, className);
 
         } finally {
             baos.close();
@@ -601,8 +597,25 @@ public class ContinuableClassLoader extends URLClassLoader {
         }
         return url;
     }
+    
+    private Object safeGetClassLoadingLock(String name) {
+        if (null == GET_CLASS_LOADING_LOCK) {
+            return this;
+        }
+        try {
+            return GET_CLASS_LOADING_LOCK.invoke(this, name);
+        } catch (IllegalAccessException ex) {
+            // Should not happen
+            throw new RuntimeException(ex);
+        } catch (IllegalArgumentException ex) {
+            // Should not happen
+            throw ex;
+        } catch (InvocationTargetException ex) {
+            // Should not happen
+            throw new RuntimeException(ex);
+        }
+    }
 
-    private static final URL[] EMPTY_URL_ARRAY = new URL[] {};
     private static final int BUFFER_SIZE = 4096;
 
     static class CurrentClass {
@@ -646,6 +659,45 @@ public class ContinuableClassLoader extends URLClassLoader {
             return null != current && (current.className + ".class").equals(name);
         }
     }
+    
+    private static Method getClassLoaderMethodOrNull(String name, Class<?>... args) {
+        try {
+            Method method = ClassLoader.class.getDeclaredMethod(name, args);
+            try {
+                // Need for Java 8 and will success
+                method.setAccessible(true);
+            } catch (Exception ex) {
+                // Ignore in Java 9
+                // - in this context (getting protected method of a superclass)
+                // method may be called anyway 
+            }
+            return method;
+        } catch (NoSuchMethodException ex) {
+            // OK, JDK version is less then 1.7
+            return null;
+        } catch (SecurityException ex) {
+            // Should be available, if method exists
+            throw ex;
+        }
+    }
+    
+    private static final Method GET_CLASS_LOADING_LOCK = 
+        getClassLoaderMethodOrNull("getClassLoadingLock", String.class);
+    
+    static { 
+        Method registerAsParallelCapable = getClassLoaderMethodOrNull("registerAsParallelCapable");
+        if (null != registerAsParallelCapable) {
+            try {
+                registerAsParallelCapable.invoke(null);
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex);
+            } catch (IllegalArgumentException ex) {
+                throw ex;
+            } catch (InvocationTargetException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
 
     private static ClassLoader fixNullParent(ClassLoader classLoader) {
         if (classLoader != null) {
@@ -655,8 +707,17 @@ public class ContinuableClassLoader extends URLClassLoader {
         }
     }
 
-    private static List<String> readOnlyList(List<String> source) {
-        return null == source ? Collections.<String>emptyList()
-                              : Collections.unmodifiableList(new ArrayList<String>(source));
+    private static List<String> dotEndingPackageNames(List<String> source) {
+        if (null == source) {
+            return Collections.emptyList();
+        }
+        List<String> result = new ArrayList<String>();
+        for (String s : source) {
+            if (s != null && s.length() > 0) {
+                s += '.';
+            }
+            result.add(s);
+        }
+        return result;
     }
 }

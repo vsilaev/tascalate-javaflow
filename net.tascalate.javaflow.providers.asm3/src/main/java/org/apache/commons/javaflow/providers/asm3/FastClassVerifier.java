@@ -64,20 +64,25 @@ class FastClassVerifier extends SimpleVerifier {
             et = t; 
             eu = u;
         }
+        /*
         Type commonType = classHierarchy.getCommonSuperType(et, eu);
+        */
+        // isAssignableFrom(Number, Integer) => getCommonSuperType(Integer, Number) == Number        
+        // Use ClassHierarchy.isSubclass biased behavior (for performance)
+        Type commonType = classHierarchy.getCommonSuperType(eu, et);
         return commonType.equals(et);
 
     }
     
     @Override
-    public Value merge(final Value v, final Value w) {
+    public Value merge(Value v, Value w) {
         if (!v.equals(w)) {
             Type t = ((BasicValue)v).getType();
             Type u = ((BasicValue)w).getType();
-            if (t != null
-                    && (t.getSort() == Type.OBJECT || t.getSort() == Type.ARRAY)) {
-                if (u != null
-                        && (u.getSort() == Type.OBJECT || u.getSort() == Type.ARRAY)) {
+            int tsort = t == null ? -1 : t.getSort();
+            if (tsort == Type.OBJECT || tsort == Type.ARRAY) {
+                int usort = u == null ? -1 : u.getSort();
+                if (usort == Type.OBJECT || usort == Type.ARRAY) {
                     if ("Lnull;".equals(t.getDescriptor())) {
                         return w;
                     }

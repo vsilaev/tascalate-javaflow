@@ -79,10 +79,10 @@ class FastClassVerifier extends SimpleVerifier {
         if (!v.equals(w)) {
             Type t = v.getType();
             Type u = w.getType();
-            int tsort = t.getSort();
-            if (t != null && (tsort == Type.OBJECT || tsort == Type.ARRAY)) {
-                int usort = u.getSort();
-                if (u != null && (usort == Type.OBJECT || usort == Type.ARRAY)) {
+            int tsort = t == null ? -1 : t.getSort();
+            if (tsort == Type.OBJECT || tsort == Type.ARRAY) {
+                int usort = u == null ? -1 : u.getSort();
+                if (usort == Type.OBJECT || usort == Type.ARRAY) {
                     if ("Lnull;".equals(t.getDescriptor())) {
                         return w;
                     }

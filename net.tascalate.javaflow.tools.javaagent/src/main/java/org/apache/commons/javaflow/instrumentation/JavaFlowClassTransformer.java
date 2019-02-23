@@ -34,7 +34,6 @@ import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
-import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 
 public class JavaFlowClassTransformer implements ClassFileTransformer {
     private static final Logger log = LoggerFactory.getLogger(JavaFlowClassTransformer.class);
@@ -58,44 +57,45 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 
         // Ensure classLoader is not null (null for boot class loader)
         classLoader = getSafeClassLoader(classLoader);
-        // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
-        className = ClassHierarchy.resolveClassName(className, classBeingRedefined, classfileBuffer);
         final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
 
-        synchronized (resolver) {
-            try {
-                // Execute with current class as extra resource (in-memory)
-                // Mandatory for Java8 lambdas and alike
-                final String cn = className;
-                return ExtendedClasspathResourceLoader.runWithInMemoryResources(
-                    new Callable<byte[]>() {
-                        public byte[] call() {
+        // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
+        className = resolveClassName(resolver, className, classBeingRedefined, classfileBuffer);
+        try {
+            // Execute with current class as extra resource (in-memory)
+            // Mandatory for Java8 lambdas and alike
+            final String cn = className;
+            return ExtendedClasspathResourceLoader.runWithInMemoryResources(
+                new Callable<byte[]>() {
+                    public byte[] call() {
+                        ResourceTransformer transformer = 
+                            resourceTransformationFactory.createTransformer(resolver);
+                        
+                        synchronized (resolver) {
                             resolver.forget(cn);
-                            final ResourceTransformer transformer = resourceTransformationFactory
-                                    .createTransformer(resolver);
-                            return transformer.transform(classfileBuffer);
+                            return transformer.transform(classfileBuffer);                                
                         }
-                    }, 
-                    Collections.singletonMap(className + ".class", classfileBuffer)
-                );
-            } catch (RuntimeException ex) {
-                if (log.isErrorEnabled()) {
-                    if (VERBOSE_ERROR_REPORTS) {
-                        log.error("Error transforming " + className, ex);
-                    } else {
-                        log.error("Error transforming " + className);
                     }
+                }, 
+                Collections.singletonMap(className + ".class", classfileBuffer)
+            );
+        } catch (RuntimeException ex) {
+            if (log.isErrorEnabled()) {
+                if (VERBOSE_ERROR_REPORTS) {
+                    log.error("Error transforming " + className, ex);
+                } else {
+                    log.error("Error transforming " + className);
                 }
-                return null;
-            } catch (ClassCircularityError ex) {
-                if (VERBOSE_ERROR_REPORTS && log.isWarnEnabled()) {
-                    log.warn("Ignoring class circularity error: " + ex.getMessage());
-                }
-                return null;
-            } catch (final Error ex) {
-                log.error("Internal error during transforming continuable class", ex);
-                throw ex;
             }
+            return null;
+        } catch (ClassCircularityError ex) {
+            if (VERBOSE_ERROR_REPORTS && log.isWarnEnabled()) {
+                log.warn("Ignoring class circularity error: " + ex.getMessage());
+            }
+            return null;
+        } catch (final Error ex) {
+            log.error("Internal error during transforming continuable class", ex);
+            throw ex;
         }
     }
 
@@ -122,6 +122,19 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
     private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
         return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
     }
+    
+    private static String resolveClassName(ContinuableClassInfoResolver resolver,
+                                           String className,
+                                           Class<?> classBeingRedefined,
+                                           byte[] classfileBuffer) {
+        if (null != className) {
+            return className;
+        } else if (classBeingRedefined != null) {
+            return classBeingRedefined.getName().replace('.', '/');
+        } else {
+            return resolver.readClassName(classfileBuffer);
+        }
+    }    
 
     private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
     private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");

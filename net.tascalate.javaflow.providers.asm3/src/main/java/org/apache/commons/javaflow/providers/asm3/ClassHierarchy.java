@@ -18,9 +18,10 @@ package org.apache.commons.javaflow.providers.asm3;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +47,7 @@ import org.apache.commons.javaflow.spi.ResourceLoader;
 public class ClassHierarchy {
     
     private final ResourceLoader loader;
-    private final Map<Key, String> lookupCache = new WeakHashMap<Key, String>();
+    private final Map<Key, String> lookupCache = new HashMap<Key, String>();
     private final Map<TypeInfo, Reference<TypeInfo>> typesCache 
         = new WeakHashMap<TypeInfo, Reference<TypeInfo>>();
     
@@ -55,7 +56,7 @@ public class ClassHierarchy {
         // Next will never be removed from the cache
         // while there is a hard-reference
         for (TypeInfo ti : SPECIAL_CLASSES) {
-            typesCache.put(ti, new WeakReference<TypeInfo>(ti));
+            typesCache.put(ti, new SoftReference<TypeInfo>(ti));
         }
     }
 
@@ -81,18 +82,6 @@ public class ClassHierarchy {
             }
         }
         return result;
-    }
-    
-    public static String resolveClassName(String className, Class<?> classBeingRedefined, byte[] classfileBuffer) {
-        String resolvedClassName = className != null ? className :
-            classBeingRedefined != null ? classBeingRedefined.getName().replace('.', '/') : null;
-
-        if (null == resolvedClassName) {
-            ClassReader cv = new ClassReader(classfileBuffer);
-            return cv.getClassName();
-        } else {
-            return resolvedClassName;
-        }
     }
     
     Type getCommonSuperType(Type type1, Type type2) {
@@ -136,7 +125,7 @@ public class ClassHierarchy {
             if (null == value) {
                 value = loadTypeInfo(type);
                 // Same key & value
-                typesCache.put(value, new WeakReference<TypeInfo>(value)); 
+                typesCache.put(value, new SoftReference<TypeInfo>(value)); 
             }
             return value;
         }

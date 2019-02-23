@@ -49,23 +49,37 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         return resourceLoader;
     }
 
+    public String readClassName(byte[] classBytes) {
+        return new ClassReader(classBytes).getClassName();
+    }
+    
     public ContinuableClassInfo forget(String className) {
         return visitedClasses.remove(className);
     }
 
     public ContinuableClassInfo resolve(String classInternalName, byte[] classBytes) {
-        return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
+        ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
+        if (classInfo == null) {
+            return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
+        } else {
+            return unmask(classInfo);
+        }
     }
 
     public ContinuableClassInfo resolve(String classInternalName) throws IOException {
-        InputStream classBytes = resourceLoader.getResourceAsStream(classInternalName + ".class");
-        try {
-            return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
-        } finally {
-            if (null != classBytes) {
-                try { classBytes.close(); } catch (IOException exIgnore) {}
+        ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
+        if (classInfo == null) {
+            InputStream classBytes = resourceLoader.getResourceAsStream(classInternalName + ".class");
+            try {
+                return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
+            } finally {
+                if (null != classBytes) {
+                    try { classBytes.close(); } catch (IOException exIgnore) {}
+                }
             }
-        }
+        } else {
+            return unmask(classInfo);
+        } 
     }
     
     public ClassMatcher veto() {
@@ -73,23 +87,20 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     }
 
     private ContinuableClassInfo resolveContinuableClassInfo(String classInternalName, ClassReader reader) {
-        ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
-        if (classInfo == null) {
+        MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
+        reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 
-            MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
-            reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-
-            if (maybeContinuableClassVisitor.isContinuable()) {
-                classInfo = new ContinuableClassInfoInternal(
-                    maybeContinuableClassVisitor.isProcessed(), 
-                    maybeContinuableClassVisitor.continuableMethods
-                );
-            } else {
-                classInfo = UNSUPPORTED_CLASS_INFO;
-            }
-            visitedClasses.put(classInternalName, classInfo);
+        ContinuableClassInfo classInfo;
+        if (maybeContinuableClassVisitor.isContinuable()) {
+            classInfo = new ContinuableClassInfoInternal(
+                maybeContinuableClassVisitor.isProcessed(), 
+                maybeContinuableClassVisitor.continuableMethods
+            );
+        } else {
+            classInfo = UNSUPPORTED_CLASS_INFO;
         }
-        return classInfo == UNSUPPORTED_CLASS_INFO ? null : classInfo;
+        visitedClasses.put(classInternalName, classInfo);
+        return unmask(classInfo);
     }
 
     private boolean resolveContinuableAnnotation(String annotationClassDescriptor, ClassReader reader) {
@@ -162,6 +173,10 @@ class Asm5ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         } else {
             return ClassMatchers.MATCH_NONE;
         }
+    }
+    
+    private static ContinuableClassInfo unmask(ContinuableClassInfo classInfo) {
+        return classInfo == UNSUPPORTED_CLASS_INFO ? null : classInfo;
     }
 
     private static final Type CONTINUABLE_ANNOTATION_TYPE = Type.getObjectType("org/apache/commons/javaflow/api/ContinuableAnnotation");

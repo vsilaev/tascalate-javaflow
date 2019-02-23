@@ -35,17 +35,18 @@ public class AsmxResourceTransformationFactory implements ResourceTransformation
     
     private static ClassHierarchy getOrCreateClassHierarchy(ContinuableClassInfoResolver cciResolver) {
         ClassHierarchy result;
+        ResourceLoader loader = cciResolver.resourceLoader();
         synchronized (CACHED_CLASS_HIERARCHY) {
-            result = CACHED_CLASS_HIERARCHY.get(cciResolver);
+            result = CACHED_CLASS_HIERARCHY.get(loader);
             if (null == result) {
-                result = new ClassHierarchy(cciResolver.resourceLoader());
-                CACHED_CLASS_HIERARCHY.put(cciResolver, result);
+                result = new ClassHierarchy(loader);
+                CACHED_CLASS_HIERARCHY.put(loader, result);
             }
         }
         return result;
     }
     
-    private static final Map<ContinuableClassInfoResolver, ClassHierarchy> CACHED_CLASS_HIERARCHY = 
-        new WeakHashMap<ContinuableClassInfoResolver, ClassHierarchy>();
+    private static final Map<ResourceLoader, ClassHierarchy> CACHED_CLASS_HIERARCHY = 
+        new WeakHashMap<ResourceLoader, ClassHierarchy>();
 
 }
