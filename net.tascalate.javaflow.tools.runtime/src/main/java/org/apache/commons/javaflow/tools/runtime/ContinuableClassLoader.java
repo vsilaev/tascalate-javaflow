@@ -182,7 +182,7 @@ public class ContinuableClassLoader extends ClassLoader {
          *            resolver/transformer to perform the byte-code enhancement.
          *            May not be null.
          */
-        Builder(ResourceTransformationFactory transformationFactory) {
+        public Builder(ResourceTransformationFactory transformationFactory) {
             super(transformationFactory);
         }
 
@@ -227,6 +227,8 @@ public class ContinuableClassLoader extends ClassLoader {
 
     /* The context to be used when loading classes and resources */
     protected final AccessControlContext acc;
+    
+    protected final ClassLoader platformClassLoader;
 
     /**
      * Creates a classloader to define classes dynamically.
@@ -292,6 +294,8 @@ public class ContinuableClassLoader extends ClassLoader {
         this.isolated = isolated;
         this.systemPackages = dotEndingPackageNames(systemPackages);
         this.loaderPackages = dotEndingPackageNames(loaderPackages);
+        
+        this.platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
     }
 
     public static Builder builder(ResourceTransformationFactory transformationFactory) {
@@ -346,6 +350,15 @@ public class ContinuableClassLoader extends ClassLoader {
         // designated to use a specific loader first
         // (this one or the parent one)
 
+        if (resourceName.startsWith("org.apache.commons.javaflow.tools.runtime.") || 
+            resourceName.startsWith("org.apache.commons.javaflow.spi.")) {
+            return true;
+        }
+        
+//        if (resourceName.startsWith("org.apache.commons.javaflow.") && !resourceName.startsWith("org.apache.commons.javaflow.examples.")) {
+//            return true;
+//        }
+        
         boolean useParentFirst = parentFirst;
 
         for (String packageName : systemPackages) {
@@ -400,24 +413,41 @@ public class ContinuableClassLoader extends ClassLoader {
                 return theClass;
             }
     
+            ClassLoader parentClassLoader = getParent();
+            if (null == parentClassLoader) {
+                parentClassLoader = platformClassLoader;
+            }
+            
             if (isParentFirst(className)) {
                 try {
-                    theClass = getParent().loadClass(className);
+                    theClass = parentClassLoader.loadClass(className);
                     log.debug("Class " + className + " loaded from parent loader " + "(parentFirst)");
                 } catch (ClassNotFoundException cnfe) {
                     theClass = findClass(className);
                     log.debug("Class " + className + " loaded from own loader " + "(parentFirst)");
                 }
             } else {
-                try {
-                    theClass = findClass(className);
-                    log.debug("Class " + className + " loaded from own loader");
-                } catch (ClassNotFoundException cnfe) {
-                    if (isolated) {
-                        throw cnfe;
+                // It's an error to load anything from platform
+                if (null != platformClassLoader) {
+                    try {
+                        theClass = platformClassLoader.loadClass(className); 
+                        log.debug("Class " + className + " is platform class");
+                    } catch (ClassNotFoundException ex) {
+                        log.debug("Class " + className + " is not visible to platform, will try to load on own loader");
                     }
-                    theClass = getParent().loadClass(className);
-                    log.debug("Class " + className + " loaded from parent loader");
+                }
+                // Not found among platform classes
+                if (null == theClass) {
+                    try {
+                        theClass = findClass(className);
+                        log.debug("Class " + className + " loaded from own loader");
+                    } catch (ClassNotFoundException cnfe) {
+                        if (isolated) {
+                            throw cnfe;
+                        }
+                        theClass = parentClassLoader.loadClass(className);
+                        log.debug("Class " + className + " loaded from parent loader");
+                    }
                 }
             }
     
@@ -463,7 +493,7 @@ public class ContinuableClassLoader extends ClassLoader {
                 int i = classNameFromData.lastIndexOf('.');
                 if (i > 0) {
                     final String packageName = classNameFromData.substring(0, i);
-                    @SuppressWarnings("deprecation")
+                    @SuppressWarnings("all")
                     final Package pkg = getPackage(packageName);
                     if (pkg == null) {
                         definePackage(packageName, null, null, null, null, null, null, null);
@@ -508,17 +538,16 @@ public class ContinuableClassLoader extends ClassLoader {
      *                from the stream.
      */
     private Class<?> getClassFromStream(InputStream stream, String className) throws IOException, SecurityException {
-
-        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
+        FastByteArrayOutputStream baos = new FastByteArrayOutputStream(BUFFER_SIZE);
         try {
 
             int bytesRead;
             byte[] buffer = new byte[BUFFER_SIZE];
 
-            while ((bytesRead = stream.read(buffer, 0, BUFFER_SIZE)) != -1) {
+            while ((bytesRead = stream.read(buffer, 0, BUFFER_SIZE)) > 0) {
                 baos.write(buffer, 0, bytesRead);
             }
-
+            
             byte[] classData = baos.unsafeBytes();
             return defineClassFromData(classData, className);
 

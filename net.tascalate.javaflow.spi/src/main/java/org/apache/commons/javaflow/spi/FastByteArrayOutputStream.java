@@ -18,7 +18,6 @@ package org.apache.commons.javaflow.spi;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 
 public class FastByteArrayOutputStream extends OutputStream {
 
@@ -103,11 +102,17 @@ public class FastByteArrayOutputStream extends OutputStream {
      * @return  the current contents of this output stream, as a byte array.
      */    
     public byte[] toByteArray() {
-        return buf.clone();
+        byte[] result = new byte[count];
+        System.arraycopy(buf, 0, result, 0, count);
+        return result;
     }
 
     public byte[] unsafeBytes() {
-        return buf;
+        if (count == buf.length) {
+            return buf;
+        } else {
+            return toByteArray();
+        }
     }
 
     /**
@@ -186,7 +191,10 @@ public class FastByteArrayOutputStream extends OutputStream {
             newCapacity = minCapacity;
         if (newCapacity - MAX_ARRAY_SIZE > 0)
             newCapacity = hugeCapacity(minCapacity);
-        buf = Arrays.copyOf(buf, newCapacity);
+        
+        byte[] newBuf = new byte[newCapacity];
+        System.arraycopy(buf, 0, newBuf, 0, count);
+        buf = newBuf;
     }
 
     private static int hugeCapacity(int minCapacity) {
