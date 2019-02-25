@@ -15,6 +15,23 @@
  */
 package org.apache.commons.javaflow.spi;
 
-public interface ContinuableClassInfo {
-    boolean isContinuableMethod(int access, String name, String desc, String signature);
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+abstract public class Cache<K, V> {
+    private final Map<K, Reference<V>> storage = new WeakHashMap<K, Reference<V>>();
+    
+    synchronized public V get(K key) {
+        Reference<V> valueRef = storage.get(key);
+        V value = null == valueRef ? null : valueRef.get();
+        if (null == value) {
+            value = createValue(key);
+            storage.put(key, new SoftReference<V>(value));
+        }
+        return value;
+    }
+    
+    abstract protected V createValue(K key);
 }

@@ -16,6 +16,8 @@
  */
 package org.apache.commons.javaflow.spi;
 
+import java.util.Collection;
+
 /**
  * Byte-code transformer that enhances the class files for javaflow.
  *
@@ -27,4 +29,9 @@ package org.apache.commons.javaflow.spi;
  */
 public interface ResourceTransformer {
     byte[] transform(byte[] original);
+    byte[] transform(byte[] original, String retransformClass);
+    byte[] transform(byte[] original, String... retransformClasses);
+    byte[] transform(byte[] original, Collection<String> retransformClasses);
+    
+    void release();
 }

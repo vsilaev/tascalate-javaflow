@@ -16,26 +16,34 @@
  */
 package org.apache.commons.javaflow.spi;
 
+import java.util.Collection;
+
 /**
  * {@link ResourceTransformer} whose transformation is defined in terms of
  * multiple {@link ResourceTransformer}s.
  *
  * @author Kohsuke Kawaguchi
  */
-public class CompositeTransformer implements ResourceTransformer {
+public class CompositeTransformer extends AbstractResourceTransformer {
     private final ResourceTransformer[] transformers;
 
     public CompositeTransformer(ResourceTransformer[] transformers) {
         this.transformers = transformers;
     }
 
-    public byte[] transform(byte[] image) {
-        for (int i = 0; i < transformers.length; i++) {
-            byte[] result = transformers[i].transform(image);
+    public byte[] transform(byte[] image, Collection<String> retransformClasses) {
+        for (ResourceTransformer transformer : transformers) {
+            byte[] result = transformer.transform(image, retransformClasses);
             if (null != result) {
                 image = result;
             }
         }
         return image;
+    }
+    
+    public void release() {
+        for (ResourceTransformer transformer : transformers) {
+            transformer.release();
+        }
     }
 }

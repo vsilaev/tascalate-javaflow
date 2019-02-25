@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collection;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.spi.AbstractResourceTransformer;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.FastByteArrayOutputStream;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
@@ -62,16 +64,14 @@ public final class RewritingUtils {
     /*
      * @todo multiple transformers
      */
-    public static boolean rewriteClassFile(
-            File pInput,
-            ResourceTransformer transformer,
-            File pOutput
-            ) throws IOException {
+    public static boolean rewriteClassFile(File input,
+                                           ResourceTransformer transformer,
+                                           File output) throws IOException {
 
-        byte[] original = toByteArray(pInput);
+        byte[] original = toByteArray(input);
         byte[] transformed = transformer.transform(original);
-        if (transformed != original /*Exact equality means not transformed*/ || !pOutput.equals(pInput)) {
-            FileOutputStream os = new FileOutputStream(pOutput);
+        if (transformed != original /*Exact equality means not transformed*/ || !output.equals(input)) {
+            FileOutputStream os = new FileOutputStream(output);
             try {
                 os.write(transformed);
             } finally {
@@ -83,38 +83,34 @@ public final class RewritingUtils {
         }
     }
 
-    public static boolean rewriteJar(
-            JarInputStream pInput,
-            ResourceTransformer transformer,
-            JarOutputStream pOutput
-            ) throws IOException {
-        return rewriteJar(pInput, transformer, pOutput, MATCH_ALL);
+    public static boolean rewriteJar(JarInputStream input,
+                                     ResourceTransformer transformer,
+                                     JarOutputStream output) throws IOException {
+        return rewriteJar(input, transformer, output, MATCH_ALL);
     }
 
-    public static boolean rewriteJar(
-            JarInputStream pInput,
-            ResourceTransformer transformer,
-            JarOutputStream pOutput,
-            Matcher pMatcher
-            ) throws IOException {
+    public static boolean rewriteJar(JarInputStream input,
+                                     ResourceTransformer transformer,
+                                     JarOutputStream output,
+                                     Matcher pMatcher) throws IOException {
 
         boolean changed = false;
 
         while(true) {
-            JarEntry entry = pInput.getNextJarEntry();
+            JarEntry entry = input.getNextJarEntry();
 
             if (entry == null) {
                 break;
             }
 
             if (entry.isDirectory()) {
-                pOutput.putNextEntry(new JarEntry(entry));
+                output.putNextEntry(new JarEntry(entry));
                 continue;
             }
 
             String name = entry.getName();
 
-            pOutput.putNextEntry(new JarEntry(name));
+            output.putNextEntry(new JarEntry(name));
 
             if (name.endsWith(".class")) {
                 if (pMatcher.isMatching(name)) {
@@ -123,37 +119,37 @@ public final class RewritingUtils {
                         log.debug("transforming " + name);
                     }
 
-                    byte[] original = toByteArray(pInput);
+                    byte[] original = toByteArray(input);
                     byte[] transformed = transformer.transform(original);
 
-                    pOutput.write(transformed);
+                    output.write(transformed);
 
                     changed |= transformed.length != original.length;
 
                     continue;
                 }
-            } else if (name.endsWith(".jar")
-                || name.endsWith(".ear")
-                || name.endsWith(".zip")
-                || name.endsWith(".war")) {
+            } else if (name.endsWith(".jar") || 
+                       name.endsWith(".ear") || 
+                       name.endsWith(".zip") || 
+                       name.endsWith(".war")) {
 
                 changed |= rewriteJar(
-                        new JarInputStream(pInput),
-                        transformer,
-                        new JarOutputStream(pOutput),
-                        pMatcher
-                        );
+                    new JarInputStream(input),
+                    transformer,
+                    new JarOutputStream(output),
+                    pMatcher
+                );
 
                 continue;
             }
 
-            int length = copy(pInput,pOutput);
+            int length = copy(input,output);
 
             log.debug("copied " + name + "(" + length + ")");
         }
 
-        pInput.close();
-        pOutput.close();
+        input.close();
+        output.close();
 
         return changed;
     }
@@ -197,11 +193,15 @@ public final class RewritingUtils {
             System.out.println("rewriting " + args[i]);
             
             ResourceTransformer transformer = createTransformer(new URL[]{new File(args[i]).toURI().toURL()}, factory);
-            RewritingUtils.rewriteJar(
-                new JarInputStream(new FileInputStream(args[i])),
-                transformer,
-                new JarOutputStream(new FileOutputStream(args[i+1]))
-            );
+            try {
+                RewritingUtils.rewriteJar(
+                    new JarInputStream(new FileInputStream(args[i])),
+                    transformer,
+                    new JarOutputStream(new FileOutputStream(args[i+1]))
+                );
+            } finally {
+                transformer.release();
+            }
         }
 
         System.out.println("done");
@@ -221,13 +221,17 @@ public final class RewritingUtils {
         URLClassLoader classLoader = new URLClassLoader(extraURL, safeParentClassLoader());
         
         final ResourceTransformer transformerDelegate = factory.createTransformer(
-            factory.createResolver(new ClasspathResourceLoader(classLoader))
+            new ClasspathResourceLoader(classLoader)
         );
         
-        return new ResourceTransformer() {
-            public byte[] transform(byte[] original) {
-                byte[] transformed = transformerDelegate.transform(original);
+        return new AbstractResourceTransformer() {
+            public byte[] transform(byte[] original, Collection<String> retransformClasses) {
+                byte[] transformed = transformerDelegate.transform(original, retransformClasses);
                 return null != transformed ? transformed : original;
+            }
+            
+            public void release() {
+                transformerDelegate.release();
             }
         };
     }

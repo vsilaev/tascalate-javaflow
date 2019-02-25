@@ -15,38 +15,61 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.io.IOException;
 
+import org.apache.commons.javaflow.spi.Cache;
+import org.apache.commons.javaflow.spi.ClassMatcher;
+import org.apache.commons.javaflow.spi.ClassMatchers;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.spi.VetoableResourceLoader;
+
+import net.tascalate.asmx.ClassReader;
 
 public class AsmxResourceTransformationFactory implements ResourceTransformationFactory {
 
-    public ResourceTransformer createTransformer(ContinuableClassInfoResolver cciResolver) {
-        return new AsmxClassTransformer(getOrCreateClassHierarchy(cciResolver), cciResolver);
+    public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
+        SharedContinuableClassInfos cciShared = CACHED_SHARED_CCI.get(resourceLoader);
+        return new ContinuableClassTransformer(
+            // Actualize ClassHierarchy per resource loader
+            cciShared.hierarchy().shareWith(resourceLoader), 
+            new IContinuableClassInfoResolver(resourceLoader, cciShared)
+        );
     }
 
     public ContinuableClassInfoResolver createResolver(ResourceLoader resourceLoader) {
-        return new AsmxContinuableClassInfoResolver(resourceLoader);
+        return new IContinuableClassInfoResolver(
+            resourceLoader,
+            CACHED_SHARED_CCI.get(resourceLoader)
+        );
     }
     
-    private static ClassHierarchy getOrCreateClassHierarchy(ContinuableClassInfoResolver cciResolver) {
-        ClassHierarchy result;
-        ResourceLoader loader = cciResolver.resourceLoader();
-        synchronized (CACHED_CLASS_HIERARCHY) {
-            result = CACHED_CLASS_HIERARCHY.get(loader);
-            if (null == result) {
-                result = new ClassHierarchy(loader);
-                CACHED_CLASS_HIERARCHY.put(loader, result);
+    public String readClassName(byte[] classBytes) {
+        return new ClassReader(classBytes).getClassName();
+    }
+
+    static ClassMatcher createVeto(ResourceLoader resourceLoader) {
+        if (resourceLoader instanceof VetoableResourceLoader) {
+            try {
+                return ((VetoableResourceLoader)resourceLoader).createVeto();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
+        } else {
+            return ClassMatchers.MATCH_NONE;
         }
-        return result;
     }
     
-    private static final Map<ResourceLoader, ClassHierarchy> CACHED_CLASS_HIERARCHY = 
-        new WeakHashMap<ResourceLoader, ClassHierarchy>();
+    private static final Cache<ResourceLoader, SharedContinuableClassInfos> CACHED_SHARED_CCI = 
+        new Cache<ResourceLoader, SharedContinuableClassInfos>() {
+            @Override
+            protected SharedContinuableClassInfos createValue(ResourceLoader loader) {
+                return new SharedContinuableClassInfos(
+                    new ClassHierarchy(loader), createVeto(loader)
+                );
+            }
+        };
 
 }

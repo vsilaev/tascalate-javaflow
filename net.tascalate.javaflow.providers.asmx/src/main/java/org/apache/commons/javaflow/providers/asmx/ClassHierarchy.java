@@ -47,17 +47,33 @@ import org.apache.commons.javaflow.spi.ResourceLoader;
 public class ClassHierarchy {
     
     private final ResourceLoader loader;
-    private final Map<Key, String> lookupCache = new HashMap<Key, String>();
-    private final Map<TypeInfo, Reference<TypeInfo>> typesCache 
-        = new WeakHashMap<TypeInfo, Reference<TypeInfo>>();
+    private final Map<Key, String> lookupCache;
+    private final Map<TypeInfo, Reference<TypeInfo>> typesCache; 
     
     public ClassHierarchy(ResourceLoader loader) {
         this.loader = loader;
+        this.lookupCache  = new HashMap<Key, String>();
+        this.typesCache = new WeakHashMap<TypeInfo, Reference<TypeInfo>>();
         // Next will never be removed from the cache
         // while there is a hard-reference
         for (TypeInfo ti : SPECIAL_CLASSES) {
             typesCache.put(ti, new SoftReference<TypeInfo>(ti));
         }
+    }
+    
+    private ClassHierarchy(ResourceLoader loader,
+                           Map<Key, String> lookupCache, 
+                           Map<TypeInfo, Reference<TypeInfo>> typesCache) {
+        this.loader = loader;
+        this.lookupCache = lookupCache;        
+        this.typesCache = typesCache;
+    }
+    
+    public ClassHierarchy shareWith(ResourceLoader resourceLoader) {
+        if (resourceLoader == this.loader) {
+            return this;
+        }
+        return new ClassHierarchy(resourceLoader, lookupCache, typesCache);
     }
 
     public boolean isSubClass(String type1, String type2) {

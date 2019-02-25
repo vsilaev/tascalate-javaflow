@@ -27,9 +27,6 @@ import java.util.List;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 
-import org.apache.commons.javaflow.spi.ResourceTransformer;
-import org.apache.commons.javaflow.tools.RewritingUtils;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
@@ -38,6 +35,9 @@ import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.types.resources.FileResource;
+
+import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.tools.RewritingUtils;
 
 /**
  * Ant task that enhances class files with javaflow instrumentation.
@@ -174,49 +174,56 @@ public class AntRewriteTask extends MatchingTask {
                 classPathByDir.toArray(new URL[]{}),
                 transformerType
             );
-
-            for (String fileName : fileNames) {
-                File source = new File(srcDir, fileName);
-                File destination = new File(dstDir, fileName);
-                
-                if (!destination.getParentFile().exists()) {
-                    log("Creating dir: " + destination.getParentFile(), Project.MSG_VERBOSE);
-                    destination.getParentFile().mkdirs();
-                }
-
-                if (source.lastModified() < destination.lastModified()) {
-                    log("Omitting " + source + " as " + destination + " is up to date", Project.MSG_VERBOSE);
-                    continue;
-                }
-                
-                if (fileName.endsWith(".class")) {
-                    log("Rewriting " + source + " to " + destination, Project.MSG_VERBOSE);
-                    // System.out.println("Rewriting " + source);
-
-                    RewritingUtils.rewriteClassFile( source, dirTransformer, destination );
-                }
-
-                if (fileName.endsWith(".jar")
-                    || fileName.endsWith(".ear")
-                    || fileName.endsWith(".zip")
-                    || fileName.endsWith(".war")) {
-
-                    log("Rewriting " + source + " to " + destination, Project.MSG_VERBOSE);
-
-                    List<URL> classPathByJar = new ArrayList<URL>(classPath);
-                    classPathByJar.add(source.toURI().toURL());
-                    ResourceTransformer jarTransformer = RewritingUtils.createTransformer(
-                       classPathByJar.toArray(new URL[]{}), 
-                       transformerType
-                    );
+            try {
+                for (String fileName : fileNames) {
+                    File source = new File(srcDir, fileName);
+                    File destination = new File(dstDir, fileName);
                     
-                    RewritingUtils.rewriteJar(
-                        new JarInputStream(new FileInputStream(source)),
-                        jarTransformer,
-                        new JarOutputStream(new FileOutputStream(destination))
-                    );
+                    if (!destination.getParentFile().exists()) {
+                        log("Creating dir: " + destination.getParentFile(), Project.MSG_VERBOSE);
+                        destination.getParentFile().mkdirs();
+                    }
+    
+                    if (source.lastModified() < destination.lastModified()) {
+                        log("Omitting " + source + " as " + destination + " is up to date", Project.MSG_VERBOSE);
+                        continue;
+                    }
                     
+                    if (fileName.endsWith(".class")) {
+                        log("Rewriting " + source + " to " + destination, Project.MSG_VERBOSE);
+                        // System.out.println("Rewriting " + source);
+    
+                        RewritingUtils.rewriteClassFile( source, dirTransformer, destination );
+                    }
+    
+                    if (fileName.endsWith(".jar") || 
+                        fileName.endsWith(".ear") || 
+                        fileName.endsWith(".zip") || 
+                        fileName.endsWith(".war")) {
+    
+                        log("Rewriting " + source + " to " + destination, Project.MSG_VERBOSE);
+    
+                        List<URL> classPathByJar = new ArrayList<URL>(classPath);
+                        classPathByJar.add(source.toURI().toURL());
+                        
+                        ResourceTransformer jarTransformer = RewritingUtils.createTransformer(
+                           classPathByJar.toArray(new URL[]{}), 
+                           transformerType
+                        );
+                        try {
+                            RewritingUtils.rewriteJar(
+                                new JarInputStream(new FileInputStream(source)),
+                                jarTransformer,
+                                new JarOutputStream(new FileOutputStream(destination))
+                            );
+                        } finally {
+                            jarTransformer.release();
+                        }
+                        
+                    }
                 }
+            } finally {
+                dirTransformer.release();
             }
         } catch (IOException e) {
             throw new BuildException(e);

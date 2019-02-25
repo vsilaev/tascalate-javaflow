@@ -40,10 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-import org.apache.commons.javaflow.spi.FastByteArrayInputStream;
 import org.apache.commons.javaflow.spi.FastByteArrayOutputStream;
-import org.apache.commons.javaflow.spi.ResourceLoader;
+import org.apache.commons.javaflow.spi.MorphingResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
@@ -197,7 +195,7 @@ public class ContinuableClassLoader extends ClassLoader {
     }
 
     protected final ResourceTransformationFactory transforationFactory;
-    protected final ContinuableClassInfoResolver cciResolver;
+    protected final MorphingResourceLoader resourceLoader;
 
     /**
      * Indicates whether the parent class loader should be consulted before
@@ -284,8 +282,8 @@ public class ContinuableClassLoader extends ClassLoader {
             throw new IllegalArgumentException();
         
         this.transforationFactory = transformationFactory;
-        this.cciResolver = transformationFactory.createResolver(
-            new ExtendedResourceLoader(new ClasspathResourceLoader(this))
+        this.resourceLoader = new MorphingResourceLoader(
+            new ClasspathResourceLoader(this)
         );
         
         this.acc = AccessController.getContext();
@@ -451,8 +449,8 @@ public class ContinuableClassLoader extends ClassLoader {
                                         final ProtectionDomain protectionDomain) {
         return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
             public Class<?> run() {
-                String classNameFromData = 
-                    cciResolver.readClassName(classData).replace('/', '.');
+                String internalClassName = transforationFactory.readClassName(classData);
+                String classNameFromData = internalClassName.replace('/', '.');
                 
                 if (null != className && !className.equals(classNameFromData)) {
                     throw new IllegalArgumentException(
@@ -471,20 +469,15 @@ public class ContinuableClassLoader extends ClassLoader {
                     }
                 }
 
-                ResourceTransformer transformer = transforationFactory.createTransformer(cciResolver);
+                ResourceTransformer transformer = transforationFactory.createTransformer(
+                    resourceLoader.withReplacement(internalClassName, classData)
+                );
+                
                 byte[] transfomred;
-                CurrentClass prevClass = CURRENT_CLASS.get();
-                CURRENT_CLASS.set(new CurrentClass(classNameFromData, classData));
                 try {
-                    synchronized (cciResolver) {
-                        transfomred = transformer.transform(classData);                        
-                    }
+                    transfomred = transformer.transform(classData, classNameFromData);                        
                 } finally {
-                    if (null != prevClass) {
-                        CURRENT_CLASS.set(prevClass);
-                    } else {
-                        CURRENT_CLASS.remove();
-                    }
+                    transformer.release();
                 }
 
                 if (null == transfomred)
@@ -617,48 +610,6 @@ public class ContinuableClassLoader extends ClassLoader {
     }
 
     private static final int BUFFER_SIZE = 4096;
-
-    static class CurrentClass {
-        final String className;
-        final byte[] classData;
-
-        CurrentClass(String className, byte[] classData) {
-            this.className = className;
-            this.classData = classData;
-        }
-    }
-
-    private static final ThreadLocal<CurrentClass> CURRENT_CLASS = new ThreadLocal<CurrentClass>();
-
-    static class ExtendedResourceLoader implements ResourceLoader {
-        private final ResourceLoader delegate;
-
-        ExtendedResourceLoader(final ResourceLoader delegate) {
-            this.delegate = delegate;
-        }
-
-        public boolean hasResource(String name) {
-            CurrentClass current = CURRENT_CLASS.get();
-            if (isInMemoryResource(current, name)) {
-                return true;
-            } else {
-                return delegate.hasResource(name);
-            }            
-        }
-        
-        public InputStream getResourceAsStream(String name) throws IOException {
-            CurrentClass current = CURRENT_CLASS.get();
-            if (isInMemoryResource(current, name)) {
-                return new FastByteArrayInputStream(current.classData);
-            } else {
-                return delegate.getResourceAsStream(name);
-            }
-        }
-
-        private static boolean isInMemoryResource(CurrentClass current, String name) {
-            return null != current && (current.className + ".class").equals(name);
-        }
-    }
     
     private static Method getClassLoaderMethodOrNull(String name, Class<?>... args) {
         try {

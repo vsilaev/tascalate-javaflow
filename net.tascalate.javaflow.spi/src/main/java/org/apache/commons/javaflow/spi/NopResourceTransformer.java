@@ -16,12 +16,17 @@
  */
 package org.apache.commons.javaflow.spi;
 
-public final class NopResourceTransformer implements ResourceTransformer {
+import java.util.Collection;
+
+public final class NopResourceTransformer extends AbstractResourceTransformer {
 
     public static final NopResourceTransformer INSTANCE = new NopResourceTransformer();
 
-    public byte[] transform(byte[] original) {
+    public byte[] transform(byte[] original, Collection<String> retransformClasses) {
         return original;
     }
 
+    public void release() {
+        
+    }
 }

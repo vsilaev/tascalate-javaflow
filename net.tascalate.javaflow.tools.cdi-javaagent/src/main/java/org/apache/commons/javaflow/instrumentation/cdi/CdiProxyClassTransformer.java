@@ -17,14 +17,9 @@ package org.apache.commons.javaflow.instrumentation.cdi;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
-
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +28,10 @@ import net.tascalate.asmx.ClassReader;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.ClassWriter;
 
+import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
+import org.apache.commons.javaflow.spi.MorphingResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.StopException;
@@ -48,6 +44,27 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
 
     private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory();
     private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+    private final Cache<ClassLoader, Object[]> cachedHelpers = 
+        new Cache<ClassLoader, Object[]>() {
+            @Override
+            protected Object[] createValue(ClassLoader classLoader) {
+                MorphingResourceLoader loader = new MorphingResourceLoader(
+                    new ClasspathResourceLoader(classLoader)
+                );
+                
+                // "touch" factory with empty morph
+                resourceTransformationFactory.createResolver(loader).release();
+                
+                ClassHierarchy hierarchy = new ClassHierarchy(loader);
+                List<ProxyType> proxyTypes = new ArrayList<ProxyType>();
+                for (ProxyType proxyType : ProxyType.values()) {
+                    if (proxyType.isAvailable(loader)) {
+                        proxyTypes.add(proxyType);
+                    }
+                }
+                return new Object[] {loader, hierarchy, proxyTypes};
+            }
+        };
 
     // @Override
     public byte[] transform(
@@ -65,33 +82,31 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
         }
 
         // Ensure classLoader is not null (null for boot class loader)
-        classLoader = getSafeClassLoader(classLoader);
+        Object[] helpers = cachedHelpers.get(getSafeClassLoader(classLoader));
         
-        Object[] helpers = getCachedHelpers(classLoader);
-        final ContinuableClassInfoResolver resolver = (ContinuableClassInfoResolver)helpers[0];
-        final ClassHierarchy hierarchy = (ClassHierarchy)helpers[1];
+        MorphingResourceLoader defaultLoader = (MorphingResourceLoader)helpers[0];
+        ClassHierarchy sharedHierarchy = (ClassHierarchy)helpers[1];
         @SuppressWarnings("unchecked")
-        final List<ProxyType> proxyTypes = (List<ProxyType>)helpers[2];
+        List<ProxyType> proxyTypes = (List<ProxyType>)helpers[2];
 
         // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
-        className = resolveClassName(resolver, className, classBeingRedefined, classfileBuffer);
+        className = resolveClassName(className, classBeingRedefined, classfileBuffer);
         try {
             // Execute with current class as extra resource (in-memory)
             // Mandatory for Java8 lambdas and alike
-            return ExtendedClasspathResourceLoader.runWithInMemoryResources(
-                new Callable<byte[]>() {
-                    public byte[] call() {
-                        ClassReader reader = new ClassReader(classfileBuffer);
-                        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
-                        synchronized (resolver) {
-                            ClassVisitor adapter = new CdiProxyClassAdapter(writer, resolver, hierarchy, proxyTypes);  
-                            reader.accept(adapter, ClassReader.EXPAND_FRAMES);
-                        }
-                        return writer.toByteArray();
-                    }
-                }, 
-                Collections.singletonMap(className + ".class", classfileBuffer)
-            );
+            ResourceLoader actualLoader = defaultLoader.withReplacement(className + ".class", classfileBuffer);
+            ClassHierarchy actualHierarchy = sharedHierarchy.shareWith(actualLoader);
+            ContinuableClassInfoResolver resolver = resourceTransformationFactory.createResolver(actualLoader);
+            
+            ClassReader reader = new ClassReader(classfileBuffer);
+            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
+            try {
+                ClassVisitor adapter = new CdiProxyClassAdapter(writer, resolver, actualHierarchy, proxyTypes);  
+                reader.accept(adapter, ClassReader.EXPAND_FRAMES);
+            } finally {
+                resolver.release();
+            }
+            return writer.toByteArray();
         } catch (StopException ex) {
             return null;
         } catch (RuntimeException ex) {
@@ -112,50 +127,22 @@ public class CdiProxyClassTransformer implements ClassFileTransformer {
     protected ClassLoader getSafeClassLoader(final ClassLoader classLoader) {
         return null != classLoader ? classLoader : systemClassLoader; 
     }
-
-    protected Object[] getCachedHelpers(ClassLoader classLoader) {
-        synchronized (PER_CLASS_LOADER_HELPERS) {
-            Object[] cachedHelpers = PER_CLASS_LOADER_HELPERS.get(classLoader);
-            if (null == cachedHelpers) {
-                log.debug("Create cached settings for class loader " + classLoader);
-                
-                ResourceLoader loader = new ExtendedClasspathResourceLoader(classLoader); 
-                ContinuableClassInfoResolver resolver = resourceTransformationFactory.createResolver(loader);
-                ClassHierarchy hierarchy = new ClassHierarchy(loader);
-                
-                List<ProxyType> proxyTypes = new ArrayList<ProxyType>();
-                for (ProxyType proxyType : ProxyType.values()) {
-                    if (proxyType.isAvailable(loader)) {
-                        proxyTypes.add(proxyType);
-                    }
-                }
-                
-                Object[] newHelpers = new Object[] {resolver, hierarchy, proxyTypes};
-                PER_CLASS_LOADER_HELPERS.put(classLoader, newHelpers);
-                return newHelpers;
-            } else {
-                return cachedHelpers;
-            }
-        }
-    }
     
     private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
         return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
     }
     
-    private static String resolveClassName(ContinuableClassInfoResolver resolver,
-                                           String className, 
-                                           Class<?> classBeingRedefined, 
-                                           byte[] classfileBuffer) {
+    private String resolveClassName(String className, 
+                                    Class<?> classBeingRedefined, 
+                                    byte[] classfileBuffer) {
         if (null != className) {
             return className;
         } else if (classBeingRedefined != null) {
             return classBeingRedefined.getName().replace('.', '/');
         } else {
-            return resolver.readClassName(classfileBuffer);
+            return resourceTransformationFactory.readClassName(classfileBuffer);
         }
     }
 
-    private static final Map<ClassLoader, Object[]> PER_CLASS_LOADER_HELPERS = new WeakHashMap<ClassLoader, Object[]>();
     private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
 }

@@ -17,19 +17,14 @@ package org.apache.commons.javaflow.instrumentation;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
-
 import java.security.ProtectionDomain;
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-import org.apache.commons.javaflow.spi.ExtendedClasspathResourceLoader;
+import org.apache.commons.javaflow.spi.MorphingResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
@@ -40,6 +35,16 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
 
     private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory();
     private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+    private final Cache<ClassLoader, MorphingResourceLoader> cachedResourceLoaders = 
+        new Cache<ClassLoader, MorphingResourceLoader>() {
+            @Override
+            protected MorphingResourceLoader createValue(ClassLoader classLoader) {
+                MorphingResourceLoader loader = new MorphingResourceLoader(new ClasspathResourceLoader(classLoader));
+                // "touch" factory with empty morph
+                resourceTransformationFactory.createTransformer(loader).release();
+                return loader;
+            }
+        };    
 
     // @Override
     public byte[] transform(ClassLoader classLoader, 
@@ -56,29 +61,21 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
         }
 
         // Ensure classLoader is not null (null for boot class loader)
-        classLoader = getSafeClassLoader(classLoader);
-        final ContinuableClassInfoResolver resolver = getCachedResolver(classLoader);
+        MorphingResourceLoader resourceLoader = cachedResourceLoaders.get(getSafeClassLoader(classLoader));
 
         // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
-        className = resolveClassName(resolver, className, classBeingRedefined, classfileBuffer);
+        className = resolveClassName(className, classBeingRedefined, classfileBuffer);
         try {
             // Execute with current class as extra resource (in-memory)
             // Mandatory for Java8 lambdas and alike
-            final String cn = className;
-            return ExtendedClasspathResourceLoader.runWithInMemoryResources(
-                new Callable<byte[]>() {
-                    public byte[] call() {
-                        ResourceTransformer transformer = 
-                            resourceTransformationFactory.createTransformer(resolver);
-                        
-                        synchronized (resolver) {
-                            resolver.forget(cn);
-                            return transformer.transform(classfileBuffer);                                
-                        }
-                    }
-                }, 
-                Collections.singletonMap(className + ".class", classfileBuffer)
+            ResourceTransformer transformer = resourceTransformationFactory.createTransformer(
+                resourceLoader.withReplacement(className + ".class", classfileBuffer)
             );
+            try {
+                return transformer.transform(classfileBuffer, className);
+            } finally {
+                transformer.release();
+            }
         } catch (RuntimeException ex) {
             if (log.isErrorEnabled()) {
                 if (VERBOSE_ERROR_REPORTS) {
@@ -103,39 +100,22 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
         return null != classLoader ? classLoader : systemClassLoader;
     }
 
-    protected ContinuableClassInfoResolver getCachedResolver(ClassLoader classLoader) {
-        synchronized (classLoader2resolver) {
-            ContinuableClassInfoResolver cachedResolver = classLoader2resolver.get(classLoader);
-            if (null == cachedResolver) {
-                log.debug("Create classInfoResolver for class loader " + classLoader);
-                ContinuableClassInfoResolver newResolver = resourceTransformationFactory.createResolver(
-                    new ExtendedClasspathResourceLoader(classLoader)
-                );
-                classLoader2resolver.put(classLoader, newResolver);
-                return newResolver;
-            } else {
-                return cachedResolver;
-            }
-        }
-    }
-
     private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
         return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
     }
     
-    private static String resolveClassName(ContinuableClassInfoResolver resolver,
-                                           String className,
-                                           Class<?> classBeingRedefined,
-                                           byte[] classfileBuffer) {
+    private String resolveClassName(String className,
+                                    Class<?> classBeingRedefined,
+                                    byte[] classfileBuffer) {
         if (null != className) {
             return className;
         } else if (classBeingRedefined != null) {
             return classBeingRedefined.getName().replace('.', '/');
         } else {
-            return resolver.readClassName(classfileBuffer);
+            return resourceTransformationFactory.readClassName(classfileBuffer);
         }
     }    
 
-    private static final Map<ClassLoader, ContinuableClassInfoResolver> classLoader2resolver = new WeakHashMap<ClassLoader, ContinuableClassInfoResolver>();
-    private static final boolean VERBOSE_ERROR_REPORTS = Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
+    private static final boolean VERBOSE_ERROR_REPORTS = 
+        Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
 }

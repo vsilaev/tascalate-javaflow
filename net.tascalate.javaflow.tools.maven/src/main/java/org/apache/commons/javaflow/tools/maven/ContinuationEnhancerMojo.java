@@ -24,10 +24,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.javaflow.spi.ResourceTransformer;
-import org.apache.commons.javaflow.tools.RewritingUtils;
-import org.apache.commons.javaflow.tools.RewritingUtils.TransformerType;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -36,6 +32,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+
+import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.tools.RewritingUtils;
+import org.apache.commons.javaflow.tools.RewritingUtils.TransformerType;
 
 /**
  * Maven plugin that will apply Continuation class transformations on compiled
@@ -113,36 +113,39 @@ public class ContinuationEnhancerMojo extends AbstractMojo {
             ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
                 classPath.toArray(new URL[] {}), TransformerType.ASMX
             );
-
-            long now = System.currentTimeMillis();
-
-            for (File source : RecursiveFilesIterator.scanClassFiles(inputDirectory)) {
-                if (source.lastModified() <= now) {
-                    log.debug("Applying continuations support: " + source);
-                    boolean rewritten = RewritingUtils.rewriteClassFile(source, dirTransformer, source);
-                    if (rewritten) {
-                        log.info("Rewritten continuation-enabled class file: " + source);
-                    }
-                }
-            }
-
-            if (includeTestClasses) {
-                File testInputDirectory = testBuildDir == null
-                    ? new File(project.getBuild().getTestOutputDirectory())
-                    : computeDir(testBuildDir);
-
-                if (testInputDirectory.exists()) {
-                    for (File source : RecursiveFilesIterator.scanClassFiles(testInputDirectory)) {
-                        if (source.lastModified() <= now) {
-                            log.debug("Applying continuations support: " + source);
-                            boolean rewritten = RewritingUtils.rewriteClassFile(source, dirTransformer, source);
-                            if (rewritten) {
-                                log.info("Rewritten continuation-enabled class file: " + source);
-                            }
-
+            try {
+                long now = System.currentTimeMillis();
+    
+                for (File source : RecursiveFilesIterator.scanClassFiles(inputDirectory)) {
+                    if (source.lastModified() <= now) {
+                        log.debug("Applying continuations support: " + source);
+                        boolean rewritten = RewritingUtils.rewriteClassFile(source, dirTransformer, source);
+                        if (rewritten) {
+                            log.info("Rewritten continuation-enabled class file: " + source);
                         }
                     }
                 }
+    
+                if (includeTestClasses) {
+                    File testInputDirectory = testBuildDir == null
+                        ? new File(project.getBuild().getTestOutputDirectory())
+                        : computeDir(testBuildDir);
+    
+                    if (testInputDirectory.exists()) {
+                        for (File source : RecursiveFilesIterator.scanClassFiles(testInputDirectory)) {
+                            if (source.lastModified() <= now) {
+                                log.debug("Applying continuations support: " + source);
+                                boolean rewritten = RewritingUtils.rewriteClassFile(source, dirTransformer, source);
+                                if (rewritten) {
+                                    log.info("Rewritten continuation-enabled class file: " + source);
+                                }
+    
+                            }
+                        }
+                    }
+                }
+            } finally {
+                dirTransformer.release();
             }
         } catch (Exception e) {
             getLog().error(e.getMessage(), e);

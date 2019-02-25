@@ -25,6 +25,8 @@ package org.apache.commons.javaflow.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -32,18 +34,20 @@ import java.util.List;
 
 public class ClasspathResourceLoader implements VetoableResourceLoader {
 
-    private final ClassLoader classLoader;
-
+    private final Reference<ClassLoader> classLoaderRef;
+    
     public ClasspathResourceLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+        this.classLoaderRef = new WeakReference<ClassLoader>(classLoader);
     }
 
     public boolean hasResource(String name) {
-        return null != classLoader.getResource(name);
+        ClassLoader classLoader = classLoaderRef.get();
+        return null != classLoader && null != classLoader.getResource(name);
     }
     
     public InputStream getResourceAsStream(String name) throws IOException {
-        InputStream result = classLoader.getResourceAsStream(name);
+        ClassLoader classLoader = classLoaderRef.get();
+        InputStream result = null != classLoader ? classLoader.getResourceAsStream(name) : null;
         if (null == result) {
             throw new IOException("Unable to find resource " + name);
         }
@@ -52,6 +56,10 @@ public class ClasspathResourceLoader implements VetoableResourceLoader {
     
     public ClassMatcher createVeto() throws IOException {
         List<ClassMatcher> matchers = new ArrayList<ClassMatcher>();
+        ClassLoader classLoader = classLoaderRef.get();
+        if (null == classLoader) {
+            return ClassMatchers.MATCH_NONE;
+        }
         Enumeration<URL> allResources = classLoader.getResources("META-INF/net.tascalate.javaflow.veto.cmf");
         ClassMatcherFileParser parser = new ClassMatcherFileParser();
         while (allResources.hasMoreElements()) {

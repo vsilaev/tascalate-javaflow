@@ -56,9 +56,22 @@ public class ExtendedClasspathResourceLoader extends ClasspathResourceLoader {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } finally {
-            IN_MEMORY_RESOURCES.set(previous);
+            if (null != previous) { 
+                IN_MEMORY_RESOURCES.set(previous);
+            } else {
+                IN_MEMORY_RESOURCES.remove();
+            }
         }
 
+    }
+    
+    @Override
+    public boolean hasResource(String name) {
+        Map<String, byte[]> inMemoryResources = IN_MEMORY_RESOURCES.get();
+        if (null != inMemoryResources && inMemoryResources.containsKey(name)) {
+            return true;
+        }
+        return super.hasResource(name);
     }
 
     @Override

@@ -15,18 +15,20 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
+import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+
 import net.tascalate.asmx.AnnotationVisitor;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.Opcodes;
 
 class MaybeContinuableAnnotationVisitor extends ClassVisitor {
-    private final AsmxContinuableClassInfoResolver environment; 
+    private final ContinuableClassInfoResolver cciResolver; 
     private boolean classContinuableAnnotationFound = false;
     private boolean isAnnotation = false;
 
-    MaybeContinuableAnnotationVisitor(AsmxContinuableClassInfoResolver environment) {
+    MaybeContinuableAnnotationVisitor(ContinuableClassInfoResolver cciResolver) {
         super(AsmVersion.CURRENT);
-        this.environment = environment;
+        this.cciResolver = cciResolver;
     }
 
     @Override
@@ -37,7 +39,7 @@ class MaybeContinuableAnnotationVisitor extends ClassVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String description, boolean visible) {
         if (isAnnotation && !classContinuableAnnotationFound) {
-            classContinuableAnnotationFound = environment.isContinuableAnnotation(description);
+            classContinuableAnnotationFound = cciResolver.isContinuableAnnotation(description);
         }
         return null;
     }
