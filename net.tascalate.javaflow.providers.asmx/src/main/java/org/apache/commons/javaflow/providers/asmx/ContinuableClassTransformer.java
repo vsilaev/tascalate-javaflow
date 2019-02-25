@@ -23,13 +23,13 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import net.tascalate.asmx.ClassReader;
-import net.tascalate.asmx.ClassWriter;
-
 import java.util.Collection;
 
 import org.apache.commons.javaflow.spi.AbstractResourceTransformer;
 import org.apache.commons.javaflow.spi.StopException;
+
+import net.tascalate.asmx.ClassReader;
+import net.tascalate.asmx.ClassWriter;
 
 /**
  * AsmClassTransformer

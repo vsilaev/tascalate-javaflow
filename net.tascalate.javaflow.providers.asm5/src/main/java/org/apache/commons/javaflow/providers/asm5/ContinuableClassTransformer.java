@@ -23,35 +23,36 @@
  */
 package org.apache.commons.javaflow.providers.asm5;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import java.util.Collection;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.spi.AbstractResourceTransformer;
 import org.apache.commons.javaflow.spi.StopException;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 /**
  * AsmClassTransformer
  * 
  * @author Eugene Kuleshov
  */
-class Asm5ClassTransformer implements ResourceTransformer {
+class ContinuableClassTransformer extends AbstractResourceTransformer {
 
     private final ClassHierarchy classHierarchy;
-    private final ContinuableClassInfoResolver cciResolver;
+    private final IContinuableClassInfoResolver cciResolver;
 
-    Asm5ClassTransformer(ClassHierarchy classHierarchy, ContinuableClassInfoResolver cciResolver) {
+    ContinuableClassTransformer(ClassHierarchy classHierarchy, IContinuableClassInfoResolver cciResolver) {
         this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
     }
 
-    public byte[] transform(byte[] original) {
+    public byte[] transform(byte[] original, Collection<String> retransformClasses) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES) {
             @Override
             protected String getCommonSuperClass(final String type1, final String type2) {
                 return classHierarchy.getCommonSuperClass(type1, type2);
             }
         };
+        cciResolver.reset(retransformClasses);
         ContinuableClassVisitor visitor = new ContinuableClassVisitor(
             cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
             classHierarchy,
@@ -72,5 +73,9 @@ class Asm5ClassTransformer implements ResourceTransformer {
         byte[] bytecode = cw.toByteArray();
         // BytecodeDebugUtils.dumpClass(bytecode);
         return bytecode;
+    }
+    
+    public void release() {
+        cciResolver.release();
     }
 }

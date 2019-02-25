@@ -28,8 +28,6 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
 
 /**
@@ -40,16 +38,16 @@ import org.apache.commons.javaflow.spi.StopException;
 class ContinuableClassVisitor extends ClassVisitor {
 
     private final ClassHierarchy classHierarchy;
-    private final ContinuableClassInfoResolver cciResolver;
+    private final IContinuableClassInfoResolver cciResolver;
     private final byte[] originalBytes;
 
     private String className;
-    private ContinuableClassInfo classInfo;
+    private IContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
 
     ContinuableClassVisitor(ClassVisitor cv, 
                             ClassHierarchy classHierarchy, 
-                            ContinuableClassInfoResolver cciResolver, 
+                            IContinuableClassInfoResolver cciResolver, 
                             byte[] originalBytes) {
         super(AsmVersion.CURRENT, cv);
         this.classHierarchy = classHierarchy;
@@ -66,7 +64,7 @@ class ContinuableClassVisitor extends ClassVisitor {
         className = name;
         classInfo = cciResolver.resolve(name, originalBytes);
 
-        if (null == classInfo || 
+        if (null == classInfo ||
             classInfo.isClassProcessed() || 
             cciResolver.veto().matches(name, signature, superName, interfaces)) {
             skipEnchancing = true;

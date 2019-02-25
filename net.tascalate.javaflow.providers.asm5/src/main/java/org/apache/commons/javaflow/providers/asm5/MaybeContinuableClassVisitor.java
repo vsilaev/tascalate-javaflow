@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -28,7 +30,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 class MaybeContinuableClassVisitor extends ClassVisitor {
-    private final Asm5ContinuableClassInfoResolver environment; 
+    private final ContinuableClassInfoResolver cciResolver; 
     private boolean classContinuatedMarkerFound = false;
     private String selfclass;
     private String superclass;
@@ -45,9 +47,9 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
 
     private boolean isAnnotation = false;
 
-    MaybeContinuableClassVisitor(Asm5ContinuableClassInfoResolver environment) {
+    MaybeContinuableClassVisitor(ContinuableClassInfoResolver cciResolver) {
         super(AsmVersion.CURRENT);
-        this.environment = environment;
+        this.cciResolver = cciResolver;
     }
 
     @Override
@@ -122,7 +124,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             @Override
             public AnnotationVisitor visitAnnotation(String description, boolean visible) {
                 if (!methodContinuableAnnotationFound) {
-                    methodContinuableAnnotationFound = environment.isContinuableAnnotation(description);
+                    methodContinuableAnnotationFound = cciResolver.isContinuableAnnotation(description);
                 }
                 return null;
             }
@@ -173,7 +175,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     }
 
     private void visitParentClass(String classInternalName) {
-        ContinuableClassInfoInternal parent = resolve(classInternalName);
+        IContinuableClassInfo parent = resolve(classInternalName);
         if (null != parent) {
             continuableMethods.addAll(parent.continuableMethods());
         }
@@ -182,7 +184,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     private void checkOuterClass() {
         if (!isAnnotation && (outerClassName != null && outerClassMethodName != null)) {
             if (!continuableMethods.isEmpty()) {
-                ContinuableClassInfoInternal outer = resolve(outerClassName);
+                IContinuableClassInfo outer = resolve(outerClassName);
                 if (null != outer && outer.isContinuableMethod(0, outerClassMethodName, outerClassMethodDesc, null)) {
                     // Reserved;
                 }
@@ -190,9 +192,9 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         }
     }
 
-    private ContinuableClassInfoInternal resolve(String classInternalName) {
+    private IContinuableClassInfo resolve(String classInternalName) {
         try {
-            return (ContinuableClassInfoInternal)environment.resolve(classInternalName);
+            return (IContinuableClassInfo)cciResolver.resolve(classInternalName);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

@@ -64,7 +64,7 @@ class ContinuableClassVisitor extends ClassVisitor {
         className = name;
         classInfo = cciResolver.resolve(name, originalBytes);
 
-        if (null == classInfo ||  
+        if (null == classInfo ||
             classInfo.isClassProcessed() || 
             cciResolver.veto().matches(name, signature, superName, interfaces)) {
             skipEnchancing = true;
