@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -429,7 +430,7 @@ public class ContinuableClassLoader extends ClassLoader {
     }
     
     public Class<?> defineClassFromData(byte[] classData, String className) {
-        return defineClassFromData(classData, className, null);
+        return defineClassFromData(classData, className, getClass().getProtectionDomain());
     }
     
     /**

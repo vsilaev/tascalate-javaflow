@@ -15,18 +15,20 @@
  */
 package org.apache.commons.javaflow.providers.asm3;
 
+import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.Opcodes;
 
 class MaybeContinuableAnnotationVisitor extends ClassAdapter {
-    private final Asm3ContinuableClassInfoResolver environment; 
+    private final ContinuableClassInfoResolver cciResolver; 
     private boolean classContinuableAnnotationFound = false;
     private boolean isAnnotation = false;
 
-    MaybeContinuableAnnotationVisitor(Asm3ContinuableClassInfoResolver environment) {
+    MaybeContinuableAnnotationVisitor(ContinuableClassInfoResolver cciResolver) {
         super(MaybeContinuableClassVisitor.NOP);
-        this.environment = environment;
+        this.cciResolver = cciResolver;
     }
 
     @Override
@@ -37,7 +39,7 @@ class MaybeContinuableAnnotationVisitor extends ClassAdapter {
     @Override
     public AnnotationVisitor visitAnnotation(String description, boolean visible) {
         if (isAnnotation && !classContinuableAnnotationFound) {
-            classContinuableAnnotationFound = environment.isContinuableAnnotation(description);
+            classContinuableAnnotationFound = cciResolver.isContinuableAnnotation(description);
         }
         return null;
     }

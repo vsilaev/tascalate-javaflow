@@ -71,6 +71,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
                           ClassHierarchy classHierarchy, 
                           ContinuableClassInfoResolver cciResolver, 
                           MethodVisitor mv) {
+        
         super(access, name, desc, signature, exceptions);
         this.className = className;
         this.classHierarchy = classHierarchy;

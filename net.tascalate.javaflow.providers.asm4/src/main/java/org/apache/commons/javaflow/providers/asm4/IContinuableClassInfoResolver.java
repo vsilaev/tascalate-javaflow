@@ -17,6 +17,8 @@ package org.apache.commons.javaflow.providers.asm4;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,39 +28,24 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 
 import org.apache.commons.javaflow.spi.ClassMatcher;
-import org.apache.commons.javaflow.spi.ClassMatchers;
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.apache.commons.javaflow.spi.VetoableResourceLoader;
 
-class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
-    private final Map<String, ContinuableClassInfo> visitedClasses = new HashMap<String, ContinuableClassInfo>();
+class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
+    private final Map<String, IContinuableClassInfo> visitedClasses = new HashMap<String, IContinuableClassInfo>();
     private final Set<String> processedAnnotations = new HashSet<String>();
     private final Set<String> continuableAnnotations = new HashSet<String>();
+    private final Set<String> refreshClasses = new HashSet<String>();
     private final ResourceLoader resourceLoader;
-    private final ClassMatcher veto;
+    private final SharedContinuableClassInfos cciShared;
     
-    Asm4ContinuableClassInfoResolver(ResourceLoader resourceLoader) {
+    IContinuableClassInfoResolver(ResourceLoader resourceLoader, SharedContinuableClassInfos cciShared) {
         this.resourceLoader = resourceLoader;
-        this.veto = createVeto(resourceLoader);
-        markContinuableAnnotation(CONTINUABLE_ANNOTATION_TYPE.getDescriptor());
+        this.cciShared = cciShared;
     }
 
-    public ResourceLoader resourceLoader() {
-        return resourceLoader;
-    }
-
-    public String readClassName(byte[] classBytes) {
-        return new ClassReader(classBytes).getClassName();
-    }
-    
-    public ContinuableClassInfo forget(String className) {
-        return visitedClasses.remove(className);
-    }
-
-    public ContinuableClassInfo resolve(String classInternalName, byte[] classBytes) {
-        ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
+    public IContinuableClassInfo resolve(String classInternalName, byte[] classBytes) {
+        IContinuableClassInfo classInfo = getResolved(classInternalName);
         if (classInfo == null) {
             return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
         } else {
@@ -66,8 +53,8 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         }
     }
 
-    public ContinuableClassInfo resolve(String classInternalName) throws IOException {
-        ContinuableClassInfo classInfo = visitedClasses.get(classInternalName);
+    public IContinuableClassInfo resolve(String classInternalName) throws IOException {
+        IContinuableClassInfo classInfo = getResolved(classInternalName);
         if (classInfo == null) {
             InputStream classBytes = resourceLoader.getResourceAsStream(classInternalName + ".class");
             try {
@@ -82,60 +69,6 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         } 
     }
     
-    public ClassMatcher veto() {
-        return veto;
-    }
-
-    private ContinuableClassInfo resolveContinuableClassInfo(String classInternalName, ClassReader reader) {
-        MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
-        reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-
-        ContinuableClassInfo classInfo;
-        if (maybeContinuableClassVisitor.isContinuable()) {
-            classInfo = new ContinuableClassInfoInternal(
-                maybeContinuableClassVisitor.isProcessed(), 
-                maybeContinuableClassVisitor.continuableMethods
-            );
-        } else {
-            classInfo = UNSUPPORTED_CLASS_INFO;
-        }
-        visitedClasses.put(classInternalName, classInfo);
-        return unmask(classInfo);
-    }
-
-    private boolean resolveContinuableAnnotation(String annotationClassDescriptor, ClassReader reader) {
-        MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(this); 
-        reader.accept(
-            maybeContinuableAnnotationVisitor, 
-            ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG
-        );
-
-        if (maybeContinuableAnnotationVisitor.isContinuable()) {
-            markContinuableAnnotation(annotationClassDescriptor);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private AnnotationProcessingState getAnnotationProcessingState(String annotationClassDescriptor) {
-        if (continuableAnnotations.contains(annotationClassDescriptor))
-            return AnnotationProcessingState.SUPPORTED;
-        else if (processedAnnotations.contains(annotationClassDescriptor))
-            return AnnotationProcessingState.UNSUPPORTED;
-        else
-            return AnnotationProcessingState.UNKNON;
-    }
-
-    private void markProcessedAnnotation(String annotationClassDescriptor) {
-        processedAnnotations.add(annotationClassDescriptor);
-    }
-
-    private void markContinuableAnnotation(String annotationClassDescriptor) {
-        markProcessedAnnotation(annotationClassDescriptor);
-        continuableAnnotations.add(annotationClassDescriptor);
-    }
-
     public boolean isContinuableAnnotation(String annotationClassDescriptor) {
         switch (getAnnotationProcessingState(annotationClassDescriptor)) {
             case SUPPORTED:
@@ -163,36 +96,104 @@ class Asm4ContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         }
     }
     
-    private static ClassMatcher createVeto(ResourceLoader resourceLoader) {
-        if (resourceLoader instanceof VetoableResourceLoader) {
-            try {
-                return ((VetoableResourceLoader)resourceLoader).createVeto();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        } else {
-            return ClassMatchers.MATCH_NONE;
-        }
+    public void release() {
+        cciShared.mergeWith(visitedClasses, processedAnnotations, continuableAnnotations);
     }
     
-    private static ContinuableClassInfo unmask(ContinuableClassInfo classInfo) {
-        return classInfo == UNSUPPORTED_CLASS_INFO ? null : classInfo;
+    void reset(Collection<String> classNames) {
+        visitedClasses.keySet().removeAll(classNames);
+        refreshClasses.addAll(classNames);
+    }
+    
+    ClassMatcher veto() {
+        return cciShared.veto();
+    }
+    
+    private IContinuableClassInfo getResolved(String classInternalName) {
+        if (refreshClasses.contains(classInternalName)) {
+            return null;
+        }
+        IContinuableClassInfo result;
+        
+        result = visitedClasses.get(classInternalName);
+        if (null != result) {
+            return result;
+        }
+        
+        result = cciShared.getResolved(classInternalName);
+        if (null != result) {
+            return result;
+        }
+        
+        return null;
     }
 
-    private static final Type CONTINUABLE_ANNOTATION_TYPE = Type.getObjectType("org/apache/commons/javaflow/api/ContinuableAnnotation");
-    private static final ContinuableClassInfo UNSUPPORTED_CLASS_INFO = new ContinuableClassInfo() {
+    private IContinuableClassInfo resolveContinuableClassInfo(String classInternalName, ClassReader reader) {
+        MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
+        reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 
-        public void markClassProcessed() {}
+        IContinuableClassInfo classInfo;
+        if (maybeContinuableClassVisitor.isContinuable()) {
+            classInfo = new IContinuableClassInfo(
+                maybeContinuableClassVisitor.isProcessed(), 
+                maybeContinuableClassVisitor.continuableMethods
+            );
+        } else {
+            classInfo = UNSUPPORTED_CLASS_INFO;
+        }
+        visitedClasses.put(classInternalName, classInfo);
+        refreshClasses.remove(classInternalName);
+        return unmask(classInfo);
+    }
 
-        public boolean isContinuableMethod(int access, String name, String desc, String signature) {
+    private boolean resolveContinuableAnnotation(String annotationClassDescriptor, ClassReader reader) {
+        MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(this); 
+        reader.accept(
+            maybeContinuableAnnotationVisitor, 
+            ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG
+        );
+
+        if (maybeContinuableAnnotationVisitor.isContinuable()) {
+            markContinuableAnnotation(annotationClassDescriptor);
+            return true;
+        } else {
             return false;
         }
+    }
 
-        public boolean isClassProcessed() {
-            return true;
+    private AnnotationProcessingState getAnnotationProcessingState(String annotationClassDescriptor) {
+        // Check already resolved shared state first
+        if (cciShared.isContinuableAnnotation(annotationClassDescriptor)) {
+            return AnnotationProcessingState.SUPPORTED;
+        } else if (cciShared.isProcessedAnnotation(annotationClassDescriptor)) {
+            return AnnotationProcessingState.UNSUPPORTED;
         }
-    };
 
+        // Now check own state
+        if (continuableAnnotations.contains(annotationClassDescriptor))
+            return AnnotationProcessingState.SUPPORTED;
+        else if (processedAnnotations.contains(annotationClassDescriptor))
+            return AnnotationProcessingState.UNSUPPORTED;
+        else
+            return AnnotationProcessingState.UNKNON;
+    }
+
+    private void markProcessedAnnotation(String annotationClassDescriptor) {
+        processedAnnotations.add(annotationClassDescriptor);
+    }
+
+    private void markContinuableAnnotation(String annotationClassDescriptor) {
+        markProcessedAnnotation(annotationClassDescriptor);
+        continuableAnnotations.add(annotationClassDescriptor);
+    }
+
+    private static IContinuableClassInfo unmask(IContinuableClassInfo classInfo) {
+        return classInfo == UNSUPPORTED_CLASS_INFO ? null : classInfo;
+    }
+    
+    private static final IContinuableClassInfo UNSUPPORTED_CLASS_INFO = 
+        new IContinuableClassInfo(true, Collections.<String>emptySet());
+    
     private static enum AnnotationProcessingState {
         UNKNON, UNSUPPORTED, SUPPORTED;
     }

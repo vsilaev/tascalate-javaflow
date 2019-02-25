@@ -19,25 +19,25 @@ import java.util.Set;
 
 import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 
-class ContinuableClassInfoInternal implements ContinuableClassInfo {
+class IContinuableClassInfo implements ContinuableClassInfo {
     private boolean processed;
     private final Set<String> methods;
 
-    ContinuableClassInfoInternal(boolean defaultProcessed, Set<String> methods) {
+    IContinuableClassInfo(boolean defaultProcessed, Set<String> methods) {
         this.processed = defaultProcessed;
         this.methods = methods;
     }
+    
+    public boolean isContinuableMethod(int access, String name, String desc, String signature) {
+        return methods.contains(name + desc);
+    }
 
-    public boolean isClassProcessed() {
+    boolean isClassProcessed() {
         return processed;
     }
 
-    public void markClassProcessed() {
+    void markClassProcessed() {
         processed = true;
-    }
-
-    public boolean isContinuableMethod(int access, String name, String desc, String signature) {
-        return methods.contains(name + desc);
     }
 
     Set<String> continuableMethods() {
