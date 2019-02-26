@@ -20,7 +20,6 @@ import java.io.IOException;
 import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ClassMatcher;
 import org.apache.commons.javaflow.spi.ClassMatchers;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;

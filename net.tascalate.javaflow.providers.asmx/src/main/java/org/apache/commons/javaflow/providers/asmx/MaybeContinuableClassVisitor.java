@@ -21,8 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-
 import net.tascalate.asmx.AnnotationVisitor;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.MethodVisitor;

@@ -13,8 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.spi;
+package org.apache.commons.javaflow.providers.asmx;
 
-public interface ContinuableClassInfo {
-    boolean isContinuableMethod(int access, String name, String desc, String signature);
+import java.io.IOException;
+import java.util.Collection;
+
+public interface ContinuableClassInfoResolver {
+    ContinuableClassInfo resolve(String className) throws IOException;
+
+    ContinuableClassInfo resolve(String className, byte[] classBytes);
+
+    boolean isContinuableAnnotation(String annotationClassDescriptor);
+    
+    void reset(Collection<String> classNames);
+    
+    void release();
 }

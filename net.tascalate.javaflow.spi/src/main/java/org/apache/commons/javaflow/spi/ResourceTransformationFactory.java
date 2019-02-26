@@ -20,6 +20,4 @@ public interface ResourceTransformationFactory {
     String readClassName(byte[] classBytes);
     
     ResourceTransformer createTransformer(ResourceLoader resourceLoader);
-    
-    ContinuableClassInfoResolver createResolver(ResourceLoader resourceLoader);
 }

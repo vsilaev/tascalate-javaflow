@@ -15,7 +15,7 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
 
 import net.tascalate.asmx.FieldVisitor;
 import net.tascalate.asmx.MethodVisitor;

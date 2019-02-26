@@ -61,9 +61,10 @@
 		<module>net.tascalate.javaflow.providers.asm5</module>
 		<module>net.tascalate.javaflow.providers.asmx</module>
 		<module>net.tascalate.javaflow.tools.jar</module>
-		<module>net.tascalate.javaflow.tools.javaagent</module>
-		<module>net.tascalate.javaflow.tools.maven</module>
 		<module>net.tascalate.javaflow.tools.ant</module>
+		<module>net.tascalate.javaflow.tools.maven</module>
+		<module>net.tascalate.javaflow.tools.instrument</module>
+		<module>net.tascalate.javaflow.tools.javaagent</module>
 		<module>net.tascalate.javaflow.tools.cdi-javaagent</module>
 		<module>net.tascalate.javaflow.tools.runtime</module>
 	</modules>

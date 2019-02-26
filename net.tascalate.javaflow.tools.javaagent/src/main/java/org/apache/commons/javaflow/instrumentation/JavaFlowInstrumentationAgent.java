@@ -15,16 +15,12 @@
  */
 package org.apache.commons.javaflow.instrumentation;
 
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.javaflow.instrumentation.common.AbstractInstrumentationAgent;
 
-import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
-
-public class JavaFlowInstrumentationAgent {
-    private static final Logger log = LoggerFactory.getLogger(JavaFlowInstrumentationAgent.class);
-    
+public class JavaFlowInstrumentationAgent extends AbstractInstrumentationAgent {
     /**
      * JVM hook to statically load the javaagent at startup.
      * 
@@ -36,8 +32,7 @@ public class JavaFlowInstrumentationAgent {
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        setupInstrumentation(instrumentation);
-        System.setProperty(JavaFlowClassTransformer.class.getName(), "true");
+        new JavaFlowInstrumentationAgent().install(args, instrumentation);
     }
 
     /**
@@ -51,45 +46,10 @@ public class JavaFlowInstrumentationAgent {
      * @throws Exception
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
-        log.info("Installing agent...");
-        setupInstrumentation(instrumentation);
-        if ("skip-retransform".equals(args)) {
-            log.info("skip-retransform argument passed, skipping re-transforming classes");
-        } else if (!instrumentation.isRetransformClassesSupported()) {
-            log.info("JVM does not support re-transform, skipping re-transforming classes");
-        } else {
-            log.info("Re-transforming existing classes...");
-            ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader(); 
-            for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
-                String className = clazz.getName();
-                if (instrumentation.isModifiableClass(clazz)) {
-                    if (ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
-                        if (log.isTraceEnabled()) {
-                            log.trace("Skip re-transforming boot or extension/platform class: " + className);
-                        }
-                        continue;
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Re-transforming class: " + className);
-                    }
-                    try {
-                        instrumentation.retransformClasses(clazz);
-                    } catch (Throwable e) {
-                        log.error("Error re-transofrming class "+ className, e);
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Non-modifiable class (re-transforming skipped): " + className);
-                    }                    
-                }
-            }
-            log.info("Existing classes was re-transormed");
-        }
-        System.setProperty(JavaFlowClassTransformer.class.getName(), "true");        
-        log.info("Agent was installed dynamically");
+        new JavaFlowInstrumentationAgent().attach(args, instrumentation);
     }
 
-    private static void setupInstrumentation(Instrumentation instrumentation) {
-        instrumentation.addTransformer(new JavaFlowClassTransformer(), true);
+    protected ClassFileTransformer createTransformer() {
+        return new JavaFlowClassTransformer();
     }
 }

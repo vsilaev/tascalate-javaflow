@@ -20,11 +20,10 @@ import net.tascalate.asmx.Opcodes;
 import net.tascalate.asmx.Type;
 import net.tascalate.asmx.commons.Method;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-
 import org.apache.commons.javaflow.instrumentation.cdi.ExtendedClassVisitor;
 import org.apache.commons.javaflow.instrumentation.cdi.ProxyClassProcessor;
 import org.apache.commons.javaflow.instrumentation.cdi.common.ProxiedMethodAdvice;
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
 
 public class WeldProxyClassProcessor extends ProxyClassProcessor {
     

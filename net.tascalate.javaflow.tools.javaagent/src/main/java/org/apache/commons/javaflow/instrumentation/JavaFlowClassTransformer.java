@@ -15,26 +15,15 @@
  */
 package org.apache.commons.javaflow.instrumentation;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
-import java.security.ProtectionDomain;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.MorphingResourceLoader;
-import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
-import org.apache.commons.javaflow.spi.ResourceTransformer;
 
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 
-public class JavaFlowClassTransformer implements ClassFileTransformer {
-    private static final Logger log = LoggerFactory.getLogger(JavaFlowClassTransformer.class);
+import org.apache.commons.javaflow.instrumentation.common.ConfigurableClassFileTransformer;
 
-    private final ResourceTransformationFactory resourceTransformationFactory = new AsmxResourceTransformationFactory();
-    private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+public class JavaFlowClassTransformer extends ConfigurableClassFileTransformer {
     private final Cache<ClassLoader, MorphingResourceLoader> cachedResourceLoaders = 
         new Cache<ClassLoader, MorphingResourceLoader>() {
             @Override
@@ -45,77 +34,13 @@ public class JavaFlowClassTransformer implements ClassFileTransformer {
                 return loader;
             }
         };    
-
-    // @Override
-    public byte[] transform(ClassLoader classLoader, 
-                            String className, 
-                            Class<?> classBeingRedefined,
-                            ProtectionDomain protectionDomain, 
-                            final byte[] classfileBuffer) throws IllegalClassFormatException {
-
-        if (isSystemClassLoaderParent(classLoader)) {
-            if (log.isDebugEnabled()) {
-                log.info("Ignoring class defined by boot or extensions/platform class loader: " + className);
-            }
-            return null;
-        }
-
-        // Ensure classLoader is not null (null for boot class loader)
-        MorphingResourceLoader resourceLoader = cachedResourceLoaders.get(getSafeClassLoader(classLoader));
-
-        // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
-        className = resolveClassName(className, classBeingRedefined, classfileBuffer);
-        try {
-            // Execute with current class as extra resource (in-memory)
-            // Mandatory for Java8 lambdas and alike
-            ResourceTransformer transformer = resourceTransformationFactory.createTransformer(
-                resourceLoader.withReplacement(className + ".class", classfileBuffer)
-            );
-            try {
-                return transformer.transform(classfileBuffer, className);
-            } finally {
-                transformer.release();
-            }
-        } catch (RuntimeException ex) {
-            if (log.isErrorEnabled()) {
-                if (VERBOSE_ERROR_REPORTS) {
-                    log.error("Error transforming " + className, ex);
-                } else {
-                    log.error("Error transforming " + className);
-                }
-            }
-            return null;
-        } catch (ClassCircularityError ex) {
-            if (VERBOSE_ERROR_REPORTS && log.isWarnEnabled()) {
-                log.warn("Ignoring class circularity error: " + ex.getMessage());
-            }
-            return null;
-        } catch (final Error ex) {
-            log.error("Internal error during transforming continuable class", ex);
-            throw ex;
-        }
+        
+    public JavaFlowClassTransformer() {
+        super(new AsmxResourceTransformationFactory());
     }
 
-    protected ClassLoader getSafeClassLoader(ClassLoader classLoader) {
-        return null != classLoader ? classLoader : systemClassLoader;
+    @Override
+    protected MorphingResourceLoader getResourceLoader(ClassLoader classLoader) {
+        return cachedResourceLoaders.get(classLoader);
     }
-
-    private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
-        return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
-    }
-    
-    private String resolveClassName(String className,
-                                    Class<?> classBeingRedefined,
-                                    byte[] classfileBuffer) {
-        if (null != className) {
-            return className;
-        } else if (classBeingRedefined != null) {
-            return classBeingRedefined.getName().replace('.', '/');
-        } else {
-            return resourceTransformationFactory.readClassName(classfileBuffer);
-        }
-    }    
-
-    private static final boolean VERBOSE_ERROR_REPORTS = 
-        Boolean.getBoolean("org.apache.commons.javaflow.instrumentation.verbose");
 }

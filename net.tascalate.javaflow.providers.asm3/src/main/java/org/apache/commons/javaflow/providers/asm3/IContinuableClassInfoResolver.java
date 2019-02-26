@@ -28,7 +28,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 
 import org.apache.commons.javaflow.spi.ClassMatcher;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 
 class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
@@ -100,7 +99,7 @@ class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         cciShared.mergeWith(visitedClasses, processedAnnotations, continuableAnnotations);
     }
     
-    void reset(Collection<String> classNames) {
+    public void reset(Collection<String> classNames) {
         visitedClasses.keySet().removeAll(classNames);
         refreshClasses.addAll(classNames);
     }

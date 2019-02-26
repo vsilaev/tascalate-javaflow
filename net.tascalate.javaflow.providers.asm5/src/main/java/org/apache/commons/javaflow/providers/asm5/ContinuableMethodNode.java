@@ -54,9 +54,6 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.SourceInterpreter;
 import org.objectweb.asm.tree.analysis.SourceValue;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-
 class ContinuableMethodNode extends MethodNode implements Opcodes {
     private final ClassHierarchy classHierarchy;
     private final ContinuableClassInfoResolver cciResolver;

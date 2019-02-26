@@ -15,8 +15,6 @@
  */
 package org.apache.commons.javaflow.providers.asm5;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;

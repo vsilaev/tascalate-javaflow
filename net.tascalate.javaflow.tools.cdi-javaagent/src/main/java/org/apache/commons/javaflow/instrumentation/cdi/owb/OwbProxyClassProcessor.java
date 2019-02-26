@@ -19,10 +19,9 @@ import net.tascalate.asmx.FieldVisitor;
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Type;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-
 import org.apache.commons.javaflow.instrumentation.cdi.ExtendedClassVisitor;
 import org.apache.commons.javaflow.instrumentation.cdi.ProxyClassProcessor;
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
 
 public class OwbProxyClassProcessor extends ProxyClassProcessor {
     private Type owbProxiedInstanceType;

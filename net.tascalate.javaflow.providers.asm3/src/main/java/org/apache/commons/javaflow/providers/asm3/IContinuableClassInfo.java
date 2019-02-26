@@ -17,8 +17,6 @@ package org.apache.commons.javaflow.providers.asm3;
 
 import java.util.Set;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-
 class IContinuableClassInfo implements ContinuableClassInfo {
     private boolean processed;
     private final Set<String> methods;

@@ -5,11 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 
 import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
-
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
 import org.apache.commons.javaflow.instrumentation.cdi.cglib.CGLibProxyClassProcessor;
 import org.apache.commons.javaflow.instrumentation.cdi.cproxy.CustomProxyClassProcessor;
 import org.apache.commons.javaflow.instrumentation.cdi.jproxy.JavaProxyClassProcessor;

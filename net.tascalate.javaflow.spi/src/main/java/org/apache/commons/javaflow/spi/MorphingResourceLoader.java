@@ -20,8 +20,8 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
-public final class MorphingResourceLoader implements VetoableResourceLoader {
-    private final ResourceLoader delegate;
+public class MorphingResourceLoader implements VetoableResourceLoader {
+    protected final ResourceLoader delegate;
     private final Map<String, byte[]> extraResources;
 
     public MorphingResourceLoader(ResourceLoader delegate) {
@@ -42,7 +42,7 @@ public final class MorphingResourceLoader implements VetoableResourceLoader {
         return new MorphingResourceLoader(delegate, alternativeResources);
     }
     
-    public ResourceLoader withAddition(String addResourceName, byte[] addResourceContent) {
+    public final ResourceLoader withAddition(String addResourceName, byte[] addResourceContent) {
         return withAddition(Collections.singletonMap(addResourceName, addResourceContent));
     }
     

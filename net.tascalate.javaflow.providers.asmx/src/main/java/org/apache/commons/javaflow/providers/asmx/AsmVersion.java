@@ -17,8 +17,8 @@ package org.apache.commons.javaflow.providers.asmx;
 
 import net.tascalate.asmx.Opcodes;
 
-final class AsmVersion {
+public final class AsmVersion {
     private AsmVersion() {}
     
-    static final int CURRENT = Opcodes.ASM7;
+    static public final int CURRENT = Opcodes.ASM7;
 }

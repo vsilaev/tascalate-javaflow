@@ -22,15 +22,15 @@ import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.FieldVisitor;
 import net.tascalate.asmx.MethodVisitor;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfoResolver;
 
-class CdiProxyClassAdapter extends ExtendedClassVisitor {
-    private static final Logger log = LoggerFactory.getLogger(CdiProxyClassAdapter.class);
+class ContinuableProxyAdapter extends ExtendedClassVisitor {
+    private static final Logger log = LoggerFactory.getLogger(ContinuableProxyAdapter.class);
     
     private final ContinuableClassInfoResolver cciResolver;
     private final ClassHierarchy hierarchy;
@@ -38,10 +38,10 @@ class CdiProxyClassAdapter extends ExtendedClassVisitor {
     
     private ProxyClassProcessor processor;
 
-    CdiProxyClassAdapter(ClassVisitor delegate, 
-                         ContinuableClassInfoResolver cciResolver, 
-                         ClassHierarchy hierarchy,
-                         List<ProxyType> proxyTypes) {
+    ContinuableProxyAdapter(ClassVisitor delegate, 
+                            ContinuableClassInfoResolver cciResolver, 
+                            ClassHierarchy hierarchy,
+                            List<ProxyType> proxyTypes) {
         super(delegate);
         this.cciResolver = cciResolver;
         this.hierarchy = hierarchy;

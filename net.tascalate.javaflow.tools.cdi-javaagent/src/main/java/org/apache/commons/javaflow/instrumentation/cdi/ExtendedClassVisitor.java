@@ -15,15 +15,16 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
+import org.apache.commons.javaflow.providers.asmx.AsmVersion;
+
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.FieldVisitor;
 import net.tascalate.asmx.MethodVisitor;
-import net.tascalate.asmx.Opcodes;
 
 public abstract class ExtendedClassVisitor extends ClassVisitor {
     
     ExtendedClassVisitor(ClassVisitor delegate) {
-        super(Opcodes.ASM7, delegate);
+        super(AsmVersion.CURRENT, delegate);
     }
     
     @SuppressWarnings("exports")

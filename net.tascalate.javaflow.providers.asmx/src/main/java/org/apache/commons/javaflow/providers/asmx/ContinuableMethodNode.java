@@ -55,9 +55,6 @@ import net.tascalate.asmx.tree.analysis.Frame;
 import net.tascalate.asmx.tree.analysis.SourceInterpreter;
 import net.tascalate.asmx.tree.analysis.SourceValue;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfo;
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-
 class ContinuableMethodNode extends MethodNode implements Opcodes {
     private final ClassHierarchy classHierarchy;
     private final ContinuableClassInfoResolver cciResolver;

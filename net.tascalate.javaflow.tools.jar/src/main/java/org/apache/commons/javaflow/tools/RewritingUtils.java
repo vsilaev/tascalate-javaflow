@@ -218,13 +218,18 @@ public final class RewritingUtils {
     }
     
     public static ResourceTransformer createTransformer(URL[] extraURL, ResourceTransformationFactory factory) {
-        URLClassLoader classLoader = new URLClassLoader(extraURL, safeParentClassLoader());
+        final URLClassLoader classLoader = new URLClassLoader(extraURL, safeParentClassLoader());
         
         final ResourceTransformer transformerDelegate = factory.createTransformer(
             new ClasspathResourceLoader(classLoader)
         );
         
         return new AbstractResourceTransformer() {
+            // Need a yard-reference from transformer
+            // Otherwise during builds this class loader is evicted!!!
+            @SuppressWarnings("unused")
+            private final Object hardReference = classLoader;
+            
             public byte[] transform(byte[] original, Collection<String> retransformClasses) {
                 byte[] transformed = transformerDelegate.transform(original, retransformClasses);
                 return null != transformed ? transformed : original;

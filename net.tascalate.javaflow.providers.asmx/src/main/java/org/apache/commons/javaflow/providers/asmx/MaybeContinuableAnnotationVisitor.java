@@ -15,8 +15,6 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import org.apache.commons.javaflow.spi.ContinuableClassInfoResolver;
-
 import net.tascalate.asmx.AnnotationVisitor;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.Opcodes;
