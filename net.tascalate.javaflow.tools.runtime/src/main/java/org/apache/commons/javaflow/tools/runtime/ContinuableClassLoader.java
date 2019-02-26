@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -349,16 +348,6 @@ public class ContinuableClassLoader extends ClassLoader {
         // if this class belongs to a package which has been
         // designated to use a specific loader first
         // (this one or the parent one)
-
-        if (resourceName.startsWith("org.apache.commons.javaflow.tools.runtime.") || 
-            resourceName.startsWith("org.apache.commons.javaflow.spi.")) {
-            return true;
-        }
-        
-//        if (resourceName.startsWith("org.apache.commons.javaflow.") && !resourceName.startsWith("org.apache.commons.javaflow.examples.")) {
-//            return true;
-//        }
-        
         boolean useParentFirst = parentFirst;
 
         for (String packageName : systemPackages) {
@@ -372,6 +361,15 @@ public class ContinuableClassLoader extends ClassLoader {
             if (resourceName.startsWith(packageName )) {
                 useParentFirst = false;
                 break;
+            }
+        }
+        
+        if (!useParentFirst) {
+            for (String packageName : OWN_PACKAGES) {
+                if (resourceName.startsWith(packageName)) {
+                    useParentFirst = true;
+                    break;
+                }
             }
         }
 
@@ -592,34 +590,6 @@ public class ContinuableClassLoader extends ClassLoader {
             }
         }
     }
-
-    /**
-     * Finds the resource with the given name. A resource is some data (images,
-     * audio, text, etc) that can be accessed by class code in a way that is
-     * independent of the location of the code.
-     *
-     * @param name
-     *            The name of the resource for which a stream is required. Must
-     *            not be <code>null</code>.
-     * @return a URL for reading the resource, or <code>null</code> if the
-     *         resource could not be found or the caller doesn't have adequate
-     *         privileges to get the resource.
-     */
-    @Override
-    public URL getResource(String name) {
-        // we need to search the components of the path to see if
-        // we can find the class we want.
-        if (isParentFirst(name)) {
-            return super.getResource(name);
-        }
-
-        // try this class loader first, then parent
-        URL url = findResource(name);
-        if (url == null) {
-            url = getParent().getResource(name);
-        }
-        return url;
-    }
     
     private Object safeGetClassLoadingLock(String name) {
         if (null == GET_CLASS_LOADING_LOCK) {
@@ -700,5 +670,20 @@ public class ContinuableClassLoader extends ClassLoader {
             result.add(s);
         }
         return result;
+    }
+    
+    private static String[] OWN_PACKAGES;
+    static {
+        Class<?>[] ownClasses = {
+            ContinuableClassLoader.class,
+            ResourceTransformer.class,
+            Logger.class
+        };
+        
+        OWN_PACKAGES = new String[ownClasses.length];
+        int i = 0;
+        for (Class<?> cls : ownClasses) {
+            OWN_PACKAGES[i++] = cls.getPackage().getName() + '.';
+        }
     }
 }
