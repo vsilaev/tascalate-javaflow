@@ -19,9 +19,10 @@ import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Type;
 import net.tascalate.asmx.commons.Method;
 
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
+
 import org.apache.commons.javaflow.instrumentation.cdi.ProxyClassProcessor;
 import org.apache.commons.javaflow.instrumentation.cdi.common.ProxiedMethodAdvice;
-import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
 
 public class CGLibProxyClassProcessor extends ProxyClassProcessor {
     

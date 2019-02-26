@@ -16,7 +16,9 @@
  */
 package org.apache.commons.javaflow.spi;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * {@link ResourceTransformer} whose transformation is defined in terms of
@@ -24,10 +26,10 @@ import java.util.Collection;
  *
  * @author Kohsuke Kawaguchi
  */
-public class CompositeTransformer extends AbstractResourceTransformer {
+public class CompositeResourceTransformer extends AbstractResourceTransformer {
     private final ResourceTransformer[] transformers;
 
-    public CompositeTransformer(ResourceTransformer[] transformers) {
+    public CompositeResourceTransformer(ResourceTransformer[] transformers) {
         this.transformers = transformers;
     }
 
@@ -45,5 +47,33 @@ public class CompositeTransformer extends AbstractResourceTransformer {
         for (ResourceTransformer transformer : transformers) {
             transformer.release();
         }
+    }
+    
+    public static ResourceTransformationFactory composeFactories(ResourceTransformationFactory... factories) {
+        return composeFactories(Arrays.asList(factories));
+    }
+    
+    public static ResourceTransformationFactory composeFactories(final List<ResourceTransformationFactory> factories) {
+        return new ResourceTransformationFactory() {
+            
+            @Override
+            public String readClassName(byte[] classBytes) {
+                if (factories.isEmpty()) {
+                    throw new IllegalStateException("No factories to perform operation");
+                } else {
+                    return factories.get(0).readClassName(classBytes);
+                }
+            }
+            
+            @Override
+            public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
+                ResourceTransformer[] transformers = new ResourceTransformer[factories.size()];
+                int idx = 0;
+                for (ResourceTransformationFactory factory : factories) {
+                    transformers[idx++] = factory.createTransformer(resourceLoader);
+                }
+                return new CompositeResourceTransformer(transformers);
+            }
+        };
     }
 }
