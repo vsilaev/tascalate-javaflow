@@ -28,6 +28,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 
@@ -145,12 +147,18 @@ public final class ApplicationWeaver {
             return false;
         }
         
+        if (null != CURRENT_INITIATOR.get()) {
+            // In recursion, without exception it will be infinite
+            throw new IllegalStateException("Class " + originalClass.getName() + " is not instrumented, probably it has no continuable methods");
+        }
+        
         try {
             ContinuableClassLoader.Builder builder = new ContinuableClassLoader.Builder(factory);
             if (null == continuablePackageRoots || continuablePackageRoots.isEmpty()) {
                 builder.parentFirst(false);
             } else {
-                for (String s : continuablePackageRoots) {
+                Set<String> filteredPackageRoots = new HashSet<String>(continuablePackageRoots);
+                for (String s : filteredPackageRoots) {
                     if ("*".equals(s)) {
                         s = originalClass.getPackage().getName();
                     }
@@ -159,16 +167,11 @@ public final class ApplicationWeaver {
             }
             ContinuableClassLoader loader = builder.parent(originalLoader).create();
             
-            ClassLoader prev = CURRENT_INITIATOR.get();
             CURRENT_INITIATOR.set(loader);
             try {
                 run(loader, originalClass.getName(), "main", args);
             } finally {
-                if (null == prev) {
-                    CURRENT_INITIATOR.remove();
-                } else {
-                    CURRENT_INITIATOR.set(prev);
-                }
+                CURRENT_INITIATOR.remove();
             }
         }
         catch (RuntimeException ex) { 
