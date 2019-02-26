@@ -27,12 +27,12 @@ public abstract class ExtendedClassVisitor extends ClassVisitor {
         super(AsmVersion.CURRENT, delegate);
     }
     
-    @SuppressWarnings("exports")
+    @SuppressWarnings("all") //"exports" in Java 9
 	public final FieldVisitor defaultVisitField(int access, String name, String descriptor, String signature, Object value) {
         return super.visitField(access, name, descriptor, signature, value);
     }
     
-    @SuppressWarnings("exports")
+    @SuppressWarnings("all") //"exports" in Java 9
 	public final MethodVisitor defaultVisitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
