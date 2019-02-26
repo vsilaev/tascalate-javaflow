@@ -47,7 +47,11 @@ public class ClasspathResourceLoader implements VetoableResourceLoader {
     
     public InputStream getResourceAsStream(String name) throws IOException {
         ClassLoader classLoader = classLoaderRef.get();
-        InputStream result = null != classLoader ? classLoader.getResourceAsStream(name) : null;
+        if (null == classLoader) {
+            throw new IOException("Underlying class loader was evicted from memory, this resource loader is unusable");
+        }
+        
+        InputStream result = classLoader.getResourceAsStream(name);
         if (null == result) {
             throw new IOException("Unable to find resource " + name);
         }

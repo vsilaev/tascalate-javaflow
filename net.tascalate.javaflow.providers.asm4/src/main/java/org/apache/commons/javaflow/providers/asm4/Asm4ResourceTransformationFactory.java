@@ -15,60 +15,16 @@
  */
 package org.apache.commons.javaflow.providers.asm4;
 
-import java.io.IOException;
-
-import org.apache.commons.javaflow.spi.Cache;
-import org.apache.commons.javaflow.spi.ClassMatcher;
-import org.apache.commons.javaflow.spi.ClassMatchers;
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
-import org.apache.commons.javaflow.spi.VetoableResourceLoader;
 
-import org.objectweb.asm.ClassReader;
+public class Asm4ResourceTransformationFactory extends AbstractResourceTransformationFactory {
 
-public class Asm4ResourceTransformationFactory implements ResourceTransformationFactory {
-
-    public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
-        SharedContinuableClassInfos cciShared = CACHED_SHARED_CCI.get(resourceLoader);
-        return new ContinuableClassTransformer(
-            // Actualize ClassHierarchy per resource loader
-            cciShared.hierarchy().shareWith(resourceLoader), 
-            new IContinuableClassInfoResolver(resourceLoader, cciShared)
-        );
+    protected ResourceTransformer createTransformer(ResourceLoader resourceLoader,
+                                                    ContinuableClassInfoResolver resolver,
+                                                    ClassHierarchy classHierarchy) {
+        
+        return new ContinuableClassTransformer(classHierarchy, (IContinuableClassInfoResolver)resolver);
     }
-
-    public ContinuableClassInfoResolver createResolver(ResourceLoader resourceLoader) {
-        return new IContinuableClassInfoResolver(
-            resourceLoader,
-            CACHED_SHARED_CCI.get(resourceLoader)
-        );
-    }
-    
-    public String readClassName(byte[] classBytes) {
-        return new ClassReader(classBytes).getClassName();
-    }
-
-    static ClassMatcher createVeto(ResourceLoader resourceLoader) {
-        if (resourceLoader instanceof VetoableResourceLoader) {
-            try {
-                return ((VetoableResourceLoader)resourceLoader).createVeto();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        } else {
-            return ClassMatchers.MATCH_NONE;
-        }
-    }
-    
-    private static final Cache<ResourceLoader, SharedContinuableClassInfos> CACHED_SHARED_CCI = 
-        new Cache<ResourceLoader, SharedContinuableClassInfos>() {
-            @Override
-            protected SharedContinuableClassInfos createValue(ResourceLoader loader) {
-                return new SharedContinuableClassInfos(
-                    new ClassHierarchy(loader), createVeto(loader)
-                );
-            }
-        };
 
 }
