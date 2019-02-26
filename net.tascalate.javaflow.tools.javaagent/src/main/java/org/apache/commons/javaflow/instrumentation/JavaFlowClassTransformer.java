@@ -15,32 +15,12 @@
  */
 package org.apache.commons.javaflow.instrumentation;
 
-import org.apache.commons.javaflow.spi.Cache;
-import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
-import org.apache.commons.javaflow.spi.MorphingResourceLoader;
-
 import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 
 import org.apache.commons.javaflow.instrumentation.common.ConfigurableClassFileTransformer;
 
 public class JavaFlowClassTransformer extends ConfigurableClassFileTransformer {
-    private final Cache<ClassLoader, MorphingResourceLoader> cachedResourceLoaders = 
-        new Cache<ClassLoader, MorphingResourceLoader>() {
-            @Override
-            protected MorphingResourceLoader createValue(ClassLoader classLoader) {
-                MorphingResourceLoader loader = new MorphingResourceLoader(new ClasspathResourceLoader(classLoader));
-                // "touch" factory with empty morph
-                resourceTransformationFactory.createTransformer(loader).release();
-                return loader;
-            }
-        };    
-        
     public JavaFlowClassTransformer() {
         super(new AsmxResourceTransformationFactory());
-    }
-
-    @Override
-    protected MorphingResourceLoader getResourceLoader(ClassLoader classLoader) {
-        return cachedResourceLoaders.get(classLoader);
     }
 }

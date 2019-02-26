@@ -15,20 +15,57 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.javaflow.providers.asmx.AbstractResourceTransformationFactory;
 import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfoResolver;
+import org.apache.commons.javaflow.providers.asmx.PartialResourceTransformationFactory;
+import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
 public class ContinuableProxyTransformationFactory extends AbstractResourceTransformationFactory {
 
-    protected ResourceTransformer createTransformer(ResourceLoader resourceLoader,
-                                                    ContinuableClassInfoResolver resolver,
-                                                    ClassHierarchy classHierarchy) {
-        
+    private final AbstractResourceTransformationFactory helper = new PartialResourceTransformationFactory();
+    
+    public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
+        SharedState sharedState = CACHED_SHARED.get(resourceLoader);
         return new ContinuableProxyTransformer(
-            classHierarchy, resolver, ((ExtrasMorphingResourceLoader)resourceLoader).proxyTypes()
+            // Actualize ClassHierarchy per resource loader
+            sharedState.hierarchy.shareWith(resourceLoader),
+            createResolver(resourceLoader),
+            sharedState.proxyTypes
         );
+    }
+    
+    public ContinuableClassInfoResolver createResolver(ResourceLoader resourceLoader) {
+        return helper.createResolver(resourceLoader);
+    }
+    
+    private static final Cache<ResourceLoader, SharedState> CACHED_SHARED = 
+        new Cache<ResourceLoader, SharedState>() {
+            @Override
+            protected SharedState createValue(ResourceLoader loader) {
+                List<ProxyType> proxyTypes = new ArrayList<ProxyType>();
+                for (ProxyType proxyType : ProxyType.values()) {
+                    if (proxyType.isAvailable(loader)) {
+                        proxyTypes.add(proxyType);
+                    }
+                }
+                return new SharedState(new ClassHierarchy(loader), proxyTypes);
+            }
+        }; 
+        
+    static class SharedState {
+        final ClassHierarchy hierarchy;
+        final List<ProxyType> proxyTypes;
+        
+        SharedState(ClassHierarchy hierarchy, List<ProxyType> proxyTypes) {
+            this.hierarchy = hierarchy;
+            this.proxyTypes = Collections.unmodifiableList(proxyTypes);
+        }
     }
 }

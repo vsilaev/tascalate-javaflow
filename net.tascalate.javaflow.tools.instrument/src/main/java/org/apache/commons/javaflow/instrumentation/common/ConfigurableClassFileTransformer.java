@@ -21,19 +21,31 @@ import java.security.ProtectionDomain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.MorphingResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
-public abstract class ConfigurableClassFileTransformer implements ClassFileTransformer {
+public class ConfigurableClassFileTransformer implements ClassFileTransformer {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
     
-    protected final ResourceTransformationFactory resourceTransformationFactory;
+    private final ResourceTransformationFactory resourceTransformationFactory;
     
-    protected ConfigurableClassFileTransformer(ResourceTransformationFactory resourceTransformationFactory) {
+    private final Cache<ClassLoader, MorphingResourceLoader> cachedResourceLoaders = 
+            new Cache<ClassLoader, MorphingResourceLoader>() {
+                @Override
+                protected MorphingResourceLoader createValue(ClassLoader classLoader) {
+                    MorphingResourceLoader loader = new MorphingResourceLoader(new ClasspathResourceLoader(classLoader));
+                    // "touch" factory with empty morph
+                    resourceTransformationFactory.createTransformer(loader).release();
+                    return loader;
+                }
+            };    
+            
+    
+    public ConfigurableClassFileTransformer(ResourceTransformationFactory resourceTransformationFactory) {
         this.resourceTransformationFactory = resourceTransformationFactory;
     }
         
@@ -52,7 +64,7 @@ public abstract class ConfigurableClassFileTransformer implements ClassFileTrans
         }
 
         // Ensure classLoader is not null (null for boot class loader)
-        MorphingResourceLoader resourceLoader = getResourceLoader(getSafeClassLoader(classLoader));
+        MorphingResourceLoader resourceLoader = cachedResourceLoaders.get(getSafeClassLoader(classLoader));
 
         // Ensure className is not null (parameter is null for dynamically defined classes like lambdas)
         className = resolveClassName(className, classBeingRedefined, classfileBuffer);
@@ -86,8 +98,6 @@ public abstract class ConfigurableClassFileTransformer implements ClassFileTrans
             throw ex;
         }
     }
-    
-    protected abstract MorphingResourceLoader getResourceLoader(ClassLoader classLoader);
 
     protected ClassLoader getSafeClassLoader(ClassLoader classLoader) {
         return null != classLoader ? classLoader : systemClassLoader;

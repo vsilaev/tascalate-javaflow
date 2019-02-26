@@ -15,31 +15,11 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
-import org.apache.commons.javaflow.spi.Cache;
-import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
-import org.apache.commons.javaflow.spi.MorphingResourceLoader;
-
 import org.apache.commons.javaflow.instrumentation.common.ConfigurableClassFileTransformer;
 
 class CdiProxyClassTransformer extends ConfigurableClassFileTransformer {
-    private final Cache<ClassLoader, MorphingResourceLoader> cachedResourceLoaders = 
-        new Cache<ClassLoader, MorphingResourceLoader>() {
-            @Override
-            protected MorphingResourceLoader createValue(ClassLoader classLoader) {
-                ExtrasMorphingResourceLoader loader = new ExtrasMorphingResourceLoader(new ClasspathResourceLoader(classLoader));
-                loader.init();
-                // "touch" factory with empty morph
-                resourceTransformationFactory.createTransformer(loader).release();
-                return loader;
-            }
-        };    
-        
+
     CdiProxyClassTransformer() {
         super(new ContinuableProxyTransformationFactory());
-    }
-
-    @Override
-    protected MorphingResourceLoader getResourceLoader(ClassLoader classLoader) {
-        return cachedResourceLoaders.get(classLoader);
     }
 }
