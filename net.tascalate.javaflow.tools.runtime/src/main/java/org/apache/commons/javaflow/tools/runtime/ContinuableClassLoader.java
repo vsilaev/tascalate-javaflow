@@ -33,6 +33,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -350,33 +351,18 @@ public class ContinuableClassLoader extends ClassLoader {
         // (this one or the parent one)
         boolean useParentFirst = parentFirst;
 
-        if (useParentFirst) {
-            for (String packageName : loaderPackages) {
-                if (resourceName.startsWith(packageName )) {
-                    useParentFirst = false;
-                    break;
-                }
-            }
+        if (useParentFirst && findInPackages(resourceName, loaderPackages)) {
+            useParentFirst = false;
         }
         
         // System takes precedence over own loader
-        if (!useParentFirst) {
-            for (String packageName : systemPackages) {
-                if (resourceName.startsWith(packageName)) {
-                    useParentFirst = true;
-                    break;
-                }
-            }
+        if (!useParentFirst && findInPackages(resourceName, systemPackages)) {
+            useParentFirst = true;
         }        
         
         // "Special" takes precedence over own loader
-        if (!useParentFirst) {
-            for (String packageName : OWN_PACKAGES) {
-                if (resourceName.startsWith(packageName)) {
-                    useParentFirst = true;
-                    break;
-                }
-            }
+        if (!useParentFirst && findInPackages(resourceName, OWN_PACKAGES)) {
+            useParentFirst = true;
         }
 
         return useParentFirst;
@@ -688,7 +674,16 @@ public class ContinuableClassLoader extends ClassLoader {
         return result;
     }
     
-    private static String[] OWN_PACKAGES;
+    private static boolean findInPackages(String resourceName, Collection<String> suffixedPackageNames) {
+        for (String packageName : suffixedPackageNames) {
+            if (resourceName.startsWith(packageName )) {
+                return true;
+            }
+        }   
+        return false;
+    }
+    
+    private static Collection<String> OWN_PACKAGES;
     static {
         Class<?>[] ownClasses = {
             ContinuableClassLoader.class,
@@ -696,10 +691,10 @@ public class ContinuableClassLoader extends ClassLoader {
             Logger.class
         };
         
-        OWN_PACKAGES = new String[ownClasses.length];
-        int i = 0;
+        List<String> packages = new ArrayList<String>(ownClasses.length);
         for (Class<?> cls : ownClasses) {
-            OWN_PACKAGES[i++] = packageNameOfClass(cls) + '.';
+            packages.add( packageNameOfClass(cls) + '.');
         }
+        OWN_PACKAGES = Collections.unmodifiableList(packages);
     }
 }
