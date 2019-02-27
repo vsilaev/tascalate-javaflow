@@ -47,21 +47,17 @@ class ContinuableClassTransformer extends AbstractResourceTransformer {
     }
 
     public byte[] transform(byte[] original, Collection<String> retransformClasses) {
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES) {
-            @Override
-            protected String getCommonSuperClass(final String type1, final String type2) {
-                return classHierarchy.getCommonSuperClass(type1, type2);
-            }
-        };
-        cciResolver.reset(retransformClasses);
+        ClassReader reader = new ClassReader(original);
+        ClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES);
         ContinuableClassVisitor visitor = new ContinuableClassVisitor(
-            cw /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/, 
+            writer, /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/ 
             classHierarchy,
             cciResolver,
             original
         );
+        cciResolver.reset(retransformClasses);
         try {
-            new ClassReader(original).accept(visitor, ClassReader.SKIP_FRAMES);
+            reader.accept(visitor, ClassReader.SKIP_FRAMES);
         } catch (StopException ex) {
             // Preliminary stop visiting non-continuable class
             return null;
@@ -71,7 +67,7 @@ class ContinuableClassTransformer extends AbstractResourceTransformer {
             return null;
         }
 
-        byte[] bytecode = cw.toByteArray();
+        byte[] bytecode = writer.toByteArray();
         // BytecodeDebugUtils.dumpClass(bytecode);
         return bytecode;
     }

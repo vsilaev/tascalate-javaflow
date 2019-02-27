@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfoResolver;
+import org.apache.commons.javaflow.providers.asmx.OfflineClassWriter;
 import org.apache.commons.javaflow.spi.AbstractResourceTransformer;
 import org.apache.commons.javaflow.spi.StopException;
 
@@ -43,22 +44,18 @@ class ContinuableProxyTransformer extends AbstractResourceTransformer {
     }
 
     public byte[] transform(byte[] original, Collection<String> retransformClasses) {
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS) {
-            @Override
-            protected String getCommonSuperClass(final String type1, final String type2) {
-                return classHierarchy.getCommonSuperClass(type1, type2);
-            }
-        };
+        ClassReader reader = new ClassReader(original);
+        ClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
+        ClassVisitor visitor = new ContinuableProxyAdapter(writer, classHierarchy, cciResolver, proxyTypes);
         cciResolver.reset(retransformClasses);
-        ClassVisitor visitor = new ContinuableProxyAdapter(cw, cciResolver, classHierarchy, proxyTypes);  
         try {
-            new ClassReader(original).accept(visitor, ClassReader.EXPAND_FRAMES);
+            reader.accept(visitor, ClassReader.EXPAND_FRAMES);
         } catch (StopException ex) {
             // Preliminary stop visiting non-continuable-proxy class
             return null;
         }
 
-        byte[] bytecode = cw.toByteArray();
+        byte[] bytecode = writer.toByteArray();
         return bytecode;
     }
     

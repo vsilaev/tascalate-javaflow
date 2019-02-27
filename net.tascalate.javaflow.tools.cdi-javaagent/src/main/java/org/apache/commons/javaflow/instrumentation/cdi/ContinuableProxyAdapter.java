@@ -38,9 +38,9 @@ class ContinuableProxyAdapter extends ExtendedClassVisitor {
     
     private ProxyClassProcessor processor;
 
-    ContinuableProxyAdapter(ClassVisitor delegate, 
-                            ContinuableClassInfoResolver cciResolver, 
+    ContinuableProxyAdapter(ClassVisitor delegate,
                             ClassHierarchy hierarchy,
+                            ContinuableClassInfoResolver cciResolver, 
                             List<ProxyType> proxyTypes) {
         super(delegate);
         this.cciResolver = cciResolver;
