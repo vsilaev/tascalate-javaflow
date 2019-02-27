@@ -160,7 +160,7 @@ public final class ApplicationWeaver {
                 Set<String> filteredPackageRoots = new HashSet<String>(continuablePackageRoots);
                 for (String s : filteredPackageRoots) {
                     if ("*".equals(s)) {
-                        s = originalClass.getPackage().getName();
+                        s = ContinuableClassLoader.packageNameOfClass(originalClass);
                     }
                     builder.addLoaderPackageRoot(s);
                 }

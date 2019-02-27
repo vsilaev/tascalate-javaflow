@@ -350,20 +350,26 @@ public class ContinuableClassLoader extends ClassLoader {
         // (this one or the parent one)
         boolean useParentFirst = parentFirst;
 
-        for (String packageName : systemPackages) {
-            if (resourceName.startsWith(packageName)) {
-                useParentFirst = true;
-                break;
-            }
-        }
-
-        for (String packageName : loaderPackages) {
-            if (resourceName.startsWith(packageName )) {
-                useParentFirst = false;
-                break;
+        if (useParentFirst) {
+            for (String packageName : loaderPackages) {
+                if (resourceName.startsWith(packageName )) {
+                    useParentFirst = false;
+                    break;
+                }
             }
         }
         
+        // System takes precedence over own loader
+        if (!useParentFirst) {
+            for (String packageName : systemPackages) {
+                if (resourceName.startsWith(packageName)) {
+                    useParentFirst = true;
+                    break;
+                }
+            }
+        }        
+        
+        // "Special" takes precedence over own loader
         if (!useParentFirst) {
             for (String packageName : OWN_PACKAGES) {
                 if (resourceName.startsWith(packageName)) {
@@ -609,6 +615,16 @@ public class ContinuableClassLoader extends ClassLoader {
         }
     }
 
+    static String packageNameOfClass(Class<?> clazz) {
+        String className = clazz.getName();
+        int lastDot = className.lastIndexOf('.');
+        if (lastDot > 0) {
+            return className.substring(0, lastDot);
+        } else {
+            return null;
+        }
+    }
+    
     private static final int BUFFER_SIZE = 4096;
     
     private static Method getClassLoaderMethodOrNull(String name, Class<?>... args) {
@@ -683,7 +699,7 @@ public class ContinuableClassLoader extends ClassLoader {
         OWN_PACKAGES = new String[ownClasses.length];
         int i = 0;
         for (Class<?> cls : ownClasses) {
-            OWN_PACKAGES[i++] = cls.getPackage().getName() + '.';
+            OWN_PACKAGES[i++] = packageNameOfClass(cls) + '.';
         }
     }
 }
