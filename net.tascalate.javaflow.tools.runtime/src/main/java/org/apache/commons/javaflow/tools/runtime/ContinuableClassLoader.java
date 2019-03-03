@@ -35,15 +35,14 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.FastByteArrayOutputStream;
+import org.apache.commons.javaflow.spi.InstrumentationUtils;
 import org.apache.commons.javaflow.spi.MorphingResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
@@ -675,18 +674,11 @@ public class ContinuableClassLoader extends ClassLoader {
         return false;
     }
     
-    private static Collection<String> OWN_PACKAGES;
-    static {
-        Class<?>[] ownClasses = {
+    private static Collection<String> OWN_PACKAGES = Collections.unmodifiableSet(
+        InstrumentationUtils.packagePrefixesOf(
             ContinuableClassLoader.class,
             ResourceTransformer.class,
             Logger.class
-        };
-        
-        Set<String> ownPackages = new HashSet<String>();
-        for (Class<?> cls : ownClasses) {
-            ownPackages.add( ClasspathResourceLoader.packageNameOfClass(cls) + '.');
-        }
-        OWN_PACKAGES = Collections.unmodifiableSet(ownPackages);
-    }
+        )
+    );
 }

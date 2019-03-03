@@ -21,8 +21,10 @@ import java.security.ProtectionDomain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
+import org.apache.commons.javaflow.spi.InstrumentationUtils;
 import org.apache.commons.javaflow.spi.MorphingResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
@@ -104,7 +106,7 @@ public class ConfigurableClassFileTransformer implements ClassFileTransformer {
     }
 
     private boolean isSystemClassLoaderParent(ClassLoader maybeParent) {
-        return ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, maybeParent);
+        return InstrumentationUtils.isClassLoaderParent(systemClassLoader, maybeParent);
     }
     
     private String resolveClassName(String className,

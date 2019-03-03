@@ -15,6 +15,10 @@
  */
 package org.apache.commons.javaflow.instrumentation.common;
 
+import static org.apache.commons.javaflow.spi.InstrumentationUtils.isClassLoaderParent;
+import static org.apache.commons.javaflow.spi.InstrumentationUtils.packageNameOf;
+import static org.apache.commons.javaflow.spi.InstrumentationUtils.packagePrefixesOf;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.Collection;
@@ -22,10 +26,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 
 public abstract class AbstractInstrumentationAgent {
 
@@ -45,7 +49,7 @@ public abstract class AbstractInstrumentationAgent {
         
         // Collect classes before ever adding transformer!
         Set<String> ownPackages = new HashSet<String>(FIXED_OWN_PACKAGES);
-        ownPackages.add(ClasspathResourceLoader.packageNameOfClass(getClass()) + '.');
+        ownPackages.add(packageNameOf(getClass()) + '.');
         
         ClassFileTransformer transformer = createTransformer();
         instrumentation.addTransformer(transformer);
@@ -67,7 +71,7 @@ public abstract class AbstractInstrumentationAgent {
         for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
             String className = clazz.getName();
             if (instrumentation.isModifiableClass(clazz)) {
-                if (ClasspathResourceLoader.isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
+                if (isClassLoaderParent(systemClassLoader, clazz.getClassLoader())) {
                     if (log.isTraceEnabled()) {
                         log.trace("Skip re-transforming boot or extension/platform class: " + className);
                     }
@@ -108,18 +112,11 @@ public abstract class AbstractInstrumentationAgent {
     
     protected abstract ClassFileTransformer createTransformer();
     
-    private static final Collection<String> FIXED_OWN_PACKAGES;
-    static {
-        Class<?>[] sampleClasses = {
-                Logger.class, 
-                ClasspathResourceLoader.class, 
-                AbstractInstrumentationAgent.class
-            };
-        
-        Set<String> fixedOwnPackages = new HashSet<String>();
-        for (Class<?> sampleClass : sampleClasses) {
-            fixedOwnPackages.add(ClasspathResourceLoader.packageNameOfClass(sampleClass) + '.');
-        }
-        FIXED_OWN_PACKAGES = Collections.unmodifiableSet(fixedOwnPackages);
-    }
+    private static final Collection<String> FIXED_OWN_PACKAGES = Collections.unmodifiableSet(
+        packagePrefixesOf(
+            Logger.class, 
+            ClasspathResourceLoader.class, 
+            AbstractInstrumentationAgent.class
+        )
+    );
 }
