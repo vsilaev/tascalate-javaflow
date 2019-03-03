@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 
 public final class ApplicationWeaver {
@@ -160,7 +161,7 @@ public final class ApplicationWeaver {
                 Set<String> filteredPackageRoots = new HashSet<String>(continuablePackageRoots);
                 for (String s : filteredPackageRoots) {
                     if ("*".equals(s)) {
-                        s = ContinuableClassLoader.packageNameOfClass(originalClass);
+                        s = ClasspathResourceLoader.packageNameOfClass(originalClass);
                     }
                     builder.addLoaderPackageRoot(s);
                 }

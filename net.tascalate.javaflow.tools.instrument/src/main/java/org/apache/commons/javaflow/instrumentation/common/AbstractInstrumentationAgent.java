@@ -17,6 +17,10 @@ package org.apache.commons.javaflow.instrumentation.common;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +42,11 @@ public abstract class AbstractInstrumentationAgent {
     
     protected void attach(String args, Instrumentation instrumentation) throws Exception {
         log.info("Installing agent...");
+        
+        // Collect classes before ever adding transformer!
+        Set<String> ownPackages = new HashSet<String>(FIXED_OWN_PACKAGES);
+        ownPackages.add(ClasspathResourceLoader.packageNameOfClass(getClass()) + '.');
+        
         ClassFileTransformer transformer = createTransformer();
         instrumentation.addTransformer(transformer);
         if ("skip-retransform".equals(args)) {
@@ -45,14 +54,15 @@ public abstract class AbstractInstrumentationAgent {
         } else if (!instrumentation.isRetransformClassesSupported()) {
             log.info("JVM does not support re-transform, skipping re-transforming classes");
         } else {
-            retransformClasses(instrumentation);
+            retransformClasses(instrumentation, ownPackages);
         }
         System.setProperty(transformer.getClass().getName(), "true");
         log.info("Agent was installed dynamically");
     }
     
-    protected void retransformClasses(Instrumentation instrumentation) {
+    protected void retransformClasses(Instrumentation instrumentation, Set<String> ownPackages) {
         log.info("Re-transforming existing classes...");
+        
         ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
         for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
             String className = clazz.getName();
@@ -63,6 +73,22 @@ public abstract class AbstractInstrumentationAgent {
                     }
                     continue;
                 }
+                
+                boolean isOwnClass = false;
+                for (String ownPackage : ownPackages) {
+                    if (className.startsWith(ownPackage)) {
+                        isOwnClass = true;
+                        break;
+                    }
+                }
+                
+                if (isOwnClass) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skip re-transforming class (agent class): " + className);
+                    }
+                    continue;
+                }
+                
                 if (log.isDebugEnabled()) {
                     log.debug("Re-transforming class: " + className);
                 }
@@ -81,4 +107,19 @@ public abstract class AbstractInstrumentationAgent {
     }
     
     protected abstract ClassFileTransformer createTransformer();
+    
+    private static final Collection<String> FIXED_OWN_PACKAGES;
+    static {
+        Class<?>[] sampleClasses = {
+                Logger.class, 
+                ClasspathResourceLoader.class, 
+                AbstractInstrumentationAgent.class
+            };
+        
+        Set<String> fixedOwnPackages = new HashSet<String>();
+        for (Class<?> sampleClass : sampleClasses) {
+            fixedOwnPackages.add(ClasspathResourceLoader.packageNameOfClass(sampleClass) + '.');
+        }
+        FIXED_OWN_PACKAGES = Collections.unmodifiableSet(fixedOwnPackages);
+    }
 }

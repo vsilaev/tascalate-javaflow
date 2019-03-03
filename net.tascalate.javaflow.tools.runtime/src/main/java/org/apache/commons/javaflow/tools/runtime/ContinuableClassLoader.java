@@ -35,7 +35,9 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -601,16 +603,6 @@ public class ContinuableClassLoader extends ClassLoader {
         }
     }
 
-    static String packageNameOfClass(Class<?> clazz) {
-        String className = clazz.getName();
-        int lastDot = className.lastIndexOf('.');
-        if (lastDot > 0) {
-            return className.substring(0, lastDot);
-        } else {
-            return null;
-        }
-    }
-    
     private static final int BUFFER_SIZE = 4096;
     
     private static Method getClassLoaderMethodOrNull(String name, Class<?>... args) {
@@ -691,10 +683,10 @@ public class ContinuableClassLoader extends ClassLoader {
             Logger.class
         };
         
-        List<String> packages = new ArrayList<String>(ownClasses.length);
+        Set<String> ownPackages = new HashSet<String>();
         for (Class<?> cls : ownClasses) {
-            packages.add( packageNameOfClass(cls) + '.');
+            ownPackages.add( ClasspathResourceLoader.packageNameOfClass(cls) + '.');
         }
-        OWN_PACKAGES = Collections.unmodifiableList(packages);
+        OWN_PACKAGES = Collections.unmodifiableSet(ownPackages);
     }
 }

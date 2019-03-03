@@ -76,6 +76,16 @@ public class ClasspathResourceLoader implements VetoableResourceLoader {
         return matchers.isEmpty() ? ClassMatchers.MATCH_NONE : ClassMatchers.whenAny(matchers);
     }
     
+    public static String packageNameOfClass(Class<?> clazz) {
+        String className = clazz.getName();
+        int lastDot = className.lastIndexOf('.');
+        if (lastDot > 0) {
+            return className.substring(0, lastDot);
+        } else {
+            return null;
+        }
+    }
+    
     /**
      * Check if <code>maybeParent</code> is a parent (probably inderect) of the <code>classLoader</code>
      * @param classLoader The classloader whose parents are checked, may not be null
