@@ -117,7 +117,7 @@ public class ConfigurableClassFileTransformer implements ClassFileTransformer {
         } else if (classBeingRedefined != null) {
             return classBeingRedefined.getName().replace('.', '/');
         } else {
-            return resourceTransformationFactory.readClassName(classfileBuffer);
+            return InstrumentationUtils.readClassName(classfileBuffer);
         }
     }
 

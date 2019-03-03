@@ -471,7 +471,7 @@ public class ContinuableClassLoader extends ClassLoader {
                                         final ProtectionDomain protectionDomain) {
         return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
             public Class<?> run() {
-                String internalClassName = transforationFactory.readClassName(classData);
+                String internalClassName = InstrumentationUtils.readClassName(classData);
                 String classNameFromData = internalClassName.replace('/', '.');
                 
                 if (null != className && !className.equals(classNameFromData)) {

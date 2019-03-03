@@ -16,8 +16,6 @@
 package org.apache.commons.javaflow.spi;
 
 public interface ResourceTransformationFactory {
-    
-    String readClassName(byte[] classBytes);
-    
+
     ResourceTransformer createTransformer(ResourceLoader resourceLoader);
 }

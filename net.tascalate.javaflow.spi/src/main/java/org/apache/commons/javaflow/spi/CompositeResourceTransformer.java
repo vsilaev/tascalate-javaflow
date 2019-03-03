@@ -57,15 +57,6 @@ public class CompositeResourceTransformer extends AbstractResourceTransformer {
         return new ResourceTransformationFactory() {
             
             @Override
-            public String readClassName(byte[] classBytes) {
-                if (factories.isEmpty()) {
-                    throw new IllegalStateException("No factories to perform operation");
-                } else {
-                    return factories.get(0).readClassName(classBytes);
-                }
-            }
-            
-            @Override
             public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
                 ResourceTransformer[] transformers = new ResourceTransformer[factories.size()];
                 int idx = 0;

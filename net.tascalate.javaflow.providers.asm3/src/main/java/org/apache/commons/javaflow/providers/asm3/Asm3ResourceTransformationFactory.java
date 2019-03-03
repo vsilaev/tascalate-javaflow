@@ -25,8 +25,6 @@ import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.VetoableResourceLoader;
 
-import org.objectweb.asm.ClassReader;
-
 public class Asm3ResourceTransformationFactory implements ResourceTransformationFactory {
 
     public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
@@ -43,10 +41,6 @@ public class Asm3ResourceTransformationFactory implements ResourceTransformation
             resourceLoader,
             CACHED_SHARED_CCI.get(resourceLoader)
         );
-    }
-    
-    public String readClassName(byte[] classBytes) {
-        return new ClassReader(classBytes).getClassName();
     }
 
     static ClassMatcher createVeto(ResourceLoader resourceLoader) {

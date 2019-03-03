@@ -48,6 +48,11 @@ public final class InstrumentationUtils {
         return packagePrefixes;
     }
     
+    
+    public static String readClassName(byte[] bytes) {
+        return new ClassHeaderReader(bytes).getClassName();
+    }
+    
     /**
      * Check if <code>maybeParent</code> is a parent (probably inderect) of the <code>classLoader</code>
      * @param classLoader The classloader whose parents are checked, may not be null
