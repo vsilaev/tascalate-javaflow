@@ -22,7 +22,14 @@
 			<groupId>net.tascalate.javaflow</groupId>
 			<artifactId>net.tascalate.javaflow.tools.jar</artifactId>
 			<version>${project.version}</version>
-		</dependency>		
+		</dependency>	
+		<dependency>
+			<groupId>net.tascalate.javaflow</groupId>
+			<artifactId>net.tascalate.javaflow.providers.asmx</artifactId>
+			<version>${project.version}</version>
+			<scope>runtime</scope>
+			<optional>false</optional>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
