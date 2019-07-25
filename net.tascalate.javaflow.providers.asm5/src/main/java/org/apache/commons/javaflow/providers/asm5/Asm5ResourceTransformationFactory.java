@@ -18,13 +18,15 @@ package org.apache.commons.javaflow.providers.asm5;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 
-public class Asm5ResourceTransformationFactory extends AbstractResourceTransformationFactory {
+public class Asm5ResourceTransformationFactory extends PartialResourceTransformationFactory {
 
-    protected ResourceTransformer createTransformer(ResourceLoader resourceLoader,
-                                                    ContinuableClassInfoResolver resolver,
-                                                    ClassHierarchy classHierarchy) {
-        
-        return new ContinuableClassTransformer(classHierarchy, (IContinuableClassInfoResolver)resolver);
+    public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
+        SharedContinuableClassInfos sharedState = getCached(resourceLoader);
+        return new ContinuableClassTransformer(
+            // Actualize ClassHierarchy per resource loader
+            sharedState.hierarchy().shareWith(resourceLoader),
+            new IContinuableClassInfoResolver(resourceLoader, sharedState)
+        );
     }
 
 }
