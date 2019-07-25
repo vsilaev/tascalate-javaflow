@@ -15,18 +15,24 @@
  */
 package org.apache.commons.javaflow.providers.asm3;
 
-import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 
-public class Asm3ResourceTransformationFactory extends PartialResourceTransformationFactory {
-
-    public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
-        SharedContinuableClassInfos sharedState = getCached(resourceLoader);
-        return new ContinuableClassTransformer(
-            // Actualize ClassHierarchy per resource loader
-            sharedState.hierarchy().shareWith(resourceLoader),
-            new IContinuableClassInfoResolver(resourceLoader, sharedState)
-        );
+public class OfflineClassWriter extends ClassWriter {
+    private final ClassHierarchy classHierarchy;
+    
+    public OfflineClassWriter(ClassHierarchy classHierarchy, int flags) {
+        super(flags);
+        this.classHierarchy = classHierarchy;
     }
-
+    
+    public OfflineClassWriter(ClassHierarchy classHierarchy, ClassReader reader, int flags) {
+        super(reader, flags);
+        this.classHierarchy = classHierarchy;
+    }
+    
+    @Override
+    protected String getCommonSuperClass(final String type1, final String type2) {
+        return classHierarchy.getCommonSuperClass(type1, type2);
+    }
 }

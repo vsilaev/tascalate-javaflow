@@ -21,8 +21,6 @@ import java.util.Collection;
 public interface ContinuableClassInfoResolver {
     ContinuableClassInfo resolve(String className) throws IOException;
 
-    ContinuableClassInfo resolve(String className, byte[] classBytes);
-
     boolean isContinuableAnnotation(String annotationClassDescriptor);
     
     void reset(Collection<String> classNames);

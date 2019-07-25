@@ -16,17 +16,9 @@
 package org.apache.commons.javaflow.providers.asm3;
 
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 
-public class Asm3ResourceTransformationFactory extends PartialResourceTransformationFactory {
-
-    public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
-        SharedContinuableClassInfos sharedState = getCached(resourceLoader);
-        return new ContinuableClassTransformer(
-            // Actualize ClassHierarchy per resource loader
-            sharedState.hierarchy().shareWith(resourceLoader),
-            new IContinuableClassInfoResolver(resourceLoader, sharedState)
-        );
-    }
-
+public abstract class AbstractResourceTransformationFactory implements ResourceTransformationFactory {
+    
+    public abstract ContinuableClassInfoResolver createResolver(ResourceLoader resourceLoader);
 }
