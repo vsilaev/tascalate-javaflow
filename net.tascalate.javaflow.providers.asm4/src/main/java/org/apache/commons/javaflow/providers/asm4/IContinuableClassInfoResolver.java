@@ -43,15 +43,6 @@ class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         this.cciShared = cciShared;
     }
 
-    public IContinuableClassInfo resolve(String classInternalName, byte[] classBytes) {
-        IContinuableClassInfo classInfo = getResolved(classInternalName);
-        if (classInfo == null) {
-            return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
-        } else {
-            return unmask(classInfo);
-        }
-    }
-
     public IContinuableClassInfo resolve(String classInternalName) throws IOException {
         IContinuableClassInfo classInfo = getResolved(classInternalName);
         if (classInfo == null) {
@@ -102,6 +93,15 @@ class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     public void reset(Collection<String> classNames) {
         visitedClasses.keySet().removeAll(classNames);
         refreshClasses.addAll(classNames);
+    }
+    
+    IContinuableClassInfo resolve(String classInternalName, byte[] classBytes) {
+        IContinuableClassInfo classInfo = getResolved(classInternalName);
+        if (classInfo == null) {
+            return resolveContinuableClassInfo(classInternalName, new ClassReader(classBytes));
+        } else {
+            return unmask(classInfo);
+        }
     }
     
     ClassMatcher veto() {

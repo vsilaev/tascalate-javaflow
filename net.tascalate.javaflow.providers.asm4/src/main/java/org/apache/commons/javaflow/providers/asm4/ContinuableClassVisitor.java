@@ -39,8 +39,8 @@ class ContinuableClassVisitor extends ClassVisitor {
 
     private final ClassHierarchy classHierarchy;
     private final IContinuableClassInfoResolver cciResolver;
-    private final byte[] originalBytes;
-
+    
+    private byte[] originalBytes;
     private String className;
     private IContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
@@ -63,6 +63,7 @@ class ContinuableClassVisitor extends ClassVisitor {
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         className = name;
         classInfo = cciResolver.resolve(name, originalBytes);
+        originalBytes = null; // reclaim memory
 
         if (null == classInfo ||
             classInfo.isClassProcessed() || 
