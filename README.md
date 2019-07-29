@@ -105,7 +105,7 @@ The agent JAR file includes all necessary dependencies and requires no additiona
 Another useful application of the instrumentation agent is to apply it for debugging code within your IDE of choice. Just specify the "-javaagent" option listed above in your IDE debug/run configuration and you will be able to perform quick "debug-fix" loops without executing full project rebuild. 
 
 # Command-line tools
-It's possible to use a stand-alone command-line utility [JavaFlowRewriteJar.jar](https://github.com/vsilaev/tascalate-javaflow/releases/download/2.2/JavaFlowRewriteJar.jar) to instrument JAR archives containing continuable classes. Please use the following command:
+It's possible to use a stand-alone command-line utility [JavaFlowRewriteJar.jar](https://github.com/vsilaev/tascalate-javaflow/releases/download/2.6.1/JavaFlowRewriteJar.jar) to instrument JAR archives containing continuable classes. Please use the following command:
 
 ```bash
     java -jar JavaFlowRewriteJar.jar src1.jar dst1.jar src2.jar dst2.jar...
