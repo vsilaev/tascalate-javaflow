@@ -112,7 +112,7 @@ public class ConfigurableClassFileTransformer implements ClassFileTransformer {
     private String resolveClassName(String className,
                                     Class<?> classBeingRedefined,
                                     byte[] classfileBuffer) {
-        if (null != className) {
+        if (className != null) {
             return className;
         } else if (classBeingRedefined != null) {
             return classBeingRedefined.getName().replace('.', '/');

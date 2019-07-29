@@ -25,6 +25,8 @@ module net.tascalate.javaflow.tools.cdi_javaagent {
 
     requires net.tascalate.javaflow.spi;
     requires net.tascalate.javaflow.providers.asmx;
+
+    requires transitive org.apache.commons.javaflow.instrumentation.common;
     
     exports org.apache.commons.javaflow.instrumentation.cdi;
 }
