@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.tascalate.javaflow</groupId>
 		<artifactId>net.tascalate.javaflow.parent</artifactId>
-		<version>2.6.1</version>
+		<version>2.6.2</version>
 		<relativePath>../</relativePath>
 	</parent>
 
