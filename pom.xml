@@ -71,7 +71,7 @@
 
 
 	<properties>
-                <asmx.version>9.2.0</asmx.version>
+		<asmx.version>9.2.0</asmx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
