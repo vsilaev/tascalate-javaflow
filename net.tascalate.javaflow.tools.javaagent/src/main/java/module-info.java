@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ module net.tascalate.javaflow.tools.javaagent {
     requires net.tascalate.javaflow.spi;
     requires net.tascalate.javaflow.providers.asmx;
 
-    requires transitive org.apache.commons.javaflow.instrumentation.common;
+    requires transitive net.tascalate.javaflow.tools.instrument;
 
     exports org.apache.commons.javaflow.instrumentation; 
 }

@@ -10,7 +10,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.LinkedList;
 
-import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.junit.Before;
 import org.junit.Test;

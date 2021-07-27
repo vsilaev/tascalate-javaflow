@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public class OfflineClassWriter extends ClassWriter {
         this.classHierarchy = classHierarchy;
     }
     
-    public OfflineClassWriter(ClassHierarchy classHierarchy, ClassReader reader, int flags) {
+    public OfflineClassWriter(ClassHierarchy classHierarchy, @SuppressWarnings("exports") ClassReader reader, int flags) {
         super(reader, flags);
         this.classHierarchy = classHierarchy;
     }
