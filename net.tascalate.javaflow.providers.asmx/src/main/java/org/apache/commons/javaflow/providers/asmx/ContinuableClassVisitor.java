@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
+import org.apache.commons.javaflow.spi.StopException;
+
 import net.tascalate.asmx.AnnotationVisitor;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Opcodes;
-
-import org.apache.commons.javaflow.spi.StopException;
+import net.tascalate.asmx.plus.AsmVersion;
+import net.tascalate.asmx.plus.ClassHierarchy;
 
 /**
  * ContinuableClassVisitor

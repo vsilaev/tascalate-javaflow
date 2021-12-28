@@ -20,6 +20,7 @@ module net.tascalate.javaflow.tools.cdi_javaagent {
     
     requires net.tascalate.asmx;
     requires net.tascalate.asmx.commons;
+    requires net.tascalate.asmx.plus;
     requires net.tascalate.asmx.tree;
     requires net.tascalate.asmx.tree.analysis;
 

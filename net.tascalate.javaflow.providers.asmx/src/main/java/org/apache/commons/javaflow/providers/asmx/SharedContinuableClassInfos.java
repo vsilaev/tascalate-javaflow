@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.javaflow.spi.ClassMatcher;
 
 import net.tascalate.asmx.Type;
+import net.tascalate.asmx.plus.ClassHierarchy;
 
 class SharedContinuableClassInfos {
     private final Map<String, IContinuableClassInfo> visitedClasses;

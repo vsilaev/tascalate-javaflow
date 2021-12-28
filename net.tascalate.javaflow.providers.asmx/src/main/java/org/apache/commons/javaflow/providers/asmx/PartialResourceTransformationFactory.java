@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.VetoableResourceLoader;
 
+import net.tascalate.asmx.plus.ClassHierarchy;
+
 public class PartialResourceTransformationFactory extends AbstractResourceTransformationFactory {
 
     public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
@@ -36,6 +38,23 @@ public class PartialResourceTransformationFactory extends AbstractResourceTransf
             CACHED_SHARED.get(resourceLoader)
         );
     }
+    
+    @SuppressWarnings("all") //"exports" in Java 9
+    public static ClassHierarchy createHierarchy(ResourceLoader resourceLoader) {
+        return new ClassHierarchy(new AsmxResourceLoader(resourceLoader));
+    }
+    
+    @SuppressWarnings("all") //"exports" in Java 9
+    public static ClassHierarchy shareHierarchy(ClassHierarchy original, ResourceLoader resourceLoader) {
+        Object loader = original.loader();
+        if (loader instanceof AsmxResourceLoader) {
+            AsmxResourceLoader aloader = (AsmxResourceLoader)loader;
+            if (aloader.resourceLoader == resourceLoader) {
+                return original;
+            }
+        }
+        return original.shareWith(new AsmxResourceLoader(resourceLoader));
+    }    
 
     static SharedContinuableClassInfos getCached(ResourceLoader resourceLoader) {
         return CACHED_SHARED.get(resourceLoader);
@@ -58,7 +77,7 @@ public class PartialResourceTransformationFactory extends AbstractResourceTransf
             @Override
             protected SharedContinuableClassInfos createValue(ResourceLoader loader) {
                 return new SharedContinuableClassInfos(
-                    new ClassHierarchy(loader), createVeto(loader)
+                    createHierarchy(loader), createVeto(loader)
                 );
             }
         };    

@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,34 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
-import static net.tascalate.asmx.Opcodes.*;
+import static net.tascalate.asmx.Opcodes.ACC_STATIC;
+import static net.tascalate.asmx.Opcodes.ACONST_NULL;
+import static net.tascalate.asmx.Opcodes.ALOAD;
+import static net.tascalate.asmx.Opcodes.ASTORE;
+import static net.tascalate.asmx.Opcodes.CHECKCAST;
+import static net.tascalate.asmx.Opcodes.DCONST_0;
+import static net.tascalate.asmx.Opcodes.DUP;
+import static net.tascalate.asmx.Opcodes.DUP2_X2;
+import static net.tascalate.asmx.Opcodes.FCONST_0;
+import static net.tascalate.asmx.Opcodes.GETFIELD;
+import static net.tascalate.asmx.Opcodes.GOTO;
+import static net.tascalate.asmx.Opcodes.ICONST_0;
+import static net.tascalate.asmx.Opcodes.IFEQ;
+import static net.tascalate.asmx.Opcodes.IFNULL;
+import static net.tascalate.asmx.Opcodes.ILOAD;
+import static net.tascalate.asmx.Opcodes.INVOKEDYNAMIC;
+import static net.tascalate.asmx.Opcodes.INVOKESPECIAL;
+import static net.tascalate.asmx.Opcodes.INVOKESTATIC;
+import static net.tascalate.asmx.Opcodes.INVOKEVIRTUAL;
+import static net.tascalate.asmx.Opcodes.IRETURN;
+import static net.tascalate.asmx.Opcodes.ISTORE;
+import static net.tascalate.asmx.Opcodes.LCONST_0;
+import static net.tascalate.asmx.Opcodes.MONITORENTER;
+import static net.tascalate.asmx.Opcodes.MONITOREXIT;
+import static net.tascalate.asmx.Opcodes.POP;
+import static net.tascalate.asmx.Opcodes.POP2;
+import static net.tascalate.asmx.Opcodes.SIPUSH;
+import static net.tascalate.asmx.Opcodes.SWAP;
 
 import java.util.List;
 
@@ -32,6 +59,7 @@ import net.tascalate.asmx.Label;
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Opcodes;
 import net.tascalate.asmx.Type;
+import net.tascalate.asmx.plus.AsmVersion;
 import net.tascalate.asmx.tree.AbstractInsnNode;
 import net.tascalate.asmx.tree.InvokeDynamicInsnNode;
 import net.tascalate.asmx.tree.MethodInsnNode;

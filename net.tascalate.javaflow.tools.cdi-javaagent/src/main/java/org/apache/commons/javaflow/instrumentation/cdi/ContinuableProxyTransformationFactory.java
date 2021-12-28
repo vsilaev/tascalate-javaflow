@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.javaflow.providers.asmx.AbstractResourceTransformationFactory;
-import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.providers.asmx.PartialResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
+
+import net.tascalate.asmx.plus.ClassHierarchy;
 
 public class ContinuableProxyTransformationFactory extends AbstractResourceTransformationFactory {
 
@@ -35,7 +36,7 @@ public class ContinuableProxyTransformationFactory extends AbstractResourceTrans
         SharedState sharedState = CACHED_SHARED.get(resourceLoader);
         return new ContinuableProxyTransformer(
             // Actualize ClassHierarchy per resource loader
-            sharedState.hierarchy.shareWith(resourceLoader),
+            PartialResourceTransformationFactory.shareHierarchy(sharedState.hierarchy, resourceLoader),
             createResolver(resourceLoader),
             sharedState.proxyTypes
         );
@@ -55,7 +56,7 @@ public class ContinuableProxyTransformationFactory extends AbstractResourceTrans
                         proxyTypes.add(proxyType);
                     }
                 }
-                return new SharedState(new ClassHierarchy(loader), proxyTypes);
+                return new SharedState(PartialResourceTransformationFactory.createHierarchy(loader), proxyTypes);
             }
         }; 
         

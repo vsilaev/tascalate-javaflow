@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  */
 package org.apache.commons.javaflow.instrumentation.cdi;
 
-import org.apache.commons.javaflow.providers.asmx.AsmVersion;
-
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.FieldVisitor;
 import net.tascalate.asmx.MethodVisitor;
+import net.tascalate.asmx.plus.AsmVersion;
 
 public abstract class ExtendedClassVisitor extends ClassVisitor {
     

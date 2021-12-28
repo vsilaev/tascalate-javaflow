@@ -15,20 +15,27 @@
  */
 package org.apache.commons.javaflow.providers.asmx;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.javaflow.spi.ResourceLoader;
-import org.apache.commons.javaflow.spi.ResourceTransformer;
 
-public class AsmxResourceTransformationFactory extends PartialResourceTransformationFactory {
-
-    public ResourceTransformer createTransformer(ResourceLoader resourceLoader) {
-        SharedContinuableClassInfos sharedState = getCached(resourceLoader);
-        return new ContinuableClassTransformer(
-            // Actualize ClassHierarchy per resource loader
-            shareHierarchy(sharedState.hierarchy(), resourceLoader),
-            new IContinuableClassInfoResolver(resourceLoader, sharedState)
-        );
-    }
+class AsmxResourceLoader implements net.tascalate.asmx.plus.ResourceLoader {
     
+    final ResourceLoader resourceLoader;
+    
+    AsmxResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
+    @Override
+    public boolean hasResource(String name) {
+        return resourceLoader.hasResource(name);
+    }
+
+    @Override
+    public InputStream getResourceAsStream(String name) throws IOException {
+        return resourceLoader.getResourceAsStream(name);
+    }
 
 }

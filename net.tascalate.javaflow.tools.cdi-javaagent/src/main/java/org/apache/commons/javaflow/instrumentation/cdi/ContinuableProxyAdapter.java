@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ package org.apache.commons.javaflow.instrumentation.cdi;
 import java.io.IOException;
 import java.util.List;
 
-import net.tascalate.asmx.ClassVisitor;
-import net.tascalate.asmx.FieldVisitor;
-import net.tascalate.asmx.MethodVisitor;
-
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
+import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfoResolver;
 import org.apache.commons.javaflow.spi.StopException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
-import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfo;
-import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfoResolver;
+
+import net.tascalate.asmx.ClassVisitor;
+import net.tascalate.asmx.FieldVisitor;
+import net.tascalate.asmx.MethodVisitor;
+import net.tascalate.asmx.plus.ClassHierarchy;
 
 class ContinuableProxyAdapter extends ExtendedClassVisitor {
     private static final Logger log = LoggerFactory.getLogger(ContinuableProxyAdapter.class);

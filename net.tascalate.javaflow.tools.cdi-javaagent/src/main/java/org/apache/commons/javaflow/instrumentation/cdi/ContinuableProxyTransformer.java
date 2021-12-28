@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ package org.apache.commons.javaflow.instrumentation.cdi;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.javaflow.providers.asmx.ClassHierarchy;
 import org.apache.commons.javaflow.providers.asmx.ContinuableClassInfoResolver;
-import org.apache.commons.javaflow.providers.asmx.OfflineClassWriter;
 import org.apache.commons.javaflow.spi.AbstractResourceTransformer;
 import org.apache.commons.javaflow.spi.StopException;
 
 import net.tascalate.asmx.ClassReader;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.ClassWriter;
+import net.tascalate.asmx.plus.ClassHierarchy;
+import net.tascalate.asmx.plus.OfflineClassWriter;
 
 class ContinuableProxyTransformer extends AbstractResourceTransformer {
 
