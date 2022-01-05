@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,13 +68,13 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
     private Analyzer analyzer;
     int stackRecorderVar;
 
-    ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
+    ContinuableMethodNode(int api, int access, String name, String desc, String signature, String[] exceptions, 
                           String className, 
                           ClassHierarchy classHierarchy, 
                           ContinuableClassInfoResolver cciResolver, 
                           MethodVisitor mv) {
         
-        super(AsmVersion.CURRENT, access, name, desc, signature, exceptions);
+        super(api, access, name, desc, signature, exceptions);
         this.className = className;
         this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
@@ -142,7 +142,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
         try {
             moveNew();
 
-            analyzer = new Analyzer(new FastClassVerifier(classHierarchy)) {
+            analyzer = new Analyzer(new FastClassVerifier(this.api, classHierarchy)) {
                 @Override
                 protected Frame newFrame(int nLocals, int nStack) {
                     return new MonitoringFrame(nLocals, nStack);
@@ -155,7 +155,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
             };
 
             analyzer.analyze(className, this);
-            accept(new ContinuableMethodVisitor(this));
+            accept(new ContinuableMethodVisitor(this.api, this));
 
         } catch (AnalyzerException ex) {
             throw new RuntimeException(ex);

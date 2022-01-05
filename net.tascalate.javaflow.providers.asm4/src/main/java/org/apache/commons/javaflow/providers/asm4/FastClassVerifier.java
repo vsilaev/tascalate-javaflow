@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.objectweb.asm.tree.analysis.SimpleVerifier;
 class FastClassVerifier extends SimpleVerifier {
     private final ClassHierarchy classHierarchy;
     
-    FastClassVerifier(ClassHierarchy classHierarchy) {
-        super(AsmVersion.CURRENT, null, null, null, false);
+    FastClassVerifier(int api, ClassHierarchy classHierarchy) {
+        super(api, null, null, null, false);
         this.classHierarchy = classHierarchy;
     }
     

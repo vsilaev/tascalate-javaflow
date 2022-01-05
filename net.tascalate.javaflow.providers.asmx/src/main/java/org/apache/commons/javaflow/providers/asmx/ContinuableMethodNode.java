@@ -38,7 +38,6 @@ import net.tascalate.asmx.Label;
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Opcodes;
 import net.tascalate.asmx.Type;
-import net.tascalate.asmx.plus.AsmVersion;
 import net.tascalate.asmx.plus.ClassHierarchy;
 import net.tascalate.asmx.tree.AbstractInsnNode;
 import net.tascalate.asmx.tree.AnnotationNode;
@@ -71,13 +70,13 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
     private Analyzer<BasicValue> analyzer;
     int stackRecorderVar;
 
-    ContinuableMethodNode(int access, String name, String desc, String signature, String[] exceptions, 
+    ContinuableMethodNode(int api, int access, String name, String desc, String signature, String[] exceptions, 
                           String className, 
                           ClassHierarchy classHierarchy, 
                           ContinuableClassInfoResolver cciResolver, 
                           MethodVisitor mv) {
         
-        super(AsmVersion.CURRENT, access, name, desc, signature, exceptions);
+        super(api, access, name, desc, signature, exceptions);
         this.className = className;
         this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
@@ -145,7 +144,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
         try {
             moveNew();
 
-            analyzer = new Analyzer<BasicValue>(new FastClassVerifier(classHierarchy)) {
+            analyzer = new Analyzer<BasicValue>(new FastClassVerifier(this.api, classHierarchy)) {
                 @Override
                 protected Frame<BasicValue> newFrame(int nLocals, int nStack) {
                     return new MonitoringFrame<BasicValue>(nLocals, nStack);
@@ -158,7 +157,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
             };
 
             analyzer.analyze(className, this);
-            accept(new ContinuableMethodVisitor(this));
+            accept(new ContinuableMethodVisitor(this.api, this));
 
         } catch (AnalyzerException ex) {
             throw new RuntimeException(ex);

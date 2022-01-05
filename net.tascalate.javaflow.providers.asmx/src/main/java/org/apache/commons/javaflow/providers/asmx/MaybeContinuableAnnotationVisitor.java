@@ -18,15 +18,14 @@ package org.apache.commons.javaflow.providers.asmx;
 import net.tascalate.asmx.AnnotationVisitor;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.Opcodes;
-import net.tascalate.asmx.plus.AsmVersion;
 
 class MaybeContinuableAnnotationVisitor extends ClassVisitor {
     private final ContinuableClassInfoResolver cciResolver; 
     private boolean classContinuableAnnotationFound = false;
     private boolean isAnnotation = false;
 
-    MaybeContinuableAnnotationVisitor(ContinuableClassInfoResolver cciResolver) {
-        super(AsmVersion.CURRENT);
+    MaybeContinuableAnnotationVisitor(int api, ContinuableClassInfoResolver cciResolver) {
+        super(api);
         this.cciResolver = cciResolver;
     }
 

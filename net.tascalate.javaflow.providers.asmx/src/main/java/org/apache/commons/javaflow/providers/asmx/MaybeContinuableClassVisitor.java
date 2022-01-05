@@ -26,7 +26,6 @@ import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Opcodes;
 import net.tascalate.asmx.Type;
-import net.tascalate.asmx.plus.AsmVersion;
 
 class MaybeContinuableClassVisitor extends ClassVisitor {
     private final ContinuableClassInfoResolver cciResolver; 
@@ -41,14 +40,21 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
     private final Map<String, String> actual2accessor = new HashMap<String, String>();
     private final Map<String, String> bridge2specialization = new HashMap<String, String>();
     private final Set<String> desugaredLambdaBodies = new HashSet<String>();
+    private final Set<String> continuableMethods = new HashSet<String>();
     
-    final Set<String> continuableMethods = new HashSet<String>();
-
     private boolean isAnnotation = false;
 
-    MaybeContinuableClassVisitor(ContinuableClassInfoResolver cciResolver) {
-        super(AsmVersion.CURRENT);
+    MaybeContinuableClassVisitor(int api, ContinuableClassInfoResolver cciResolver) {
+        super(api);
         this.cciResolver = cciResolver;
+    }
+    
+    IContinuableClassInfo toContinuableClassInfo() {
+        if (isContinuable()) {
+            return new IContinuableClassInfo(isProcessed(), continuableMethods);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -199,11 +205,11 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
         }
     }
 
-    boolean isContinuable() { 
+    private boolean isContinuable() { 
         return !isAnnotation && !continuableMethods.isEmpty();
     }
 
-    boolean isProcessed() {
+    private boolean isProcessed() {
         // Processed only after marker field is added
         // Additionally, Java8 allows implementation in interfaces        
         return classContinuatedMarkerFound;

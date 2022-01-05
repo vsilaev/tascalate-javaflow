@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,9 @@ class ContinuableClassTransformer extends AbstractResourceTransformer {
 
     public byte[] transform(byte[] original, Collection<String> retransformClasses) {
         ClassReader reader = new ClassReader(original);
-        ClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES);
+        OfflineClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES);
         ContinuableClassVisitor visitor = new ContinuableClassVisitor(
+            writer.api(),
             writer, /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/ 
             classHierarchy,
             cciResolver,

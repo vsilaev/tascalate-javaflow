@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.FastByteArrayOutputStream;
 import org.apache.commons.javaflow.spi.InstrumentationUtils;
 import org.apache.commons.javaflow.spi.MorphingResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformationFactory;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link URLClassLoader} with bytecode instrumentation for javaflow.
@@ -321,7 +320,9 @@ public class ContinuableClassLoader extends ClassLoader {
      *                classpath.
      */
     public Class<?> forceLoadClass(String className) throws ClassNotFoundException {
-        log.debug("force loading " + className);
+        if (log.isDebugEnabled()) {
+            log.debug("force loading " + className);
+        }
 
         Class<?> theClass = findLoadedClass(className);
 
@@ -365,7 +366,6 @@ public class ContinuableClassLoader extends ClassLoader {
         if (!useParentFirst && findInPackages(resourceName, OWN_PACKAGES)) {
             useParentFirst = true;
         }
-
         return useParentFirst;
     }
 
@@ -408,36 +408,50 @@ public class ContinuableClassLoader extends ClassLoader {
             if (null == parentClassLoader) {
                 parentClassLoader = platformClassLoader;
             }
-            
+
             if (isParentFirst(className)) {
                 try {
                     theClass = parentClassLoader.loadClass(className);
-                    log.debug("Class " + className + " loaded from parent loader " + "(parentFirst)");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Class " + className + " loaded from parent loader " + "(parentFirst)");
+                    }
                 } catch (ClassNotFoundException cnfe) {
                     theClass = findClass(className);
-                    log.debug("Class " + className + " loaded from own loader " + "(parentFirst)");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Class " + className + " loaded from own loader " + "(parentFirst)");
+                    }
                 }
             } else {
                 // It's an error to load anything from platform
-                if (null != platformClassLoader) {
+                // But in JDK 9+ platformClassLoader sees application classes
+                // hence the double check
+                if (null != platformClassLoader && !findInPackages(className, loaderPackages)) {
                     try {
                         theClass = platformClassLoader.loadClass(className); 
-                        log.debug("Class " + className + " is platform class");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Class " + className + " is platform class");
+                        }
                     } catch (ClassNotFoundException ex) {
-                        log.debug("Class " + className + " is not visible to platform, will try to load on own loader");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Class " + className + " is not visible to platform, will try to load on own loader");
+                        }
                     }
                 }
-                // Not found among platform classes
+                // Should be loaded by this class loader
                 if (null == theClass) {
                     try {
                         theClass = findClass(className);
-                        log.debug("Class " + className + " loaded from own loader");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Class " + className + " loaded from own loader");
+                        }
                     } catch (ClassNotFoundException cnfe) {
                         if (isolated) {
                             throw cnfe;
                         }
                         theClass = parentClassLoader.loadClass(className);
-                        log.debug("Class " + className + " loaded from parent loader");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Class " + className + " loaded from parent loader");
+                        }
                     }
                 }
             }
@@ -484,7 +498,7 @@ public class ContinuableClassLoader extends ClassLoader {
                 int i = classNameFromData.lastIndexOf('.');
                 if (i > 0) {
                     final String packageName = classNameFromData.substring(0, i);
-                    @SuppressWarnings("all")
+                    @SuppressWarnings("deprecation")
                     final Package pkg = getPackage(packageName);
                     if (pkg == null) {
                         definePackage(packageName, null, null, null, null, null, null, null);
@@ -501,7 +515,9 @@ public class ContinuableClassLoader extends ClassLoader {
                 } finally {
                     transformer.release();
                 }
-
+                if (log.isDebugEnabled()) {
+                    log.debug("Transformed " + className + " = " + (transfomred != null));
+                }
                 if (null == transfomred)
                     transfomred = classData;
 
@@ -562,7 +578,9 @@ public class ContinuableClassLoader extends ClassLoader {
      */
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
-        log.debug("Finding class " + name);
+        if (log.isDebugEnabled()) {
+            log.debug("Finding class " + name);
+        }
 
         // locate the class file
         String classFileName = name.replace('.', '/') + ".class";
@@ -606,16 +624,8 @@ public class ContinuableClassLoader extends ClassLoader {
     
     private static Method getClassLoaderMethodOrNull(String name, Class<?>... args) {
         try {
-            Method method = ClassLoader.class.getDeclaredMethod(name, args);
-            try {
-                // Need for Java 8 and will success
-                method.setAccessible(true);
-            } catch (Exception ex) {
-                // Ignore in Java 9
-                // - in this context (getting protected method of a superclass)
-                // method may be called anyway 
-            }
-            return method;
+            //Method method = ClassLoader.class.getDeclaredMethod(name, args);
+            return ContinuableClassLoader.class.getMethod(name, args);
         } catch (NoSuchMethodException ex) {
             // OK, JDK version is less then 1.7
             return null;

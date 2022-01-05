@@ -50,8 +50,9 @@ class ContinuableClassTransformer extends AbstractResourceTransformer {
 
     public byte[] transform(byte[] original, Collection<String> retransformClasses) {
         ClassReader reader = new ClassReader(original);
-        ClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES);
+        OfflineClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES);
         ContinuableClassVisitor visitor = new ContinuableClassVisitor(
+            writer.api(),
             writer, /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/ 
             classHierarchy,
             cciResolver,

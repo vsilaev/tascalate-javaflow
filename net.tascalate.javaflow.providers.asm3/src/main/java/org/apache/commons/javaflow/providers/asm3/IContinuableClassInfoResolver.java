@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,18 +131,10 @@ class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
         MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
         reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 
-        IContinuableClassInfo classInfo;
-        if (maybeContinuableClassVisitor.isContinuable()) {
-            classInfo = new IContinuableClassInfo(
-                maybeContinuableClassVisitor.isProcessed(), 
-                maybeContinuableClassVisitor.continuableMethods
-            );
-        } else {
-            classInfo = UNSUPPORTED_CLASS_INFO;
-        }
-        visitedClasses.put(classInternalName, classInfo);
+        IContinuableClassInfo classInfo = maybeContinuableClassVisitor.toContinuableClassInfo();
+        visitedClasses.put(classInternalName, null != classInfo ? classInfo : UNSUPPORTED_CLASS_INFO);
         refreshClasses.remove(classInternalName);
-        return unmask(classInfo);
+        return classInfo;
     }
 
     private boolean resolveContinuableAnnotation(String annotationClassDescriptor, ClassReader reader) {

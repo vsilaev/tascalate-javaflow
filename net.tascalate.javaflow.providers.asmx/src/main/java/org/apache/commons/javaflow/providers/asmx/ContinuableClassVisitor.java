@@ -29,7 +29,6 @@ import net.tascalate.asmx.AnnotationVisitor;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Opcodes;
-import net.tascalate.asmx.plus.AsmVersion;
 import net.tascalate.asmx.plus.ClassHierarchy;
 
 /**
@@ -47,11 +46,12 @@ class ContinuableClassVisitor extends ClassVisitor {
     private IContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
 
-    ContinuableClassVisitor(ClassVisitor cv, 
+    ContinuableClassVisitor(int api,
+                            ClassVisitor cv, 
                             ClassHierarchy classHierarchy, 
                             IContinuableClassInfoResolver cciResolver, 
                             byte[] originalBytes) {
-        super(AsmVersion.CURRENT, cv);
+        super(api, cv);
         this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
         this.originalBytes = originalBytes;
@@ -108,7 +108,7 @@ class ContinuableClassVisitor extends ClassVisitor {
             return mv;
         } else {
             return new ContinuableMethodNode(
-                access, name, desc, signature, exceptions, 
+                this.api, access, name, desc, signature, exceptions, 
                 className, classHierarchy, cciResolver, mv
             );
         }

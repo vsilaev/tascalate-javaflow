@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,5 +18,5 @@ module net.tascalate.javaflow.tools.jar {
 
     requires transitive net.tascalate.javaflow.spi;
     
-    exports org.apache.commons.javaflow.tools;
+    exports org.apache.commons.javaflow.tools.jar;
 }

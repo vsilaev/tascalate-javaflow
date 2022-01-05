@@ -59,7 +59,7 @@
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Main-Class>org.apache.commons.javaflow.tools.RewritingUtils</Main-Class>
+							<Main-Class>org.apache.commons.javaflow.tools.jar.RewritingUtils</Main-Class>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -101,6 +101,7 @@
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
 										<Multi-Release>false</Multi-Release>
+										<Automatic-Module-Name>net.tascalate.javaflow.tools.jar.shaded</Automatic-Module-Name>
 									</manifestEntries>
 								</transformer>
 							</transformers>

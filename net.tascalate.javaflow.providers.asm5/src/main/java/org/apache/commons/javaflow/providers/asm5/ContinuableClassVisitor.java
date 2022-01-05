@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,12 @@ class ContinuableClassVisitor extends ClassVisitor {
     private IContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
 
-    ContinuableClassVisitor(ClassVisitor cv, 
+    ContinuableClassVisitor(int api,
+                            ClassVisitor cv, 
                             ClassHierarchy classHierarchy, 
                             IContinuableClassInfoResolver cciResolver, 
                             byte[] originalBytes) {
-        super(AsmVersion.CURRENT, cv);
+        super(api, cv);
         this.classHierarchy = classHierarchy;
         this.cciResolver = cciResolver;
         this.originalBytes = originalBytes;
@@ -106,7 +107,7 @@ class ContinuableClassVisitor extends ClassVisitor {
             return mv;
         } else {
             return new ContinuableMethodNode(
-                access, name, desc, signature, exceptions, 
+                this.api, access, name, desc, signature, exceptions, 
                 className, classHierarchy, cciResolver, mv
             );
         }

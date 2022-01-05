@@ -59,7 +59,6 @@ import net.tascalate.asmx.Label;
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Opcodes;
 import net.tascalate.asmx.Type;
-import net.tascalate.asmx.plus.AsmVersion;
 import net.tascalate.asmx.tree.AbstractInsnNode;
 import net.tascalate.asmx.tree.InvokeDynamicInsnNode;
 import net.tascalate.asmx.tree.MethodInsnNode;
@@ -81,8 +80,8 @@ class ContinuableMethodVisitor extends MethodVisitor {
     private Frame<?> currentFrame = null;
 
 
-    ContinuableMethodVisitor(ContinuableMethodNode a) {
-        super(AsmVersion.CURRENT, a.mv);
+    ContinuableMethodVisitor(int api, ContinuableMethodNode a) {
+        super(api, a.mv);
         this.methodNode = a;
         this.labels = a.labels;
         this.nodes = a.nodes;

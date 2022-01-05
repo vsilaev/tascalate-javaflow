@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,7 @@ class MaybeContinuableClassVisitor extends ClassAdapter {
     private final Map<String, String> actual2accessor = new HashMap<String, String>();
     private final Map<String, String> bridge2specialization = new HashMap<String, String>();
     private final Set<String> desugaredLambdaBodies = new HashSet<String>();
-    
-    final Set<String> continuableMethods = new HashSet<String>();
+    private final Set<String> continuableMethods = new HashSet<String>();
 
     private boolean isAnnotation = false;
 
@@ -51,6 +50,14 @@ class MaybeContinuableClassVisitor extends ClassAdapter {
         super(NOP);
         this.cciResolver = cciResolver;
     }
+    
+    IContinuableClassInfo toContinuableClassInfo() {
+        if (isContinuable()) {
+            return new IContinuableClassInfo(isProcessed(), continuableMethods);
+        } else {
+            return null;
+        }
+    }    
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -193,11 +200,11 @@ class MaybeContinuableClassVisitor extends ClassAdapter {
         }
     }
 
-    boolean isContinuable() { 
+    private boolean isContinuable() { 
         return !isAnnotation && !continuableMethods.isEmpty();
     }
 
-    boolean isProcessed() {
+    private boolean isProcessed() {
         // Processed only after marker field is added
         return classContinuatedMarkerFound;
     }

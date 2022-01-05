@@ -24,7 +24,6 @@
 package org.apache.commons.javaflow.providers.asmx;
 
 import net.tascalate.asmx.Type;
-import net.tascalate.asmx.plus.AsmVersion;
 import net.tascalate.asmx.plus.ClassHierarchy;
 import net.tascalate.asmx.tree.analysis.BasicValue;
 import net.tascalate.asmx.tree.analysis.SimpleVerifier;
@@ -32,8 +31,8 @@ import net.tascalate.asmx.tree.analysis.SimpleVerifier;
 class FastClassVerifier extends SimpleVerifier {
     private final ClassHierarchy classHierarchy;
     
-    FastClassVerifier(ClassHierarchy classHierarchy) {
-        super(AsmVersion.CURRENT, null, null, null, false);
+    FastClassVerifier(int api, ClassHierarchy classHierarchy) {
+        super(api, null, null, null, false);
         this.classHierarchy = classHierarchy;
     }
     

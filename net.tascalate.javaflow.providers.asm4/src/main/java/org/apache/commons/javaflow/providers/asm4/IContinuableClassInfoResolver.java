@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Type;
-
 import org.apache.commons.javaflow.spi.ClassMatcher;
 import org.apache.commons.javaflow.spi.ResourceLoader;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Type;
 
 class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     private final Map<String, IContinuableClassInfo> visitedClasses = new HashMap<String, IContinuableClassInfo>();
@@ -128,25 +128,17 @@ class IContinuableClassInfoResolver implements ContinuableClassInfoResolver {
     }
 
     private IContinuableClassInfo resolveContinuableClassInfo(String classInternalName, ClassReader reader) {
-        MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(this); 
+        MaybeContinuableClassVisitor maybeContinuableClassVisitor = new MaybeContinuableClassVisitor(AsmVersion.CURRENT, this); 
         reader.accept(maybeContinuableClassVisitor, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 
-        IContinuableClassInfo classInfo;
-        if (maybeContinuableClassVisitor.isContinuable()) {
-            classInfo = new IContinuableClassInfo(
-                maybeContinuableClassVisitor.isProcessed(), 
-                maybeContinuableClassVisitor.continuableMethods
-            );
-        } else {
-            classInfo = UNSUPPORTED_CLASS_INFO;
-        }
-        visitedClasses.put(classInternalName, classInfo);
+        IContinuableClassInfo classInfo = maybeContinuableClassVisitor.toContinuableClassInfo();
+        visitedClasses.put(classInternalName, null != classInfo ? classInfo : UNSUPPORTED_CLASS_INFO);
         refreshClasses.remove(classInternalName);
-        return unmask(classInfo);
+        return classInfo;
     }
 
     private boolean resolveContinuableAnnotation(String annotationClassDescriptor, ClassReader reader) {
-        MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(this); 
+        MaybeContinuableAnnotationVisitor maybeContinuableAnnotationVisitor = new MaybeContinuableAnnotationVisitor(AsmVersion.CURRENT, this); 
         reader.accept(
             maybeContinuableAnnotationVisitor, 
             ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG

@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import org.apache.commons.javaflow.spi.ResourceTransformer;
-import org.apache.commons.javaflow.tools.RewritingUtils;
-import org.apache.commons.javaflow.tools.RewritingUtils.TransformerType;
+import org.apache.commons.javaflow.tools.jar.RewritingUtils;
+import org.apache.commons.javaflow.tools.jar.RewritingUtils.TransformerType;
 
 /**
  * Maven plugin that will apply Continuation class transformations on compiled

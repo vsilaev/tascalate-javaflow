@@ -26,12 +26,12 @@
 		<dependency>
 			<groupId>net.tascalate</groupId>
 			<artifactId>net.tascalate.asmx.plus</artifactId>
-			<version>${asmx.version}</version>
+			<version>${tascalate.asmx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate</groupId>
 			<artifactId>net.tascalate.asmx.analysis</artifactId>
-			<version>${asmx.version}</version>
+			<version>${tascalate.asmx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
