@@ -75,17 +75,17 @@ class ClassMatchStrategyFileParser {
     }
     
     static enum VariantFactory {
-        BY_NAME_FULL() {
+        NAME_FULL() {
             ClassMatchStrategy create(String option) {
                 return ClassMatchStrategies.byClassName(option, false);
             }
         },
-        BY_NAME_PART() {
+        NAME_PART() {
             ClassMatchStrategy create(String option) {
                 return ClassMatchStrategies.byClassName(option, true);
             }
         },
-        BY_NAME_PATTERN() {
+        NAME_PATTERN() {
             ClassMatchStrategy create(String option) {
                 return ClassMatchStrategies.byClassNamePattern(option);
             }
@@ -100,12 +100,12 @@ class ClassMatchStrategyFileParser {
                 return nested;
             }
         },
-        SUPERCLASS() {
+        EXTENDS_CLASS() {
             ClassMatchStrategy create(ClassMatchStrategy nested) {
                 return ClassMatchStrategies.bySuperClass(nested);
             }
         },
-        INTERFACE() {
+        IMPLEMENTS_INTERFACE() {
             ClassMatchStrategy create(ClassMatchStrategy nested) {
                 return ClassMatchStrategies.byInterface(nested);
             }
