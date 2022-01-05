@@ -12,21 +12,21 @@
 #
 # This two superclasses implies implementation of
 # org/apache/commons/javaflow/core/ContinuableProxy
-extends-class:name=java/lang/reflect/Proxy
-extends-class:name=net/sf/cglib/proxy/Proxy$ProxyImpl
+#extends-class:name=java/lang/reflect/Proxy
+#extends-class:name=net/sf/cglib/proxy/Proxy$ProxyImpl
 #
 # Ad-hoc custom continuable proxy
-implements-interface:name=org/apache/commons/javaflow/core/CustomContinuableProxy
+#implements-interface:name=org/apache/commons/javaflow/core/CustomContinuableProxy
 #
 # Interfaces from Apache OpenWebBeans CDI container
-implements-interface:name=org/apache/webbeans/proxy/OwbInterceptorProxy
-implements-interface:name=org/apache/webbeans/proxy/OwbNormalScopeProxy
+#implements-interface:name=org/apache/webbeans/proxy/OwbInterceptorProxy
+#implements-interface:name=org/apache/webbeans/proxy/OwbNormalScopeProxy
 #
 # Interfaces from JBoss Weld CDI container
-implements-interface:name=org/jboss/weld/bean/proxy/ProxyObject
+#implements-interface:name=org/jboss/weld/bean/proxy/ProxyObject
 #
 # Interfaces from JBoss WildFly application server
-implements-interface:name=org/jboss/as/ee/component/serialization/WriteReplaceInterface
+#implements-interface:name=org/jboss/as/ee/component/serialization/WriteReplaceInterface
 #
 # CGLib generated classes, default naming strategy
-class:name-pattern=.*\$\$EnhancerByCGLIB\$\$.*
+#class:name-pattern=.*\$\$EnhancerByCGLIB\$\$.*

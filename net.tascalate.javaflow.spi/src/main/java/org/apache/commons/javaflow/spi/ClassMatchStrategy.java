@@ -15,9 +15,15 @@
  */
 package org.apache.commons.javaflow.spi;
 
-import java.io.IOException;
-
-public interface VetoableResourceLoader extends ResourceLoader {
-    ClassMatcher createVeto() throws IOException;
-    ClassMatchStrategy getVetoStrategy() throws IOException;
+public abstract class ClassMatchStrategy {
+    abstract public boolean matches(String name, String signature, String superName, String[] interfaces, ResourceLoader loader);
+    
+    public ClassMatcher bind(final ResourceLoader loader) {
+        return new ClassMatcher() {
+            @Override
+            public boolean matches(String name, String signature, String superName, String[] interfaces) {
+                return ClassMatchStrategy.this.matches(name, signature, superName, interfaces, loader);
+            }
+        };
+    }
 }

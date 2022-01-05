@@ -211,6 +211,40 @@ class ClassHeaderReader {
         // this_class is just after the access_flags field (using 2 bytes).
         return readClass(header + 2, new char[maxStringLength]);
     }
+    
+    /**
+     * Returns the internal of name of the super class (see {@link Type#getInternalName()}). For
+     * interfaces, the super class is {@link Object}.
+     *
+     * @return the internal name of the super class, or {@literal null} for {@link Object} class.
+     * @see ClassVisitor#visit(int, int, String, String, String, String[])
+     */
+    String getSuperName() {
+      // super_class is after the access_flags and this_class fields (2 bytes each).
+      return readClass(header + 4, new char[maxStringLength]);
+    }
+
+    /**
+     * Returns the internal names of the implemented interfaces (see {@link Type#getInternalName()}).
+     *
+     * @return the internal names of the directly implemented interfaces. Inherited implemented
+     *     interfaces are not returned.
+     * @see ClassVisitor#visit(int, int, String, String, String, String[])
+     */
+    String[] getInterfaces() {
+      // interfaces_count is after the access_flags, this_class and super_class fields (2 bytes each).
+      int currentOffset = header + 6;
+      int interfacesCount = readUnsignedShort(currentOffset);
+      String[] interfaces = new String[interfacesCount];
+      if (interfacesCount > 0) {
+        char[] charBuffer = new char[maxStringLength];
+        for (int i = 0; i < interfacesCount; ++i) {
+          currentOffset += 2;
+          interfaces[i] = readClass(currentOffset, charBuffer);
+        }
+      }
+      return interfaces;
+    }    
 
     // -----------------------------------------------------------------------------------------------
     // Public methods

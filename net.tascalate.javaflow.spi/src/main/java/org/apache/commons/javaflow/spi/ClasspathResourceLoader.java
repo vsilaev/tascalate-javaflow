@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,20 +59,24 @@ public class ClasspathResourceLoader implements VetoableResourceLoader {
     }
     
     public ClassMatcher createVeto() throws IOException {
-        List<ClassMatcher> matchers = new ArrayList<ClassMatcher>();
+        return getVetoStrategy().bind(this);
+    }
+    
+    public ClassMatchStrategy getVetoStrategy() throws IOException {
+        List<ClassMatchStrategy> strategies = new ArrayList<ClassMatchStrategy>();
         ClassLoader classLoader = classLoaderRef.get();
         if (null == classLoader) {
-            return ClassMatchers.MATCH_NONE;
+            return ClassMatchStrategies.MATCH_NONE;
         }
         Enumeration<URL> allResources = classLoader.getResources("META-INF/net.tascalate.javaflow.veto.cmf");
-        ClassMatcherFileParser parser = new ClassMatcherFileParser();
+        ClassMatchStrategyFileParser parser = new ClassMatchStrategyFileParser();
         while (allResources.hasMoreElements()) {
             URL resource = allResources.nextElement();
-            ClassMatcher matcher = parser.parse(resource);
-            if (null != matcher && ClassMatchers.MATCH_NONE != matcher) {
-                matchers.add(matcher);
+            ClassMatchStrategy strategy = parser.parse(resource);
+            if (null != strategy && ClassMatchStrategies.MATCH_NONE != strategy) {
+                strategies.add(strategy);
             }
         }
-        return matchers.isEmpty() ? ClassMatchers.MATCH_NONE : ClassMatchers.whenAny(matchers);
+        return strategies.isEmpty() ? ClassMatchStrategies.MATCH_NONE : ClassMatchStrategies.whenAny(strategies);
     }
 }

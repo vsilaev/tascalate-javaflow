@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import org.apache.commons.javaflow.spi.Cache;
 import org.apache.commons.javaflow.spi.ClassMatcher;
-import org.apache.commons.javaflow.spi.ClassMatchers;
 import org.apache.commons.javaflow.spi.ResourceLoader;
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.spi.VetoableResourceLoader;
@@ -49,7 +48,7 @@ public class PartialResourceTransformationFactory extends AbstractResourceTransf
                 throw new RuntimeException(ex);
             }
         } else {
-            return ClassMatchers.MATCH_NONE;
+            return ClassMatcher.MATCH_NONE;
         }
     }
     

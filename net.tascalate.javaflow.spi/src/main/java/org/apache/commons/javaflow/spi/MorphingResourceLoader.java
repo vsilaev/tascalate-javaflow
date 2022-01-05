@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,13 +64,18 @@ public class MorphingResourceLoader implements VetoableResourceLoader {
             return delegate.getResourceAsStream(name);
         }
     }
-
+    
     @Override
     public ClassMatcher createVeto() throws IOException {
+        return getVetoStrategy().bind(this);
+    }    
+
+    @Override
+    public ClassMatchStrategy getVetoStrategy() throws IOException {
         if (delegate instanceof VetoableResourceLoader) {
-            return ((VetoableResourceLoader)delegate).createVeto();
+            return ((VetoableResourceLoader)delegate).getVetoStrategy();
         } else {
-            return ClassMatchers.MATCH_NONE;
+            return ClassMatchStrategies.MATCH_NONE;
         }
     }
     

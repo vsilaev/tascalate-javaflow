@@ -35,7 +35,7 @@ You have to add the following configuration to enable build-time instrumentation
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
 			<artifactId>net.tascalate.javaflow.extras</artifactId>
-			<version>2.4.1</version>
+			<version>2.4.2</version>
 		</dependency>	
 		...
 	</dependencies>

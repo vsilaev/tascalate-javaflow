@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2019 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2021 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,4 +17,18 @@ package org.apache.commons.javaflow.spi;
 
 public interface ClassMatcher {
     boolean matches(String name, String signature, String superName, String[] interfaces);
+    
+    public static final ClassMatcher MATCH_NONE = new ClassMatcher() {
+        @Override
+        public boolean matches(String name, String signature, String superName, String[] interfaces) {
+            return false;
+        }
+    };
+    
+    public static final ClassMatcher MATCH_ALL  = new ClassMatcher() {
+        @Override
+        public boolean matches(String name, String signature, String superName, String[] interfaces) {
+            return true;
+        }
+    };
 }
