@@ -71,41 +71,45 @@ class ClassMatchStrategyFileParser {
     }
     
     static interface StrategyFactory {
-        ClassMatchStrategy create(String className);
+        ClassMatchStrategy create(String option);
     }
     
-    static enum VariantFactory {
+    static enum VariantFactory implements StrategyFactory {
         NAME_FULL() {
-            ClassMatchStrategy create(String option) {
+            @Override
+            public ClassMatchStrategy create(String option) {
                 return ClassMatchStrategies.byClassName(option, false);
             }
         },
         NAME_PART() {
-            ClassMatchStrategy create(String option) {
+            @Override
+            public ClassMatchStrategy create(String option) {
                 return ClassMatchStrategies.byClassName(option, true);
             }
         },
         NAME_PATTERN() {
-            ClassMatchStrategy create(String option) {
+            @Override
+            public ClassMatchStrategy create(String option) {
                 return ClassMatchStrategies.byClassNamePattern(option);
             }
         };        
-        
-        abstract ClassMatchStrategy create(String option);
     }
     
     static enum KindFactory {
         CLASS() {
+            @Override
             ClassMatchStrategy create(ClassMatchStrategy nested) {
                 return nested;
             }
         },
         EXTENDS_CLASS() {
+            @Override
             ClassMatchStrategy create(ClassMatchStrategy nested) {
                 return ClassMatchStrategies.bySuperClass(nested);
             }
         },
         IMPLEMENTS_INTERFACE() {
+            @Override
             ClassMatchStrategy create(ClassMatchStrategy nested) {
                 return ClassMatchStrategies.byInterface(nested);
             }
