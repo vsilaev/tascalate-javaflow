@@ -227,8 +227,6 @@ public class ContinuableClassLoader extends ClassLoader {
 
     /* The context to be used when loading classes and resources */
     protected final AccessControlContext acc;
-    
-    protected final ClassLoader platformClassLoader;
 
     /**
      * Creates a classloader to define classes dynamically.
@@ -294,8 +292,6 @@ public class ContinuableClassLoader extends ClassLoader {
         this.isolated = isolated;
         this.systemPackages = dotEndingPackageNames(systemPackages);
         this.loaderPackages = dotEndingPackageNames(loaderPackages);
-        
-        this.platformClassLoader = ClassLoader.getSystemClassLoader().getParent();
     }
 
     public static Builder builder(ResourceTransformationFactory transformationFactory) {
@@ -405,10 +401,6 @@ public class ContinuableClassLoader extends ClassLoader {
             }
     
             ClassLoader parentClassLoader = getParent();
-            if (null == parentClassLoader) {
-                parentClassLoader = platformClassLoader;
-            }
-
             if (isParentFirst(className)) {
                 try {
                     theClass = parentClassLoader.loadClass(className);
@@ -422,21 +414,6 @@ public class ContinuableClassLoader extends ClassLoader {
                     }
                 }
             } else {
-                // It's an error to load anything from platform
-                // But in JDK 9+ platformClassLoader sees application classes
-                // hence the double check
-                if (null != platformClassLoader && !findInPackages(className, loaderPackages)) {
-                    try {
-                        theClass = platformClassLoader.loadClass(className); 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Class " + className + " is platform class");
-                        }
-                    } catch (ClassNotFoundException ex) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Class " + className + " is not visible to platform, will try to load on own loader");
-                        }
-                    }
-                }
                 // Should be loaded by this class loader
                 if (null == theClass) {
                     try {

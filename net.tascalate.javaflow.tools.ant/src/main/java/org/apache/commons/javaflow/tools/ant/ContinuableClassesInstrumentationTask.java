@@ -42,7 +42,7 @@ import org.apache.commons.javaflow.tools.jar.RewritingUtils;
 /**
  * Ant task that enhances class files with javaflow instrumentation.
  */
-public class AntRewriteTask extends MatchingTask {
+public class ContinuableClassesInstrumentationTask extends MatchingTask {
 
     private RewritingUtils.TransformerType transformerType;
 

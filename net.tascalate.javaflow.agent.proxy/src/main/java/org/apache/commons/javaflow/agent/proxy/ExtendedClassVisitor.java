@@ -18,12 +18,11 @@ package org.apache.commons.javaflow.agent.proxy;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.FieldVisitor;
 import net.tascalate.asmx.MethodVisitor;
-import net.tascalate.asmx.plus.AsmVersion;
 
 public abstract class ExtendedClassVisitor extends ClassVisitor {
     
-    ExtendedClassVisitor(ClassVisitor delegate) {
-        super(AsmVersion.CURRENT, delegate);
+    ExtendedClassVisitor(int api, ClassVisitor delegate) {
+        super(api, delegate);
     }
     
     @SuppressWarnings("all") //"exports" in Java 9

@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.agent.core;
+package org.apache.commons.javaflow.agent.proxy;
 
 import org.apache.commons.javaflow.agent.common.ConfigurableClassFileTransformer;
-import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
 
-public class JavaFlowClassTransformer extends ConfigurableClassFileTransformer {
-    public JavaFlowClassTransformer() {
-        super(new AsmxResourceTransformationFactory());
+class ContinuableProxyBytecodeTransformer extends ConfigurableClassFileTransformer {
+
+    ContinuableProxyBytecodeTransformer() {
+        super(new ContinuableProxyTransformationFactory());
     }
 }

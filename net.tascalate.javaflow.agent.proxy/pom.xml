@@ -11,11 +11,11 @@
 	<artifactId>net.tascalate.javaflow.agent.proxy</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Tascalate JavaFlow / Agent / Proxy (CDI, Spring, etc) Instrumentation JavaAgent</name>
+	<name>Tascalate JavaFlow / Agent / Continuable Proxies (CDI, Spring, etc) Instrumentation Agent</name>
 
 	<properties>
 		<license.header>../HEADER-ORIGINAL.txt</license.header>
-		<java-agent.class>org.apache.commons.javaflow.agent.proxy.CdiProxyInstrumentationAgent</java-agent.class>
+		<java-agent.class>org.apache.commons.javaflow.agent.proxy.ContinuableProxiesInstrumentationAgent</java-agent.class>
 	</properties>
 
 	<dependencies>

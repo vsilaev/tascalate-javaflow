@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.agent.proxy.jproxy;
+package org.apache.commons.javaflow.agent.proxy.jdk;
 
 import net.tascalate.asmx.MethodVisitor;
 import net.tascalate.asmx.Type;

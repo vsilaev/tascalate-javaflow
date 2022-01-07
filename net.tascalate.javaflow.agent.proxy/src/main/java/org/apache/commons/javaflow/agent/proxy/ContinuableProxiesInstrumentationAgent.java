@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.agent.core;
+package org.apache.commons.javaflow.agent.proxy;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -25,13 +25,11 @@ import java.util.Set;
 import org.apache.commons.javaflow.agent.common.ConfigurableClassFileTransformer;
 import org.apache.commons.javaflow.spi.InstrumentationUtils;
 
-import net.tascalate.instrument.agent.AbstractLambdaAwareInstrumentationAgent;
+import net.tascalate.instrument.agent.AbstractInstrumentationAgent;
 
-public class JavaFlowInstrumentationAgent extends AbstractLambdaAwareInstrumentationAgent {
-
-    private final ClassFileTransformer javaFlowClassTransformer = new JavaFlowClassTransformer();
+public class ContinuableProxiesInstrumentationAgent extends AbstractInstrumentationAgent {
     
-    protected JavaFlowInstrumentationAgent(String arguments, Instrumentation instrumentation) {
+    protected ContinuableProxiesInstrumentationAgent(String arguments, Instrumentation instrumentation) {
         super(arguments, instrumentation);
     }
 
@@ -46,8 +44,7 @@ public class JavaFlowInstrumentationAgent extends AbstractLambdaAwareInstrumenta
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        JavaFlowInstrumentationAgent agent = new JavaFlowInstrumentationAgent(args, instrumentation);
-        agent.attachDefaultLambdaInstrumentationHook();
+        ContinuableProxiesInstrumentationAgent agent = new ContinuableProxiesInstrumentationAgent(args, instrumentation);
         agent.install();
     }
 
@@ -62,33 +59,25 @@ public class JavaFlowInstrumentationAgent extends AbstractLambdaAwareInstrumenta
      * @throws Exception
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
-        JavaFlowInstrumentationAgent agent = new JavaFlowInstrumentationAgent(args, instrumentation);
-        agent.attachDefaultLambdaInstrumentationHook();
+        ContinuableProxiesInstrumentationAgent agent = new ContinuableProxiesInstrumentationAgent(args, instrumentation);
         Set<String> nonRetransformPackages = new HashSet<String>(BASE_OWN_PACKAGES);
         nonRetransformPackages.addAll(
             InstrumentationUtils.packagePrefixesOf(
-                InstrumentationUtils.class,
+                InstrumentationUtils.class, 
                 ConfigurableClassFileTransformer.class
             )
         );
         agent.attach(nonRetransformPackages);
     }
-
+    
     @Override
     protected Collection<ClassFileTransformer> createTransformers(boolean canRetransform) {
         if (canRetransform) {
-            return Collections.singleton(javaFlowClassTransformer);
+            ClassFileTransformer transformer = new ContinuableProxyBytecodeTransformer();
+            return Collections.singleton(transformer);
         } else {
             return Collections.emptySet();
         }
     }
 
-    @Override
-    protected String readLambdaClassName(byte[] bytes) {
-        return InstrumentationUtils.readClassName(bytes);
-    }
-
-    void attachDefaultLambdaInstrumentationHook() throws Exception {
-        attachLambdaInstrumentationHook(createLambdaClassTransformer(javaFlowClassTransformer));  
-    }
 }

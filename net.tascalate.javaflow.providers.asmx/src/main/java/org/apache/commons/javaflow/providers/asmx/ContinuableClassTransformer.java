@@ -30,6 +30,7 @@ import org.apache.commons.javaflow.spi.StopException;
 
 import net.tascalate.asmx.ClassReader;
 import net.tascalate.asmx.ClassWriter;
+import net.tascalate.asmx.plus.AsmVersion;
 import net.tascalate.asmx.plus.ClassHierarchy;
 import net.tascalate.asmx.plus.OfflineClassWriter;
 
@@ -50,9 +51,9 @@ class ContinuableClassTransformer extends AbstractResourceTransformer {
 
     public byte[] transform(byte[] original, Collection<String> retransformClasses) {
         ClassReader reader = new ClassReader(original);
-        OfflineClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES);
+        ClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES);
         ContinuableClassVisitor visitor = new ContinuableClassVisitor(
-            writer.api(),
+            AsmVersion.CURRENT,
             writer, /* BytecodeDebugUtils.decorateClassVisitor(cw, true, * System.err) -- DUMP*/ 
             classHierarchy,
             cciResolver,

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.agent.proxy;
+package org.apache.commons.javaflow.agent.core;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -25,11 +25,13 @@ import java.util.Set;
 import org.apache.commons.javaflow.agent.common.ConfigurableClassFileTransformer;
 import org.apache.commons.javaflow.spi.InstrumentationUtils;
 
-import net.tascalate.instrument.agent.AbstractInstrumentationAgent;
+import net.tascalate.instrument.agent.AbstractLambdaAwareInstrumentationAgent;
 
-public class CdiProxyInstrumentationAgent extends AbstractInstrumentationAgent {
+public class ContinuableClassesInstrumentationAgent extends AbstractLambdaAwareInstrumentationAgent {
+
+    private final ClassFileTransformer continuableClassTransformer = new ContinuableClassBytecodeTransformer();
     
-    protected CdiProxyInstrumentationAgent(String arguments, Instrumentation instrumentation) {
+    protected ContinuableClassesInstrumentationAgent(String arguments, Instrumentation instrumentation) {
         super(arguments, instrumentation);
     }
 
@@ -44,7 +46,8 @@ public class CdiProxyInstrumentationAgent extends AbstractInstrumentationAgent {
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        CdiProxyInstrumentationAgent agent = new CdiProxyInstrumentationAgent(args, instrumentation);
+        ContinuableClassesInstrumentationAgent agent = new ContinuableClassesInstrumentationAgent(args, instrumentation);
+        agent.attachDefaultLambdaInstrumentationHook();
         agent.install();
     }
 
@@ -59,25 +62,33 @@ public class CdiProxyInstrumentationAgent extends AbstractInstrumentationAgent {
      * @throws Exception
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
-        CdiProxyInstrumentationAgent agent = new CdiProxyInstrumentationAgent(args, instrumentation);
+        ContinuableClassesInstrumentationAgent agent = new ContinuableClassesInstrumentationAgent(args, instrumentation);
+        agent.attachDefaultLambdaInstrumentationHook();
         Set<String> nonRetransformPackages = new HashSet<String>(BASE_OWN_PACKAGES);
         nonRetransformPackages.addAll(
             InstrumentationUtils.packagePrefixesOf(
-                InstrumentationUtils.class, 
+                InstrumentationUtils.class,
                 ConfigurableClassFileTransformer.class
             )
         );
         agent.attach(nonRetransformPackages);
     }
-    
+
     @Override
     protected Collection<ClassFileTransformer> createTransformers(boolean canRetransform) {
         if (canRetransform) {
-            ClassFileTransformer transformer = new CdiProxyClassTransformer();
-            return Collections.singleton(transformer);
+            return Collections.singleton(continuableClassTransformer);
         } else {
             return Collections.emptySet();
         }
     }
 
+    @Override
+    protected String readLambdaClassName(byte[] bytes) {
+        return InstrumentationUtils.readClassName(bytes);
+    }
+
+    void attachDefaultLambdaInstrumentationHook() throws Exception {
+        attachLambdaInstrumentationHook(createLambdaClassTransformer(continuableClassTransformer));  
+    }
 }

@@ -38,11 +38,12 @@ class ContinuableProxyAdapter extends ExtendedClassVisitor {
     
     private ProxyClassProcessor processor;
 
-    ContinuableProxyAdapter(ClassVisitor delegate,
+    ContinuableProxyAdapter(int api,
+                            ClassVisitor delegate,
                             ClassHierarchy hierarchy,
                             ContinuableClassInfoResolver cciResolver, 
                             List<ProxyType> proxyTypes) {
-        super(delegate);
+        super(api, delegate);
         this.cciResolver = cciResolver;
         this.hierarchy = hierarchy;
         this.proxyTypes = proxyTypes;

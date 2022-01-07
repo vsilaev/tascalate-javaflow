@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.apache.commons.javaflow.agent.proxy.cglib.CGLibProxyClassProcessor;
 import org.apache.commons.javaflow.agent.proxy.custom.CustomProxyClassProcessor;
-import org.apache.commons.javaflow.agent.proxy.jproxy.JavaProxyClassProcessor;
+import org.apache.commons.javaflow.agent.proxy.jdk.JavaProxyClassProcessor;
 import org.apache.commons.javaflow.agent.proxy.owb.OwbProxyClassProcessor;
 import org.apache.commons.javaflow.agent.proxy.spring.SpringProxyClassProcessor;
 import org.apache.commons.javaflow.agent.proxy.weld.WeldProxyClassProcessor;

@@ -55,7 +55,7 @@ import org.apache.commons.javaflow.tools.jar.RewritingUtils.TransformerType;
  * 
  */
 @Mojo(name = "javaflow-enhance", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class ContinuationEnhancerMojo extends AbstractMojo {
+public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", property = "javaflow.enhancer.project", required = true, readonly = true)
     private MavenProject project;

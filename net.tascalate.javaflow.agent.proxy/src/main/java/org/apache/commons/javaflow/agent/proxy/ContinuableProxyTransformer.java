@@ -25,6 +25,7 @@ import org.apache.commons.javaflow.spi.StopException;
 import net.tascalate.asmx.ClassReader;
 import net.tascalate.asmx.ClassVisitor;
 import net.tascalate.asmx.ClassWriter;
+import net.tascalate.asmx.plus.AsmVersion;
 import net.tascalate.asmx.plus.ClassHierarchy;
 import net.tascalate.asmx.plus.OfflineClassWriter;
 
@@ -46,7 +47,7 @@ class ContinuableProxyTransformer extends AbstractResourceTransformer {
     public byte[] transform(byte[] original, Collection<String> retransformClasses) {
         ClassReader reader = new ClassReader(original);
         ClassWriter writer = new OfflineClassWriter(classHierarchy, reader, ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
-        ClassVisitor visitor = new ContinuableProxyAdapter(writer, classHierarchy, cciResolver, proxyTypes);
+        ClassVisitor visitor = new ContinuableProxyAdapter(AsmVersion.CURRENT, writer, classHierarchy, cciResolver, proxyTypes);
         cciResolver.reset(retransformClasses);
         try {
             reader.accept(visitor, ClassReader.EXPAND_FRAMES);
