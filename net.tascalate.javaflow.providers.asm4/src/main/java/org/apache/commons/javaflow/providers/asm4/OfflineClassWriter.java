@@ -35,8 +35,4 @@ public class OfflineClassWriter extends ClassWriter {
     protected String getCommonSuperClass(final String type1, final String type2) {
         return classHierarchy.getCommonSuperClass(type1, type2);
     }
-    
-    int api() {
-        return api;
-    }
 }

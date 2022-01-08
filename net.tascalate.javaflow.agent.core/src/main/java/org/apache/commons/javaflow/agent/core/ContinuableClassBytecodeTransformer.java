@@ -16,10 +16,10 @@
 package org.apache.commons.javaflow.agent.core;
 
 import org.apache.commons.javaflow.agent.common.ConfigurableClassFileTransformer;
-import org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory;
+import org.apache.commons.javaflow.providers.core.ContinuableClassTransformationFactory;
 
 class ContinuableClassBytecodeTransformer extends ConfigurableClassFileTransformer {
     public ContinuableClassBytecodeTransformer() {
-        super(new AsmxResourceTransformationFactory());
+        super(new ContinuableClassTransformationFactory());
     }
 }

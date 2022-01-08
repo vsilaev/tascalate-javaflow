@@ -16,6 +16,7 @@
  */
 package org.apache.commons.javaflow.spi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -27,10 +28,18 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public class CompositeResourceTransformer extends AbstractResourceTransformer {
-    private final ResourceTransformer[] transformers;
+    private final List<? extends ResourceTransformer> transformers;
 
     public CompositeResourceTransformer(ResourceTransformer[] transformers) {
-        this.transformers = transformers;
+        this(Arrays.asList(transformers), false);
+    }
+    
+    public CompositeResourceTransformer(List<? extends ResourceTransformer> transformers) {
+        this(transformers, true);
+    }
+    
+    private CompositeResourceTransformer(List<? extends ResourceTransformer> transformers, boolean makeCopy) {
+        this.transformers = makeCopy ? makeCopy(transformers) : transformers;
     }
 
     public byte[] transform(byte[] image, Collection<String> retransformClasses) {
@@ -50,10 +59,15 @@ public class CompositeResourceTransformer extends AbstractResourceTransformer {
     }
     
     public static ResourceTransformationFactory composeFactories(ResourceTransformationFactory... factories) {
-        return composeFactories(Arrays.asList(factories));
+        return composeFactories(Arrays.asList(factories), false);
     }
     
-    public static ResourceTransformationFactory composeFactories(final List<ResourceTransformationFactory> factories) {
+    public static ResourceTransformationFactory composeFactories(final List<? extends ResourceTransformationFactory> factories) {
+        return composeFactories(factories, true);
+    }
+    
+    private static ResourceTransformationFactory composeFactories(final List<? extends ResourceTransformationFactory> originalFactories, boolean makeCopy) {
+        final List<? extends ResourceTransformationFactory> factories = makeCopy ? makeCopy(originalFactories) : originalFactories;
         return new ResourceTransformationFactory() {
             
             @Override
@@ -66,5 +80,9 @@ public class CompositeResourceTransformer extends AbstractResourceTransformer {
                 return new CompositeResourceTransformer(transformers);
             }
         };
+    }
+    
+    private static <T> List<T> makeCopy(List<? extends T> original) {
+        return new ArrayList<T>(original);
     }
 }

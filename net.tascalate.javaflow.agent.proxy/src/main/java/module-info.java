@@ -16,20 +16,10 @@
 module net.tascalate.javaflow.agent.proxy {
     requires transitive java.instrument;
     
-    requires org.slf4j;
-    
-    requires net.tascalate.asmx;
-    requires net.tascalate.asmx.commons;
-    requires net.tascalate.asmx.plus;
-    requires net.tascalate.asmx.tree;
-    requires net.tascalate.asmx.tree.analysis;
-
     requires net.tascalate.instrument.agent;
-    
-    requires transitive net.tascalate.javaflow.spi;
-    requires transitive net.tascalate.javaflow.providers.asmx;
 
-    requires transitive net.tascalate.javaflow.agent.common;
-    
+    requires net.tascalate.javaflow.agent.common;
+    requires net.tascalate.javaflow.providers.proxy;
+
     exports org.apache.commons.javaflow.agent.proxy;
 }

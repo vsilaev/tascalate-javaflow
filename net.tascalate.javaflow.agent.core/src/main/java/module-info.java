@@ -16,14 +16,10 @@
 module net.tascalate.javaflow.agent.core {
     requires transitive java.instrument;
 
-    requires org.slf4j;
-
     requires net.tascalate.instrument.agent;
+
+    requires net.tascalate.javaflow.agent.common;
+    requires net.tascalate.javaflow.providers.core;
     
-    requires net.tascalate.javaflow.spi;
-    requires net.tascalate.javaflow.providers.asmx;
-
-    requires transitive net.tascalate.javaflow.agent.common;
-
-    exports org.apache.commons.javaflow.agent.core; 
+    exports org.apache.commons.javaflow.agent.core;
 }

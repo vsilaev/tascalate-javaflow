@@ -21,23 +21,9 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>net.tascalate</groupId>
-			<artifactId>net.tascalate.asmx.plus</artifactId>
-			<version>${tascalate.asmx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.tascalate</groupId>
-			<artifactId>net.tascalate.asmx.commons</artifactId>
-			<version>${tascalate.asmx.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate.instrument</groupId>
@@ -46,12 +32,12 @@
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
-			<artifactId>net.tascalate.javaflow.providers.asmx</artifactId>
+			<artifactId>net.tascalate.javaflow.agent.common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
-			<artifactId>net.tascalate.javaflow.agent.common</artifactId>
+			<artifactId>net.tascalate.javaflow.providers.proxy</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

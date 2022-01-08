@@ -35,14 +35,14 @@
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
-			<artifactId>net.tascalate.javaflow.providers.asmx</artifactId>
+			<artifactId>net.tascalate.javaflow.agent.common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.tascalate.javaflow</groupId>
-			<artifactId>net.tascalate.javaflow.agent.common</artifactId>
+			<artifactId>net.tascalate.javaflow.providers.core</artifactId>
 			<version>${project.version}</version>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

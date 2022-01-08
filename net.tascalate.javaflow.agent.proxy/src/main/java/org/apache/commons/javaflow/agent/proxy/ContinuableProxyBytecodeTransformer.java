@@ -16,6 +16,7 @@
 package org.apache.commons.javaflow.agent.proxy;
 
 import org.apache.commons.javaflow.agent.common.ConfigurableClassFileTransformer;
+import org.apache.commons.javaflow.providers.proxy.ContinuableProxyTransformationFactory;
 
 class ContinuableProxyBytecodeTransformer extends ConfigurableClassFileTransformer {
 

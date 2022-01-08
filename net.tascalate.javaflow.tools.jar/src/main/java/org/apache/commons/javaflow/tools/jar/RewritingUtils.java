@@ -225,7 +225,7 @@ public final class RewritingUtils {
         );
         
         return new AbstractResourceTransformer() {
-            // Need a yard-reference from transformer
+            // Need a hard-reference from transformer
             // Otherwise during builds this class loader is evicted!!!
             @SuppressWarnings("unused")
             private final Object hardReference = classLoader;
@@ -262,7 +262,6 @@ public final class RewritingUtils {
             }
         }
         try {
-            // Class.newInstance is deprecated as of Java 9
             return transformerFactoryClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException ex) {
             throw new RuntimeException(ex);
@@ -287,10 +286,14 @@ public final class RewritingUtils {
     }
 
     public static enum TransformerType {
-        ASMX("org.apache.commons.javaflow.providers.asmx.AsmxResourceTransformationFactory"),
+        ASMX("org.apache.commons.javaflow.providers.core.ContinuableClassTransformationFactory"),
+        @Deprecated
         ASM5("org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory"),
+        @Deprecated
         ASM4("org.apache.commons.javaflow.providers.asm4.Asm4ResourceTransformationFactory"),
+        @Deprecated
         ASM3("org.apache.commons.javaflow.providers.asm3.Asm3ResourceTransformationFactory"),
+        @Deprecated
         BCEL("org.apache.commons.javaflow.providers.bcel.BcelResourceTransformationFactory");
 
         private String implementation;
