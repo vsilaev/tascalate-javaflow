@@ -44,8 +44,6 @@ import org.apache.commons.javaflow.tools.jar.RewritingUtils;
  */
 public class ContinuableClassesInstrumentationTask extends MatchingTask {
 
-    private RewritingUtils.TransformerType transformerType;
-
     private File dstDir;
     private File srcDir;
     private Path compileClasspath;
@@ -81,8 +79,9 @@ public class ContinuableClassesInstrumentationTask extends MatchingTask {
      * of the other (and this option will be removed then.)
      *
      * @param name
-     *      "ASM5". Case insensitive.
+     *      "ASMX". Case insensitive.
      */
+    @Deprecated
     public void setMode(String name) {
         try {
             RewritingUtils.TransformerType.valueOf(name.toUpperCase());
@@ -171,8 +170,7 @@ public class ContinuableClassesInstrumentationTask extends MatchingTask {
             classPathByDir.add(srcDir.toURI().toURL());
 
             ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
-                classPathByDir.toArray(new URL[]{}),
-                transformerType
+                classPathByDir.toArray(new URL[]{})
             );
             try {
                 for (String fileName : fileNames) {
@@ -207,8 +205,7 @@ public class ContinuableClassesInstrumentationTask extends MatchingTask {
                         classPathByJar.add(source.toURI().toURL());
                         
                         ResourceTransformer jarTransformer = RewritingUtils.createTransformer(
-                           classPathByJar.toArray(new URL[]{}), 
-                           transformerType
+                           classPathByJar.toArray(new URL[]{})
                         );
                         try {
                             RewritingUtils.rewriteJar(

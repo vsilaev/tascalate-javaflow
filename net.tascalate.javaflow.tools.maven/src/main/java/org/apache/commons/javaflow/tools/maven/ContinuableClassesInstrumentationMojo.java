@@ -35,7 +35,6 @@ import org.apache.maven.project.MavenProject;
 
 import org.apache.commons.javaflow.spi.ResourceTransformer;
 import org.apache.commons.javaflow.tools.jar.RewritingUtils;
-import org.apache.commons.javaflow.tools.jar.RewritingUtils.TransformerType;
 
 /**
  * Maven plugin that will apply Continuation class transformations on compiled
@@ -111,7 +110,7 @@ public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
             loadAdditionalClassPath(classPath);
 
             ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
-                classPath.toArray(new URL[] {}), TransformerType.ASMX
+                classPath.toArray(new URL[] {})
             );
             try {
                 long now = System.currentTimeMillis();

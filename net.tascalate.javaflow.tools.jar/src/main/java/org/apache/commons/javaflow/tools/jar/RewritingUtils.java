@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.javaflow.spi.ResourceTransformer;
+import org.apache.commons.javaflow.providers.core.ContinuableClassTransformationFactory;
 import org.apache.commons.javaflow.spi.AbstractResourceTransformer;
 import org.apache.commons.javaflow.spi.ClasspathResourceLoader;
 import org.apache.commons.javaflow.spi.FastByteArrayOutputStream;
@@ -212,11 +213,6 @@ public final class RewritingUtils {
         return createTransformer(extraURL, createTransformerFactoryInstance());
     }
 
-    
-    public static ResourceTransformer createTransformer(URL[] extraURL, TransformerType type) {
-       return createTransformer(extraURL, createTransformerFactoryInstance(type));
-    }
-    
     public static ResourceTransformer createTransformer(URL[] extraURL, ResourceTransformationFactory factory) {
         final URLClassLoader classLoader = new URLClassLoader(extraURL, safeParentClassLoader());
         
@@ -247,9 +243,15 @@ public final class RewritingUtils {
     }
     
     public static ResourceTransformationFactory createTransformerFactoryInstance() {
-        return createTransformerFactoryInstance(null);
+        return new ContinuableClassTransformationFactory();
     }
     
+    @Deprecated
+    public static ResourceTransformer createTransformer(URL[] extraURL, TransformerType type) {
+       return createTransformer(extraURL, createTransformerFactoryInstance(type));
+    }
+    
+    @Deprecated
     public static ResourceTransformationFactory createTransformerFactoryInstance(TransformerType transformerType) {
         Class<? extends ResourceTransformationFactory> transformerFactoryClass;
         if (null == transformerType) {
@@ -285,15 +287,12 @@ public final class RewritingUtils {
         throw new RuntimeException("No bytecode transformation class is found for JavaFlow bytecode modifications");
     }
 
+    @Deprecated
     public static enum TransformerType {
         ASMX("org.apache.commons.javaflow.providers.core.ContinuableClassTransformationFactory"),
-        @Deprecated
         ASM5("org.apache.commons.javaflow.providers.asm5.Asm5ResourceTransformationFactory"),
-        @Deprecated
         ASM4("org.apache.commons.javaflow.providers.asm4.Asm4ResourceTransformationFactory"),
-        @Deprecated
         ASM3("org.apache.commons.javaflow.providers.asm3.Asm3ResourceTransformationFactory"),
-        @Deprecated
         BCEL("org.apache.commons.javaflow.providers.bcel.BcelResourceTransformationFactory");
 
         private String implementation;
