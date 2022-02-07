@@ -9,7 +9,7 @@
 Java 9+ is fully supported now, all artefacts are modular multi-release JAR-s that works correctly with Java versions 1.6 to 17. The library code was tested with JDK 17, and all features of the Java 17 bytecode (including nest of inner classes, sealed classes, records) works correctly.
 
 # IMPORTANT NOTICE FOR RELEASE 2.3.0!!!
-- `net.tascalate.javaflow.extras` artifact is withdrawn, its code serves as a basis for the project [Tascalate JavaFlow Util](https://github.com/vsilaev/tascalate-javaflow-util)
+- `net.tascalate.javaflow.extras` artifact is withdrawn, its code serves as a basis for the project [Tascalate JavaFlow Extras](https://github.com/vsilaev/tascalate-javaflow-extras)
 - All examples are moved to separate project [Tascalate JavaFlow Examples](https://github.com/vsilaev/tascalate-javaflow-examples)
 
 # Continuation support for Java
