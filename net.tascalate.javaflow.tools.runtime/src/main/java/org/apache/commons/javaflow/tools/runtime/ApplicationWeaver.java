@@ -142,7 +142,7 @@ public final class ApplicationWeaver {
             }
         }
         
-        if ((originalLoader instanceof ContinuableClassLoader) &&
+        if ((originalLoader instanceof ResourceTransformingClassLoader) &&
             isProcessed(originalClass)) {
             // Correct loader and annotations applied
             return false;
@@ -154,7 +154,7 @@ public final class ApplicationWeaver {
         }
         
         try {
-            ContinuableClassLoader.Builder builder = new ContinuableClassLoader.Builder(factory);
+            ResourceTransformingClassLoader.Builder builder = new ResourceTransformingClassLoader.Builder(factory);
             if (null == continuablePackageRoots || continuablePackageRoots.isEmpty()) {
                 builder.parentFirst(false);
             } else {
@@ -166,7 +166,7 @@ public final class ApplicationWeaver {
                     builder.addLoaderPackageRoot(s);
                 }
             }
-            ContinuableClassLoader loader = builder.parent(originalLoader).create();
+            ResourceTransformingClassLoader loader = builder.parent(originalLoader).create();
             
             CURRENT_INITIATOR.set(loader);
             try {
@@ -184,7 +184,7 @@ public final class ApplicationWeaver {
         return true;
     }
     
-    private static void run(ContinuableClassLoader classLoader, String className, String method, String... args) throws Exception {
+    private static void run(ResourceTransformingClassLoader classLoader, String className, String method, String... args) throws Exception {
         Class<?> mainClass = classLoader.forceLoadClass(className);
         if (!isProcessed(mainClass)) {
             throw new IllegalStateException("Class " + className + " has no continuable methods");

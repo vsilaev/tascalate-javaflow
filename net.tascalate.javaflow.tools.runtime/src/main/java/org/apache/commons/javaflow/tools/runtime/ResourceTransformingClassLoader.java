@@ -57,11 +57,11 @@ import org.slf4j.LoggerFactory;
  * the continuation-enabled portion of your application into a separate jar
  * file.
  */
-public class ContinuableClassLoader extends ClassLoader {
+public class ResourceTransformingClassLoader extends ClassLoader {
 
-    private final static Logger log = LoggerFactory.getLogger(ContinuableClassLoader.class);
+    private final static Logger log = LoggerFactory.getLogger(ResourceTransformingClassLoader.class);
 
-    public static abstract class AbstractBuilder<L extends ContinuableClassLoader, B extends AbstractBuilder<L, B>> {
+    public static abstract class AbstractBuilder<L extends ResourceTransformingClassLoader, B extends AbstractBuilder<L, B>> {
         protected final ResourceTransformationFactory transformationFactory;
 
         protected ClassLoader parent;
@@ -173,7 +173,7 @@ public class ContinuableClassLoader extends ClassLoader {
         }
     }
 
-    public static class Builder extends AbstractBuilder<ContinuableClassLoader, Builder> {
+    public static class Builder extends AbstractBuilder<ResourceTransformingClassLoader, Builder> {
         /**
          * Creates a classloader builder.
          *
@@ -187,8 +187,8 @@ public class ContinuableClassLoader extends ClassLoader {
         }
 
         @Override
-        public ContinuableClassLoader create() {
-            return new ContinuableClassLoader(
+        public ResourceTransformingClassLoader create() {
+            return new ResourceTransformingClassLoader(
                 parent, transformationFactory, 
                 parentFirst, isolated, systemPackages, loaderPackages
             );
@@ -240,7 +240,7 @@ public class ContinuableClassLoader extends ClassLoader {
      *            This factory is used to create necessary resolver/transformer
      *            to perform the byte-code enhancement. May not be null.
      */
-    public ContinuableClassLoader(ClassLoader parent, ResourceTransformationFactory transformationFactory) {
+    public ResourceTransformingClassLoader(ClassLoader parent, ResourceTransformationFactory transformationFactory) {
         this(parent, transformationFactory, true, false, null, null);
     }
 
@@ -270,7 +270,7 @@ public class ContinuableClassLoader extends ClassLoader {
      *            regardless of whether the parent class loader is being
      *            searched first or not.
      */
-    public ContinuableClassLoader(ClassLoader parent, 
+    public ResourceTransformingClassLoader(ClassLoader parent, 
                                   ResourceTransformationFactory transformationFactory,
                                   boolean parentFirst, 
                                   boolean isolated, 
@@ -602,7 +602,7 @@ public class ContinuableClassLoader extends ClassLoader {
     private static Method getClassLoaderMethodOrNull(String name, Class<?>... args) {
         try {
             //Method method = ClassLoader.class.getDeclaredMethod(name, args);
-            return ContinuableClassLoader.class.getMethod(name, args);
+            return ResourceTransformingClassLoader.class.getMethod(name, args);
         } catch (NoSuchMethodException ex) {
             // OK, JDK version is less then 1.7
             return null;
@@ -663,7 +663,7 @@ public class ContinuableClassLoader extends ClassLoader {
     
     private static Collection<String> OWN_PACKAGES = Collections.unmodifiableSet(
         InstrumentationUtils.packagePrefixesOf(
-            ContinuableClassLoader.class,
+            ResourceTransformingClassLoader.class,
             ResourceTransformer.class,
             Logger.class
         )

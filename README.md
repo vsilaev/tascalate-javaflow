@@ -1,7 +1,12 @@
 [![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/artifact/net.tascalate.javaflow/net.tascalate.javaflow.parent/2.7.0/pom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.7.0) [![license](https://img.shields.io/github/license/vsilaev/tascalate-javaflow.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+# IMPORTANT NOTICE FOR RELEASE 2.7.0!!!
+- Agents & Tools projects were refactored to follow consisntent naming of classes and to avoid package name clashes
+- Separate provider was extracted from `CdiProxy` to allow reuse in mutliple scenarious (not only in Java Agent)
+- `net.tascalate.javaflow.provider.asm[VERSION]` artifacts are deprecated now and scheduled for removal in next release
+
 # IMPORTANT NOTICE FOR RELEASE 2.5.0!!!
-Java 9+ is fully supported now, all artefacts are modular multi-release JAR-s that works correctly with Java versions 1.6 to 17. The library code was tested with JDK 17, and all features of the Java 17 bytecode (including nest of inner classes) works correctly.
+Java 9+ is fully supported now, all artefacts are modular multi-release JAR-s that works correctly with Java versions 1.6 to 17. The library code was tested with JDK 17, and all features of the Java 17 bytecode (including nest of inner classes, sealed classes, records) works correctly.
 
 # IMPORTANT NOTICE FOR RELEASE 2.3.0!!!
 - `net.tascalate.javaflow.extras` artifact is withdrawn, its code serves as a basis for the project [Tascalate JavaFlow Util](https://github.com/vsilaev/tascalate-javaflow-util)
