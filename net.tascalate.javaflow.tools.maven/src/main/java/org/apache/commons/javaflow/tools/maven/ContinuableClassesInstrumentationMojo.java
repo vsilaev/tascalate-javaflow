@@ -18,15 +18,17 @@ package org.apache.commons.javaflow.tools.maven;
 import static java.lang.Thread.currentThread;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -53,7 +55,7 @@ import org.apache.commons.javaflow.tools.jar.RewritingUtils;
  * </pre>
  * 
  */
-@Mojo(name = "javaflow-enhance", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+@Mojo(name = "javaflow-enhance", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.TEST /* ALL DEPENDENCIES */)
 public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", property = "javaflow.enhancer.project", required = true, readonly = true)
@@ -85,6 +87,9 @@ public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
     @Parameter(property = "javaflow.enhancer.testBuildDir", required = false)
     private String testBuildDir;
 
+    @Component
+    private MojoExecution execution;
+    
     public void execute() throws MojoExecutionException {
         final Log log = getLog();
         if (skip) {
@@ -92,26 +97,49 @@ public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
             return;
         }
 
-        ClassLoader originalContextClassLoader = currentThread().getContextClassLoader();
-
         try {
-            List<URL> classPath = new ArrayList<URL>();
-
-            for (String runtimeResource : project.getRuntimeClasspathElements()) {
-                classPath.add(resolveUrl(new File(runtimeResource)));
-            }
-
-            File inputDirectory = buildDir == null 
+            File mainInputDirectory = buildDir == null 
                 ? new File(project.getBuild().getOutputDirectory())
                 : computeDir(buildDir);
+            
+            if (mainInputDirectory.exists()) {
+                // Use runtime instead of compile - runtime contains non less than compile
+                transformFiles(mainInputDirectory, project.getRuntimeClasspathElements()); 
+            } else {
+                log.warn("No main build output directory available, skipping enhancing main classes");
+            }
 
+            if (includeTestClasses) {
+                File testInputDirectory = testBuildDir == null
+                    ? new File(project.getBuild().getTestOutputDirectory())
+                    : computeDir(testBuildDir);
+
+                if (testInputDirectory.exists()) {
+                    transformFiles(testInputDirectory, project.getTestClasspathElements()); 
+                } else if ("process-test-classes".equals(execution.getLifecyclePhase())) {
+                    log.warn("No test build output directory available, skipping enhancing test classes");
+                }
+            }
+        } catch (Exception e) {
+            getLog().error(e.getMessage(), e);
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
+    }
+    
+    private void transformFiles(File inputDirectory, List<String> classPathEntries) throws IOException {
+        final Log log = getLog();
+        ClassLoader originalContextClassLoader = currentThread().getContextClassLoader();
+        try {
+            List<URL> classPath = new ArrayList<URL>();
+            for (String classPathEntry : classPathEntries) {
+                classPath.add(resolveUrl(new File(classPathEntry)));
+            }
             classPath.add(resolveUrl(inputDirectory));
-
-            loadAdditionalClassPath(classPath);
 
             ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
                 classPath.toArray(new URL[] {})
             );
+            
             try {
                 long now = System.currentTimeMillis();
     
@@ -124,47 +152,14 @@ public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
                         }
                     }
                 }
-    
-                if (includeTestClasses) {
-                    File testInputDirectory = testBuildDir == null
-                        ? new File(project.getBuild().getTestOutputDirectory())
-                        : computeDir(testBuildDir);
-    
-                    if (testInputDirectory.exists()) {
-                        for (File source : RecursiveFilesIterator.scanClassFiles(testInputDirectory)) {
-                            if (source.lastModified() <= now) {
-                                log.debug("Applying continuations support: " + source);
-                                boolean rewritten = RewritingUtils.rewriteClassFile(source, dirTransformer, source);
-                                if (rewritten) {
-                                    log.info("Rewritten continuation-enabled class file: " + source);
-                                }
-    
-                            }
-                        }
-                    }
-                }
             } finally {
                 dirTransformer.release();
             }
-        } catch (Exception e) {
-            getLog().error(e.getMessage(), e);
-            throw new MojoExecutionException(e.getMessage(), e);
+            
         } finally {
             currentThread().setContextClassLoader(originalContextClassLoader);
         }
-    }
-
-    private void loadAdditionalClassPath(List<URL> classPath) {
-        if (classPath.isEmpty()) {
-            return;
-        }
-        ClassLoader contextClassLoader = currentThread().getContextClassLoader();
-
-        URLClassLoader pluginClassLoader = URLClassLoader.newInstance(
-            classPath.toArray(new URL[classPath.size()]), contextClassLoader
-        );
-
-        currentThread().setContextClassLoader(pluginClassLoader);
+        
     }
 
     private File computeDir(String dir) {
