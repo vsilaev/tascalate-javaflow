@@ -15,8 +15,6 @@
  */
 package org.apache.commons.javaflow.tools.maven;
 
-import static java.lang.Thread.currentThread;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -127,39 +125,32 @@ public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
     }
     
     private void transformFiles(File inputDirectory, List<String> classPathEntries) throws IOException {
-        final Log log = getLog();
-        ClassLoader originalContextClassLoader = currentThread().getContextClassLoader();
-        try {
-            List<URL> classPath = new ArrayList<URL>();
-            for (String classPathEntry : classPathEntries) {
-                classPath.add(resolveUrl(new File(classPathEntry)));
-            }
-            classPath.add(resolveUrl(inputDirectory));
+        Log log = getLog();
+        List<URL> classPath = new ArrayList<URL>();
+        for (String classPathEntry : classPathEntries) {
+            classPath.add(resolveUrl(new File(classPathEntry)));
+        }
+        classPath.add(resolveUrl(inputDirectory));
 
-            ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
-                classPath.toArray(new URL[] {})
-            );
-            
-            try {
-                long now = System.currentTimeMillis();
-    
-                for (File source : RecursiveFilesIterator.scanClassFiles(inputDirectory)) {
-                    if (source.lastModified() <= now) {
-                        log.debug("Applying continuations support: " + source);
-                        boolean rewritten = RewritingUtils.rewriteClassFile(source, dirTransformer, source);
-                        if (rewritten) {
-                            log.info("Rewritten continuation-enabled class file: " + source);
-                        }
+        ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
+            classPath.toArray(new URL[] {})
+        );
+        
+        try {
+            long now = System.currentTimeMillis();
+
+            for (File source : RecursiveFilesIterator.scanClassFiles(inputDirectory)) {
+                if (source.lastModified() <= now) {
+                    log.debug("Applying continuations support: " + source);
+                    boolean rewritten = RewritingUtils.rewriteClassFile(source, dirTransformer, source);
+                    if (rewritten) {
+                        log.info("Rewritten continuation-enabled class file: " + source);
                     }
                 }
-            } finally {
-                dirTransformer.release();
             }
-            
         } finally {
-            currentThread().setContextClassLoader(originalContextClassLoader);
+            dirTransformer.release();
         }
-        
     }
 
     private File computeDir(String dir) {
