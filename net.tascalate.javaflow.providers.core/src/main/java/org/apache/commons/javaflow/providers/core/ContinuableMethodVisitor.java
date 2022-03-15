@@ -125,7 +125,7 @@ class ContinuableMethodVisitor extends MethodVisitor {
         mv.visitVarInsn(ASTORE, stackRecorderVar);
         mv.visitLabel(startLabel);
 
-        // PC: if (stackRecorder != null && !stackRecorder.isRestoring) {  
+        // PC: if (stackRecorder != null && stackRecorder.isRestoring) {  
         mv.visitJumpInsn(IFNULL, l0);
         mv.visitVarInsn(ALOAD, stackRecorderVar);
         mv.visitFieldInsn(GETFIELD, STACK_RECORDER, "isRestoring", "Z");
