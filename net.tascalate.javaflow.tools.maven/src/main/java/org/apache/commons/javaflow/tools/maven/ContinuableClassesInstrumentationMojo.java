@@ -53,7 +53,10 @@ import org.apache.commons.javaflow.tools.jar.RewritingUtils;
  * </pre>
  * 
  */
-@Mojo(name = "javaflow-enhance", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.TEST /* ALL DEPENDENCIES */)
+@Mojo(name = "javaflow-enhance",
+      threadSafe = true, 
+      defaultPhase = LifecyclePhase.PROCESS_CLASSES, 
+      requiresDependencyResolution = ResolutionScope.TEST /* ALL DEPENDENCIES */)
 public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", property = "javaflow.enhancer.project", required = true, readonly = true)
