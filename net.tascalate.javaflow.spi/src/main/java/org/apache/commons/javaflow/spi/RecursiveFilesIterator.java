@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.javaflow.tools.maven;
+package org.apache.commons.javaflow.spi;
 
 import java.io.File;
 import java.io.FileFilter;
