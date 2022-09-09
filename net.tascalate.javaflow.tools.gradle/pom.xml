@@ -89,17 +89,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Automatic-Module-Name>${project.artifactId}</Automatic-Module-Name>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
 					<execution>
@@ -110,6 +99,8 @@
 						<configuration>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>shaded</shadedClassifierName>
+							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<finalName>javaflow.gradle-plugin</finalName>
 							<minimizeJar>false</minimizeJar>
 							<filters>
 								<filter>
@@ -142,6 +133,17 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Automatic-Module-Name>${project.artifactId}</Automatic-Module-Name>
+						</manifestEntries>
+					</archive>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
