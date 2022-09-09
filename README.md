@@ -62,11 +62,20 @@ You have to add the following configuration to enable build-time instrumentation
 			<version>2.7.3</version>
 			<executions>
 				<execution>
+					<id>javaflow-enhance-main-classes</id> 
 					<phase>process-classes</phase>
 					<goals>
 						<goal>javaflow-enhance</goal>
 					</goals>
 				</execution>
+				<!-- Only if you need to enhance test classes -->
+				<execution>
+					<id>javaflow-enhance-test-classes</id> 
+					<phase>process-test-classes</phase>
+					<goals>
+						<goal>javaflow-enhance</goal>
+					</goals>
+				</execution>				
 			</executions>
 		</plugin>
 	</plugins>
