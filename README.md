@@ -83,7 +83,8 @@ There is a separate Ant task for applying JavaFlow instrumentation at build-time
 It's possibe to instrument compiled Java classes as below:
 ```xml
 <target name="instrument-classes" description="JavaFlow Instrumentation" depends="compile">
-    <taskdef name="javaflow" classname="org.apache.commons.javaflow.tools.ant.ContinuableClassesInstrumentationTask" 
+    <taskdef name="javaflow" 
+    classname="org.apache.commons.javaflow.tools.ant.ContinuableClassesInstrumentationTask" 
     classpathref="ant-lib-classpath"/>
     <echo message="JavaFlow instrumentation of compiled classes in ${classes.dir}" />
     <javaflow srcdir="${classes.dir}" destdir="${i-classes.dir}" classpathref="classpath"/>
@@ -92,7 +93,8 @@ It's possibe to instrument compiled Java classes as below:
 ... as well as re-write packaged JAR file:
 ```xml
 <target name="instrument-jar" description="JavaFlow Instrumentation" depends="jar">
-    <taskdef name="javaflow" classname="org.apache.commons.javaflow.tools.ant.ContinuableClassesInstrumentationTask" 
+    <taskdef name="javaflow" 
+    classname="org.apache.commons.javaflow.tools.ant.ContinuableClassesInstrumentationTask" 
     classpathref="ant-lib-classpath"/>
     <echo message="JavaFlow instrumentation of compiled classes in ${jar.dir}/${ant.project.name}.jar" />
     <javaflow srcdir="${jar.dir}" destdir="${i-jar.dir}" classpathref="classpath"/>
