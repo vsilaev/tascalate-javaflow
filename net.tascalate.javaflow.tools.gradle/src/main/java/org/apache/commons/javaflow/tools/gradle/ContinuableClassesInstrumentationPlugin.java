@@ -129,15 +129,12 @@ public class ContinuableClassesInstrumentationPlugin implements Plugin<Project> 
     
     private void instrument(Set<File> classesDirs, Set<File> compileClasspath, ContinuableClassesInstrumentationPluginConfiguration config) {
         try {
-            List<File> classpath = new ArrayList<File>();
             log.debug("Getting compile classpath");
-            classpath.addAll(compileClasspath);
-            
             List<URL> classPath = new ArrayList<URL>();
             classPath.addAll(urlsOf(classesDirs));
             classPath.addAll(urlsOf(compileClasspath));
             
-            log.debug("Classpath for instrumentation is as follows: " + classpath);
+            log.debug("Classpath for instrumentation is as follows: " + classPath);
             ResourceTransformer dirTransformer = RewritingUtils.createTransformer(
                 classPath.toArray(new URL[] {})
             );

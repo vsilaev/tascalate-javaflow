@@ -31,6 +31,4 @@ public class ContinuableClassesInstrumentationPluginConfiguration {
     public void setIncludeTestClasses(boolean includeTestClasses) {
         this.includeTestClasses = includeTestClasses;
     }
-    
-    
 }
