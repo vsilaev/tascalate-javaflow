@@ -16,8 +16,5 @@
 module net.tascalate.javaflow.tools.jar {
     requires org.slf4j;
 
-    requires transitive net.tascalate.javaflow.spi;
     requires net.tascalate.javaflow.providers.core;
-    
-    exports org.apache.commons.javaflow.tools.jar;
 }

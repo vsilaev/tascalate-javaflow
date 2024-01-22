@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 module net.tascalate.javaflow.agent.common {
-    requires transitive java.instrument;
 
     requires org.slf4j;
-    
-    requires transitive net.tascalate.javaflow.spi;
 
     exports org.apache.commons.javaflow.agent.common; 
 }
