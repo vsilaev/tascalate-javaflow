@@ -15,8 +15,4 @@
  */
 module net.tascalate.javaflow.tools.runtime {
     requires org.slf4j;
-
-    requires transitive net.tascalate.javaflow.spi;
-    
-    exports org.apache.commons.javaflow.tools.runtime;
 }

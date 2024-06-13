@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 module net.tascalate.javaflow.agent.core {
-    requires transitive java.instrument;
 
     requires net.tascalate.instrument.agent;
-
-    requires net.tascalate.javaflow.agent.common;
     requires net.tascalate.javaflow.providers.core;
-    
-    exports org.apache.commons.javaflow.agent.core;
+
 }
