@@ -31,6 +31,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.SourceSet;
@@ -114,10 +115,11 @@ public class ContinuableClassesInstrumentationPlugin implements Plugin<Project> 
                     SourceSetContainer sourceSetsContainer = (SourceSetContainer)project.getProperties().get("sourceSets");
                     SourceSet sourceSet = sourceSetsContainer.getByName(sourceType);
                     if (null != sourceSet) {
-                        Set<File> compileClasspath = sourceSet.getCompileClasspath().getFiles();
+                        FileCollection compileClasspath = sourceSet.getCompileClasspath();
+                        FileCollection runtimeClasspath = sourceSet.getRuntimeClasspath();
                         SourceSetOutput output = sourceSet.getOutput();
                         Set<File> classesDirs = output.getClassesDirs().getFiles();
-                        instrument(classesDirs, compileClasspath, config);
+                        instrument(classesDirs, (null == runtimeClasspath ? compileClasspath : compileClasspath.plus(runtimeClasspath)).getFiles(), config);
                     }
                 } catch (Exception e) {
                     log.log(LogLevel.ERROR, "Coroutines instrumentation failed", e);

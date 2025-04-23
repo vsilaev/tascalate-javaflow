@@ -16,18 +16,22 @@
 package org.apache.commons.javaflow.tools.gradle;
 
 public class ContinuableClassesInstrumentationPluginConfiguration {
+
     private boolean skip = false;
     private boolean includeTestClasses = true;
     
     public boolean isSkip() {
         return skip;
     }
+
     public void setSkip(boolean skip) {
         this.skip = skip;
     }
+
     public boolean isIncludeTestClasses() {
         return includeTestClasses;
     }
+
     public void setIncludeTestClasses(boolean includeTestClasses) {
         this.includeTestClasses = includeTestClasses;
     }

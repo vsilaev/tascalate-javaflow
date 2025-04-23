@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.tascalate.javaflow</groupId>
 		<artifactId>net.tascalate.javaflow.parent</artifactId>
-		<version>2.7.6</version>
+		<version>2.7.7</version>
 		<relativePath>../</relativePath>
 	</parent>
 
@@ -87,9 +87,10 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.15.1</version>
 					<configuration>
 						<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+						<goalPrefix>javaflow-enhance-maven-plugin</goalPrefix>
 					</configuration>
 					<executions>
 						<execution>

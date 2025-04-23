@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecution;
@@ -106,7 +109,10 @@ public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
             
             if (mainInputDirectory.exists()) {
                 // Use runtime instead of compile - runtime contains non less than compile
-                transformFiles(mainInputDirectory, project.getRuntimeClasspathElements()); 
+                Set<String> cp = new HashSet<String>();
+                cp.addAll(project.getCompileClasspathElements());  
+                cp.addAll(project.getRuntimeClasspathElements());  
+                transformFiles(mainInputDirectory, cp); 
             } else {
                 log.warn("No main build output directory available, skipping enhancing main classes");
             }
@@ -128,7 +134,7 @@ public class ContinuableClassesInstrumentationMojo extends AbstractMojo {
         }
     }
     
-    private void transformFiles(File inputDirectory, List<String> classPathEntries) throws IOException {
+    private void transformFiles(File inputDirectory, Collection<String> classPathEntries) throws IOException {
         Log log = getLog();
         List<URL> classPath = new ArrayList<URL>();
         for (String classPathEntry : classPathEntries) {
