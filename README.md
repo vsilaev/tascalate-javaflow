@@ -55,7 +55,7 @@ You have to add the following configuration to enable build-time instrumentation
 				<source>1.6</source>
 				<target>1.6</target>
 				<!-- For JDK 21+ uncomment the following compiler settings (instead of source/target) --->   
-				<!-- &dash;&dash;enable-preview is optional, but it allows to use more efficient ScopedValue instead 
+				<!-- --enable-preview is optional, but it allows to use more efficient ScopedValue instead 
                                      of ThreadLocal for continuations core
 				<!--	                                 
 				<release>21</release>  
