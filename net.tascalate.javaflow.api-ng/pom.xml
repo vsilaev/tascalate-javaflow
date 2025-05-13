@@ -1,0 +1,90 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.tascalate.javaflow</groupId>
+		<artifactId>net.tascalate.javaflow.parent</artifactId>
+		<version>2.7.9</version>
+		<relativePath>../</relativePath>
+	</parent>
+
+	<artifactId>net.tascalate.javaflow.api-ng</artifactId>
+	<packaging>jar</packaging>
+
+	<name>Tascalate JavaFlow / API + Internal Core Java 21+ Update</name>
+
+	<properties>
+		<license.header>../HEADER-DERRIVED.txt</license.header>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>21</version>
+								<vendor>Oracle</vendor>
+							</jdkToolchain>
+						</configuration>
+					</execution> 
+				</executions>
+				<configuration>
+					<release>21</release>  
+					<compilerArgs>
+						<arg>--enable-preview</arg>
+					</compilerArgs>
+					<!--
+					<debug>false</debug>
+					-->
+				</configuration>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+			<plugin>
+
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>21</version>
+								<vendor>Oracle</vendor>
+							</jdkToolchain>
+							<release>21</release>
+							<additionalOptions>--enable-preview</additionalOptions>
+						</configuration>	
+					</execution>
+				</executions>
+			</plugin>
+
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

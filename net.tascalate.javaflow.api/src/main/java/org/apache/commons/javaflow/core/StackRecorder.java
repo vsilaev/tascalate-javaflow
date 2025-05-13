@@ -7,7 +7,7 @@
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
- * Modified work: copyright 2013-2022 Valery Silaev (http://vsilaev.com)
+ * Modified work: copyright 2013-2025 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,11 +103,11 @@ public final class StackRecorder extends Stack {
         return stackRecorder.parameter.value();
     }
 
-    public SuspendResult execute(ResumeParameter parameter) {
+    public SuspendResult execute(final ResumeParameter parameter) {
         if (null == parameter) {
             throw new IllegalArgumentException("ResumeContext parameter may not be null");
         }
-        StackRecorder old = registerThread();
+
         try {
             isRestoring = !isEmpty(); // start restoring if we have a filled stack
             this.parameter = parameter;
@@ -119,7 +119,7 @@ public final class StackRecorder extends Stack {
             }
             
             log.debug("calling runnable");
-            runnable.run();
+            PlatformContinuationExecutor.current().runWith(this, runnable);
 
             if (isCapturing) {
                 if (isEmpty()) {
@@ -166,8 +166,7 @@ public final class StackRecorder extends Stack {
         } finally {
             this.parameter = null;
             this.result = null;
-            deregisterThread(old);
-        }
+        }                
     }
 
     public static void exit() {
@@ -185,31 +184,11 @@ public final class StackRecorder extends Stack {
     }
 
     /**
-     * Bind this stack recorder to running thread.
-     */
-    private StackRecorder registerThread() {
-        StackRecorder old = get();
-        threadMap.set(this);
-        return old;
-    }
-
-    /**
-     * Unbind the current stack recorder to running thread.
-     */
-    private void deregisterThread(StackRecorder old) {
-        if (null == old) {
-            threadMap.remove();
-        } else {
-            threadMap.set(old);
-        }
-    }
-
-    /**
      * Return the continuation, which is associated to the current thread.
      * @return currently associated continuation stack, or <code>null</code> if invoked outside
      * of continuation context
      */
     public static StackRecorder get() {
-        return threadMap.get();
+        return PlatformContinuationExecutor.current().currentStackRecorder();
     }
 }

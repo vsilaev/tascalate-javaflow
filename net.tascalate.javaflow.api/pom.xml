@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.tascalate.javaflow</groupId>
 		<artifactId>net.tascalate.javaflow.parent</artifactId>
-		<version>2.7.8</version>
+		<version>2.7.9</version>
 		<relativePath>../</relativePath>
 	</parent>
 
@@ -18,6 +18,13 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>${project.groupId}.api-ng</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -34,6 +41,27 @@
 			<plugin>
 				<groupId>org.moditect</groupId>
 				<artifactId>moditect-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-binaries-ng</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeGroupIds>${project.groupId}</includeGroupIds>
+							<includeArtifactIds>${project.groupId}.api-ng</includeArtifactIds>
+							<type>jar</type>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
+							<includes>**/PlatformContinuationExecutor.class,**/ScopedValueContinuationExecutor.class</includes>
+							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
