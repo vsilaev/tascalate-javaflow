@@ -24,7 +24,9 @@ import org.apache.commons.javaflow.providers.core.ContinuableClassInfo;
 import org.apache.commons.javaflow.providers.proxy.cglib.CGLibProxyClassProcessor;
 import org.apache.commons.javaflow.providers.proxy.custom.CustomProxyClassProcessor;
 import org.apache.commons.javaflow.providers.proxy.jdk.JavaProxyClassProcessor;
-import org.apache.commons.javaflow.providers.proxy.owb.OwbProxyClassProcessor;
+import org.apache.commons.javaflow.providers.proxy.owb.JEEClassLib;
+import org.apache.commons.javaflow.providers.proxy.owb.Owb2ProxyClassProcessor;
+import org.apache.commons.javaflow.providers.proxy.owb.Owb4ProxyClassProcessor;
 import org.apache.commons.javaflow.providers.proxy.spring.SpringProxyClassProcessor;
 import org.apache.commons.javaflow.providers.proxy.weld.WeldProxyClassProcessor;
 import org.apache.commons.javaflow.spi.ResourceLoader;
@@ -55,14 +57,30 @@ public enum ProxyType {
         }            
 
     },
-    OWB(
-        "org/apache/webbeans/proxy/OwbInterceptorProxy",
-        "org/apache/webbeans/proxy/OwbNormalScopeProxy" 
-        ) {
+    OWB2("org/apache/webbeans/proxy/OwbInterceptorProxy",
+         "org/apache/webbeans/proxy/OwbNormalScopeProxy") {
         
         @Override
         ProxyClassProcessor createProcessor(int api, String className, ContinuableClassInfo classInfo) {
-            return new OwbProxyClassProcessor(api, className, classInfo);
+            return new Owb2ProxyClassProcessor(api, className, classInfo);
+        }
+        
+        @Override
+        boolean isAvailable(ResourceLoader resourceLoader) {
+            return super.isAvailable(resourceLoader) && !resourceLoader.hasResource(JEEClassLib.JAKARTA.providerType().getInternalName() + ".class");
+        }
+    },
+    OWB4("org/apache/webbeans/proxy/OwbInterceptorProxy",
+         "org/apache/webbeans/proxy/OwbNormalScopeProxy") {
+        
+        @Override
+        ProxyClassProcessor createProcessor(int api, String className, ContinuableClassInfo classInfo) {
+            return new Owb4ProxyClassProcessor(api, className, classInfo);
+        }
+        
+        @Override
+        boolean isAvailable(ResourceLoader resourceLoader) {
+            return super.isAvailable(resourceLoader) && resourceLoader.hasResource(JEEClassLib.JAKARTA.providerType().getInternalName() + ".class");
         }
     },
     SPRING("org/springframework/aop/framework/Advised") {

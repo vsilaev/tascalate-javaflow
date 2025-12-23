@@ -15,6 +15,7 @@
  */
 module net.tascalate.javaflow.api {
     requires org.slf4j;
+    requires java.management;
 
     exports org.apache.commons.javaflow.api;
     exports org.apache.commons.javaflow.core;

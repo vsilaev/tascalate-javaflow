@@ -23,21 +23,22 @@ import net.tascalate.asmx.commons.Method;
 
 class OwbScopeProxyMethodAdvice extends ProxiedMethodAdvice {
 
-    final private Type proxiedInstanceProviderType; 
+    private final Type proxiedInstanceProviderType;
+    private final JEEClassLib jeeClassLib;
 
-    public OwbScopeProxyMethodAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc, Type proxiedInstanceProviderType) {
+    public OwbScopeProxyMethodAdvice(int api, MethodVisitor mv, int acc, String className, String methodName, String desc, Type proxiedInstanceProviderType, JEEClassLib jeeClassLib) {
         super(api, mv, acc, className, methodName, desc);
         this.proxiedInstanceProviderType = proxiedInstanceProviderType;
+        this.jeeClassLib = jeeClassLib;
     }
 
     @Override
     protected void loadProxiedInstance() {
         loadThis();
         getField(Type.getObjectType(className), FIELD_INSTANCE_PROVIDER, proxiedInstanceProviderType);
-        invokeInterface(PROVIDER, PROVIDER_GET);
+        invokeInterface(jeeClassLib.providerType(), PROVIDER_GET);
     }
 
-    private static final Type PROVIDER = Type.getObjectType("javax/inject/Provider");
     private static final Method PROVIDER_GET = Method.getMethod("java.lang.Object get()");
 
     static final String FIELD_INSTANCE_PROVIDER = "owbContextualInstanceProvider";//NormalScopeProxyFactory.FIELD_INSTANCE_PROVIDER;

@@ -23,11 +23,11 @@ import org.apache.commons.javaflow.providers.core.ContinuableClassInfo;
 import org.apache.commons.javaflow.providers.proxy.ExtendedClassVisitor;
 import org.apache.commons.javaflow.providers.proxy.ProxyClassProcessor;
 
-public class OwbProxyClassProcessor extends ProxyClassProcessor {
+public abstract class OwbProxyClassProcessor extends ProxyClassProcessor {
     private Type owbProxiedInstanceType;
     private Type owbProxiedInstanceProviderType;
     
-    public OwbProxyClassProcessor(int api, String className, ContinuableClassInfo classInfo) {
+    OwbProxyClassProcessor(int api, String className, ContinuableClassInfo classInfo) {
         super(api, className, classInfo);
     }
     
@@ -36,7 +36,7 @@ public class OwbProxyClassProcessor extends ProxyClassProcessor {
         if (null != owbProxiedInstanceType) {
             return new OwbInterceptorProxyMethodAdvice(api, mv, acc, className, name, desc, owbProxiedInstanceType); 
         } else if (null != owbProxiedInstanceProviderType) {
-            return new OwbScopeProxyMethodAdvice(api, mv, acc, className, name, desc, owbProxiedInstanceProviderType); 
+            return new OwbScopeProxyMethodAdvice(api, mv, acc, className, name, desc, owbProxiedInstanceProviderType, jeeClassLib()); 
         } else {
             return mv;
         }
@@ -52,4 +52,6 @@ public class OwbProxyClassProcessor extends ProxyClassProcessor {
         }
         return super.visitField(cv, access, name, desc, signature, value);
     }
+
+    abstract JEEClassLib jeeClassLib();
 }
