@@ -15,6 +15,8 @@
  */
 package org.apache.commons.javaflow.providers.asm5;
 
+import java.io.IOException;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
@@ -37,7 +39,16 @@ class MaybeContinuableAnnotationVisitor extends ClassVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String description, boolean visible) {
         if (isAnnotation && !classContinuableAnnotationFound) {
-            classContinuableAnnotationFound = cciResolver.isContinuableAnnotation(description);
+            try {
+                classContinuableAnnotationFound = cciResolver.isContinuableAnnotation(description);
+            } catch (RuntimeException ex) {
+                if (ex.getCause() instanceof IOException) {
+                    // Ignore non-runtime annotations like @Nonull from
+                    // com.google.code.findbugs:jsr305
+                } else {
+                    throw ex;
+                }
+            }
         }
         return null;
     }

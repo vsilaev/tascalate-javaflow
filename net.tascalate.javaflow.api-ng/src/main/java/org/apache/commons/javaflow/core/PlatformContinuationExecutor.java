@@ -38,8 +38,17 @@ final class PlatformContinuationExecutor {
     private static final ScopedContinuationExecutor DELEGATE;
     
     static {
-        Set<String> args = new HashSet<>(ManagementFactory.getRuntimeMXBean().getInputArguments());
-        if (args.contains("--enable-preview")) {
+        var majorVersion = Runtime.version().feature();
+        boolean useScopedValue;
+        if (majorVersion >= 25) {
+            useScopedValue = true;
+        } else if (majorVersion < 21) {
+            useScopedValue = false;
+        } else {
+            Set<String> args = new HashSet<>(ManagementFactory.getRuntimeMXBean().getInputArguments());
+            useScopedValue = args.contains("--enable-preview");
+        }
+        if (useScopedValue) {
             // Using ScopedValue as scoped continuation executor
             DELEGATE = ScopedValueContinuationExecutor.INSTANCE;
         } else {
