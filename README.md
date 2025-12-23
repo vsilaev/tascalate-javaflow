@@ -181,7 +181,7 @@ java -javaagent:<path-to-jar>/javaflow.instrument-continuations.jar \
      -javaagent:<path-to-jar>/javaflow.instrument-proxies.jar \
      <rest-of arguments>
 ```
-CDI functionality is tested with JBoss Weld 2.x - 3.1.7, 4.0.x and Apache OpenWebBeans 1.6.x - 2.0.23. Contribution for other CDI/CDI-like containers (Spring, Google Guice, etc) is welcome.
+CDI functionality is tested with JBoss Weld 2.x - 3.1.7, 4.0.x, 5.x, 6.x and Apache OpenWebBeans 1.6.x - 2.0.28 and 4.0.3. Contribution for other CDI/CDI-like containers (Spring, Google Guice, etc) is welcome.
 
 # More documentation & exmaples
 Examples of the library usage may be found in the [Tascalate JavaFlow Examples](https://github.com/vsilaev/tascalate-javaflow-examples) project. The covered topics are common tasks, inheritance, lambdas support, proxies, usage with CDI containers like JBoss Weld and Apache OpenWebBeans.
