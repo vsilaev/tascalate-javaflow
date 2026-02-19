@@ -37,8 +37,6 @@ public final class StackRecorder extends Stack {
     private static final Logger log = LoggerFactory.getLogger(StackRecorder.class);
     private static final long serialVersionUID = 3L;
 
-    private static final ThreadLocal<StackRecorder> threadMap = new ThreadLocal<StackRecorder>();
-
     /**
      * True, if the continuation restores the previous stack trace to the last
      * invocation of suspend().
