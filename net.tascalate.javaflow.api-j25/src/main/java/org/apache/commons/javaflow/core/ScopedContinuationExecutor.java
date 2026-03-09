@@ -1,5 +1,5 @@
 /**
- * ﻿Copyright 2013-2022 Valery Silaev (http://vsilaev.com)
+ * ﻿Copyright 2013-2025 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module net.tascalate.javaflow.api {
-    requires org.slf4j;
+package org.apache.commons.javaflow.core;
 
-    exports org.apache.commons.javaflow.api;
-    exports org.apache.commons.javaflow.core;
+public interface ScopedContinuationExecutor {
+    abstract public void runWith(StackRecorder stackRecorder, Runnable code);
+    abstract public StackRecorder currentStackRecorder();
 }

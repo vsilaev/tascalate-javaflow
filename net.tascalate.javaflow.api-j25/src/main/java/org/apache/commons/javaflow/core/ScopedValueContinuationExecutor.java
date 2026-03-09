@@ -16,19 +16,14 @@
 package org.apache.commons.javaflow.core;
 
 final class ScopedValueContinuationExecutor implements ScopedContinuationExecutor {
-    static final ScopedContinuationExecutor INSTANCE = new ScopedValueContinuationExecutor();
     
     private static final ScopedValue<StackRecorder> STACK_RECORDER = ScopedValue.newInstance();
     
-    private ScopedValueContinuationExecutor() {
-        
-    }
-    
     public final void runWith(StackRecorder stackRecorder, Runnable code) {
-        ScopedValue.runWhere(STACK_RECORDER, stackRecorder, code);
+        ScopedValue.where(STACK_RECORDER, stackRecorder).run(code);
     }
     
     public final StackRecorder currentStackRecorder() {
-        return STACK_RECORDER.orElse(null);
+        return STACK_RECORDER.isBound() ? STACK_RECORDER.get() : null;
     }
 }

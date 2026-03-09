@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.tascalate.javaflow</groupId>
 		<artifactId>net.tascalate.javaflow.parent</artifactId>
-		<version>2.8.1</version>
+		<version>2.8.2</version>
 		<relativePath>../</relativePath>
 	</parent>
 
@@ -20,7 +20,21 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>${project.groupId}.api-ng</artifactId>
+			<artifactId>${project.groupId}.api-j09</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>${project.groupId}.api-j21</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>${project.groupId}.api-j25</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
 			<optional>true</optional>
@@ -41,23 +55,56 @@
 			<plugin>
 				<groupId>org.moditect</groupId>
 				<artifactId>moditect-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>unpack-binaries-ng</id>
+						<id>unpack-binaries-09</id>
 						<phase>process-classes</phase>
 						<goals>
 							<goal>unpack-dependencies</goal>
 						</goals>
 						<configuration>
 							<includeGroupIds>${project.groupId}</includeGroupIds>
-							<includeArtifactIds>${project.groupId}.api-ng</includeArtifactIds>
+							<includeArtifactIds>${project.groupId}.api-j09</includeArtifactIds>
+							<type>jar</type>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+							<includes>**/module-info.class</includes>
+							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-binaries-21</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeGroupIds>${project.groupId}</includeGroupIds>
+							<includeArtifactIds>${project.groupId}.api-j21</includeArtifactIds>
 							<type>jar</type>
 							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
-							<includes>**/PlatformContinuationExecutor.class,**/ScopedValueContinuationExecutor.class</includes>
+							<includes>**/PlatformContinuationExecutor.class,**/ScopedValueContinuationExecutor.class,**/module-info.class</includes>
+							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-binaries-25</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeGroupIds>${project.groupId}</includeGroupIds>
+							<includeArtifactIds>${project.groupId}.api-j25</includeArtifactIds>
+							<type>jar</type>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/25</outputDirectory>
+							<includes>**/PlatformContinuationExecutor.class,**/ScopedValueContinuationExecutor.class,**/module-info.class</includes>
 							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
 						</configuration>
 					</execution>

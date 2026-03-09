@@ -1,5 +1,13 @@
 /**
- * ﻿Copyright 2013-2022 Valery Silaev (http://vsilaev.com)
+ * ﻿Original work: copyright 1999-2004 The Apache Software Foundation
+ * (http://www.apache.org/)
+ *
+ * This project is based on the work licensed to the Apache Software
+ * Foundation (ASF) under one or more contributor license agreements.
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * Modified work: copyright 2013-2025 Valery Silaev (http://vsilaev.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +21,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module net.tascalate.javaflow.api {
-    requires org.slf4j;
+package org.apache.commons.javaflow.core;
 
-    exports org.apache.commons.javaflow.api;
-    exports org.apache.commons.javaflow.core;
+public final class StackRecorder {
+
 }

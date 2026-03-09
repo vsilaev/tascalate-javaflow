@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module net.tascalate.javaflow.api {
-    requires org.slf4j;
+package org.apache.commons.javaflow.core;
 
-    exports org.apache.commons.javaflow.api;
-    exports org.apache.commons.javaflow.core;
+public class Placeholder {
+    private Placeholder() {}
 }

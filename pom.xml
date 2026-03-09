@@ -3,7 +3,7 @@
 
 	<groupId>net.tascalate.javaflow</groupId>
 	<artifactId>net.tascalate.javaflow.parent</artifactId>
-	<version>2.8.1</version>
+	<version>2.8.2</version>
 	<packaging>pom</packaging>
 
 	<name>Tascalate JavFlow</name>
@@ -54,7 +54,9 @@
 
 
 	<modules>
-		<module>net.tascalate.javaflow.api-ng</module>
+		<module>net.tascalate.javaflow.api-j09</module>
+		<module>net.tascalate.javaflow.api-j21</module>
+		<module>net.tascalate.javaflow.api-j25</module>
 		<module>net.tascalate.javaflow.api</module>
 		<module>net.tascalate.javaflow.spi</module>
 		<module>net.tascalate.javaflow.providers.asm3</module>
