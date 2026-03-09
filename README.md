@@ -94,7 +94,47 @@ Note that if you are using continuations with Java 1.8 lambdas then you need to 
 
 Please refer to [pom.xml](https://github.com/vsilaev/tascalate-javaflow-examples/blob/master/net.tascalate.javaflow.examples.common/pom.xml) in examples project for typical Maven configuration.
 
-# Gradle
+# Gradle after 7.0
+First thing you nedd is to modify `settings.gradle`:
+```groovy
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+	resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "continuations") {
+                useModule("net.tascalate.javaflow:net.tascalate.javaflow.tools.gradle:2.8.2")
+            }
+        }
+    }
+}
+
+rootProject.name = '<your-project-name>'
+```
+Next, the following must be added to the `build.gradle`:
+```groovy
+plugins {
+	id 'java'
+	id 'continuations'
+    /* CONTINUATIONS should be added after JAVA */
+    /* other plugins if necessary */
+}
+...
+dependencies {
+    implementation 'net.tascalate.javaflow:net.tascalate.javaflow.api:2.8.2'
+}
+```
+With JDK versions 21..24 inclusive add the following configuration to use `ScopedValue` instead of `ThreadLocal` for continuation internals:
+```
+tasks.withType(JavaExec) {
+    jvmArgs += '--enable-preview'
+}
+```
+Java versions before 21 and 25 doesn't require this settings. Moreover, Java 21..24 will run without issues if this option is missing: `ThreadLocal`-based implementation will be used as fallback instead of `ScopedValue`-based one.
+
+# Gradle before 7.0
 To use continuations bytecode enhancer with Gradle you need to do the following.
 First, specify JavaFlow gradle plugin dependency in `build.gradle`:
 ```groovy
@@ -121,12 +161,14 @@ dependencies {
     implementation 'net.tascalate.javaflow:net.tascalate.javaflow.api:2.8.2'
 }
 ```
-With JDK 21+ add the following configuration to use ScopedValue instead of ThreadLocal for continuation internals:
+With JDK versions 21..24 inclusive add the following configuration to use `ScopedValue` instead of `ThreadLocal` for continuation internals:
 ```
 tasks.withType(JavaExec) {
     jvmArgs += '--enable-preview'
 }
 ```
+Java versions before 21 and 25 doesn't require this settings. Moreover, Java 21..24 will run without issues if this option is missing: `ThreadLocal`-based implementation will be used as fallback instead of `ScopedValue`-based one.
+
 # Ant
 
 There is a separate Ant task for applying JavaFlow instrumentation at build-time. 
