@@ -189,4 +189,8 @@ public final class StackRecorder extends Stack {
     public static StackRecorder get() {
         return PlatformContinuationExecutor.current().currentStackRecorder();
     }
+    
+    public static boolean isExitSignal(Throwable ex) {
+        return ContinuationDeath.INSTANCE == ex; 
+    }
 }
