@@ -67,7 +67,7 @@ class ContinuableClassTransformer extends AbstractResourceTransformer {
             return null;
         }
 
-        if (visitor.skipEnchancing()) {
+        if (visitor.skipEnchancing() || visitor.modifications() == 0) {
             return null;
         }
 

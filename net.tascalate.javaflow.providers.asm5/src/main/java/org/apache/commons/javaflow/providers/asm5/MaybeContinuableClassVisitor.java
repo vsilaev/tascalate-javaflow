@@ -160,9 +160,12 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
             }
         }
         // Take desugared lambda bodies in consideration always 
+        // if continuable methods are present in this class
         // If there is no calls to continuable inside then
         // there are will be no run-time penalty anyway
-        continuableMethods.addAll(desugaredLambdaBodies);
+        if (!continuableMethods.isEmpty()) {
+            continuableMethods.addAll(desugaredLambdaBodies);
+        }
     }
 
     private boolean inheritanceChainVisited = false;

@@ -45,6 +45,7 @@ class ContinuableClassVisitor extends ClassAdapter {
     private String className;
     private IContinuableClassInfo classInfo;
     private boolean skipEnchancing = false;
+    private int modifications = 0;
 
     ContinuableClassVisitor(ClassVisitor cv, 
                             ClassHierarchy classHierarchy, 
@@ -59,7 +60,11 @@ class ContinuableClassVisitor extends ClassAdapter {
     boolean skipEnchancing() {
         return skipEnchancing;
     }
-    
+
+    int modifications() {
+        return modifications;
+    }
+
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         className = name;
@@ -73,7 +78,7 @@ class ContinuableClassVisitor extends ClassAdapter {
             // Must exit by throwing exception, otherwise NPE is possible in nested visitor
             throw StopException.INSTANCE;
         }
-        cv.visit(version, access, name, signature, superName, interfaces);
+        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
@@ -88,7 +93,7 @@ class ContinuableClassVisitor extends ClassAdapter {
 
     @Override
     public void visitEnd() {
-        if (!skipEnchancing) {
+        if (!skipEnchancing && modifications > 0) {
             AnnotationVisitor v = super.visitAnnotation(MaybeContinuableClassVisitor.SKIP_ENCHANCING_ANNOTATION, true);
             if (null != v) {
                 v.visitEnd();
@@ -106,6 +111,7 @@ class ContinuableClassVisitor extends ClassAdapter {
         if (skip) {
             return mv;
         } else {
+            modifications++;
             return new ContinuableMethodNode(
                 access, name, desc, signature, exceptions, 
                 className, classHierarchy, cciResolver, mv
