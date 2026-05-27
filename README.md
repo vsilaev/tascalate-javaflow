@@ -229,3 +229,5 @@ CDI functionality is tested with JBoss Weld 2.x - 3.1.7, 4.0.x, 5.x, 6.x and Apa
 Examples of the library usage may be found in the [Tascalate JavaFlow Examples](https://github.com/vsilaev/tascalate-javaflow-examples) project. The covered topics are common tasks, inheritance, lambdas support, proxies, usage with CDI containers like JBoss Weld and Apache OpenWebBeans.
 
 For additional documentation, tutorials and guidelines please visit my [blog](http://vsilaev.com)
+
+#
