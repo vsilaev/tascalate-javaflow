@@ -29,6 +29,7 @@ final class ScopedValueContinuationExecutor implements ScopedContinuationExecuto
     }
     
     public final StackRecorder currentStackRecorder() {
-        return STACK_RECORDER.isBound() ? STACK_RECORDER.get() : null;
+        StackRecorder result = STACK_RECORDER.orElse(StackRecorder.INVALID);
+        return result == StackRecorder.INVALID ? null : result;
     }
 }

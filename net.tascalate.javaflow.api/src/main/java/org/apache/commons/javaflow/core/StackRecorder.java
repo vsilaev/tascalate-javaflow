@@ -36,6 +36,12 @@ public final class StackRecorder extends Stack {
 
     private static final Logger log = LoggerFactory.getLogger(StackRecorder.class);
     private static final long serialVersionUID = 3L;
+    
+    private static final Runnable NO_OP_RUNNABLE = new Runnable() {
+        public void run() {}
+    };
+    
+    static final StackRecorder INVALID = new StackRecorder(NO_OP_RUNNABLE);
 
     /**
      * True, if the continuation restores the previous stack trace to the last

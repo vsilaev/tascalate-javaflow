@@ -24,5 +24,5 @@
 package org.apache.commons.javaflow.core;
 
 public final class StackRecorder {
-
+    static final StackRecorder INVALID = new StackRecorder();
 }
