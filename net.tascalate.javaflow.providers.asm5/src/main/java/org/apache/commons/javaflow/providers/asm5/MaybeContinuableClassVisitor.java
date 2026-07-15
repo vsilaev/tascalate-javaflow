@@ -100,6 +100,7 @@ class MaybeContinuableClassVisitor extends ClassVisitor {
                                 actual2accessor.put(targetName + targetDesc, name + desc);
                             }
                             if (isBridge) {
+                                bridge2specialization.put(name + desc, targetName + targetDesc);
                                 bridge2specialization.put(targetName + targetDesc, name + desc);
                             }
                         }
