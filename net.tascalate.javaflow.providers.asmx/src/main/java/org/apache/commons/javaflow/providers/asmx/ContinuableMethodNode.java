@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -132,7 +133,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
 
     @Override
     public void visitEnd() {
-
+        checkForEach();
         checkCallSites();
 
         if (instructions.size() == 0 || labels.size() == 0) {
@@ -143,7 +144,6 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
         this.stackRecorderVar = maxLocals;
         try {
             moveNew();
-
             analyzer = new Analyzer<BasicValue>(new FastClassVerifier(this.api, classHierarchy)) {
                 @Override
                 protected Frame<BasicValue> newFrame(int nLocals, int nStack) {
@@ -163,6 +163,10 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
             throw new RuntimeException(ex);
         }
     }
+    
+    private void checkForEach() {
+        new ForEachHandler(api, this, classHierarchy, cciResolver).liftForEachVars();
+    }
 
     private void checkCallSites() {
         List<LocalVariableAnnotationNode> varAnnotations = new ArrayList<LocalVariableAnnotationNode>();
@@ -173,7 +177,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
         paramAnnotations.putAll(CallSiteFinder.annotationsList(visibleParameterAnnotations));
         paramAnnotations.putAll(CallSiteFinder.annotationsList(invisibleParameterAnnotations));
 
-        List<CallSiteFinder.Result> results = new CallSiteFinder().findMatchingCallSites(instructions, varAnnotations, paramAnnotations);
+        List<CallSiteFinder.Result> results = CallSiteFinder.findMatchingCallSites(instructions, varAnnotations, paramAnnotations);
         for (CallSiteFinder.Result result : results) {
             if (!nodes.contains(result.methodCall) && checkContinuableAnnotation(result.annotations)) {
                 Label label = new Label();
@@ -189,6 +193,7 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
                 }
             }
         }
+        removeAnnotations(CallSiteFinder.CCS_ANNOTATION_DESCRIPTOR);
     }
 
     private boolean checkContinuableAnnotation(Collection<String> annotationDescriptors) {
@@ -209,6 +214,42 @@ class ContinuableMethodNode extends MethodNode implements Opcodes {
             }
         }
         return inSelected;
+    }
+    
+    private void removeAnnotations(String annotationDescriptor) {
+        removeAnnotations(annotationDescriptor, invisibleLocalVariableAnnotations);
+        removeAnnotations(annotationDescriptor, visibleLocalVariableAnnotations);
+        removeAnnotations(annotationDescriptor, invisibleParameterAnnotations);
+        removeAnnotations(annotationDescriptor, visibleParameterAnnotations);
+    }
+    
+    private static void removeAnnotations(String annotationDescriptor, List<LocalVariableAnnotationNode> nodes) {
+        if (null == nodes) {
+            return;
+        }
+        for (Iterator<LocalVariableAnnotationNode> it = nodes.iterator(); it.hasNext(); ) {
+            LocalVariableAnnotationNode n = it.next();
+            if (annotationDescriptor.equals(n.desc)) {
+                it.remove();
+            }
+        }
+    }
+    
+    private static void removeAnnotations(String annotationDescriptor, List<AnnotationNode>[] nodes) {
+        if (null == nodes) {
+            return;
+        }
+        for (List<AnnotationNode> list : nodes) {
+            if (null == list) {
+                continue;
+            }
+            for (Iterator<AnnotationNode> it = list.iterator(); it.hasNext(); ) {
+                AnnotationNode n = it.next();
+                if (annotationDescriptor.equals(n.desc)) {
+                    it.remove();
+                }
+            }
+        }
     }
 
     private void moveNew() throws AnalyzerException {

@@ -41,6 +41,8 @@ import net.tascalate.asmx.tree.VarInsnNode;
 
 class CallSiteFinder {
 
+    static final String CCS_ANNOTATION_DESCRIPTOR = Type.getObjectType("org/apache/commons/javaflow/api/ccs").getDescriptor();
+    
     static class Result {
         final AbstractInsnNode callSite;
         final MethodInsnNode methodCall;
@@ -63,8 +65,12 @@ class CallSiteFinder {
             return '{' + caller + '.' + methodCall.name + methodCall.desc + annotations + '}';
         }
     }
+    
+    private CallSiteFinder() {
+        
+    }
 
-    List<Result> findMatchingCallSites(InsnList instructions, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
+    static List<Result> findMatchingCallSites(InsnList instructions, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
         List<Result> result = new ArrayList<Result>();
         for (Iterator<AbstractInsnNode> i = instructions.iterator(); i.hasNext(); ) {
             AbstractInsnNode ins = i.next();
@@ -100,7 +106,7 @@ class CallSiteFinder {
         return result;
     }
 
-    private Result findMatchingCallSite(MethodInsnNode m, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
+    private static Result findMatchingCallSite(MethodInsnNode m, List<LocalVariableAnnotationNode> varAnnotations, Map<Integer, List<AnnotationNode>> paramAnnotations) {
         int opcode = m.getOpcode(); 
 
         if (INVOKEVIRTUAL != opcode && INVOKEINTERFACE != opcode ) {
@@ -138,7 +144,7 @@ class CallSiteFinder {
         return null;
     }
 
-    private Set<String> getVarAnnotations(List<LocalVariableAnnotationNode> varAnnotations, VarInsnNode v) {
+    private static Set<String> getVarAnnotations(List<LocalVariableAnnotationNode> varAnnotations, VarInsnNode v) {
         Set<String> result = new TreeSet<String>();
         for (LocalVariableAnnotationNode n : varAnnotations) {
             int idx = n.index.indexOf(v.var);
@@ -154,7 +160,7 @@ class CallSiteFinder {
         return result;
     }
 
-    private boolean isVarBetweenBounds(AbstractInsnNode var, LabelNode lo, LabelNode hi) {
+    private static boolean isVarBetweenBounds(AbstractInsnNode var, LabelNode lo, LabelNode hi) {
         AbstractInsnNode x;
         boolean loFound = false;
         for (x = var; !(x == null || loFound); x = x.getPrevious()) {
@@ -172,7 +178,7 @@ class CallSiteFinder {
 
     }
 
-    private Set<String> getParamAnnotations(Map<Integer, List<AnnotationNode>> paramAnnotations, int varIdx) {
+    private static Set<String> getParamAnnotations(Map<Integer, List<AnnotationNode>> paramAnnotations, int varIdx) {
         Set<String> result = new TreeSet<String>();
         List<AnnotationNode> annos = paramAnnotations.get(varIdx);
         if (null != annos) {
@@ -184,12 +190,11 @@ class CallSiteFinder {
 
     }
 
-    private static int getStackSizeChange(AbstractInsnNode ins) {
+    static int getStackSizeChange(AbstractInsnNode ins) {
         /**
          * See http://cs.au.dk/~mis/dOvs/jvmspec/ref-Java.html
          */
 
-        int s;
         int o = ins.getOpcode();
 
         if (o < 0) {
@@ -224,10 +229,14 @@ class CallSiteFinder {
     
             case LDC: 
                 LdcInsnNode l = (LdcInsnNode)ins;
-                if (l.cst instanceof Long || l.cst instanceof Double)
+                if (l.cst instanceof Long || l.cst instanceof Double) {
                     return 2;
-                else
-                    return 1;
+                }
+                if (l.cst instanceof Type) {
+                    int sort = ((Type) l.cst).getSort();
+                    if (sort == Type.LONG || sort == Type.DOUBLE) return 2;
+                }
+                return 1;
     
             case ILOAD: return 1;
             case LLOAD: return 2;
@@ -264,7 +273,7 @@ class CallSiteFinder {
             case POP: return -1;
             case POP2: return -2;
             case DUP:
-            case DUP_X1:;
+            case DUP_X1:
             case DUP_X2: return 1;
             case DUP2:
             case DUP2_X1: return 2;
@@ -297,11 +306,11 @@ class CallSiteFinder {
             case FNEG:
             case DNEG: return 0;
             case ISHL: return -1;
-            case LSHL: return -2;
+            case LSHL: return -1 - 2 + 2;
             case ISHR: return -1;
-            case LSHR: return -2;
+            case LSHR: return -1 - 2 + 2;
             case IUSHR: return -1;
-            case LUSHR: return -2;
+            case LUSHR: return -1 - 2 + 2;
             case IAND: return -1;
             case LAND: return -2;
             case IOR: return -1;
@@ -327,7 +336,7 @@ class CallSiteFinder {
             case I2S: return 0;
     
             // POP 2 * size from frame for compared elements, PUSH int result
-            case LCMP: return -2 * 2 +1;
+            case LCMP: return -2 * 2 + 1;
             case FCMPL: 
             case FCMPG: return -2 * 1 + 1;
             case DCMPL:
@@ -383,13 +392,10 @@ class CallSiteFinder {
             case INVOKESTATIC:
             case INVOKEINTERFACE:
                 MethodInsnNode m = (MethodInsnNode)ins;
-                s = Type.getArgumentsAndReturnSizes(m.desc);
-                return - (s / 2) + (s % 2); 
+                return getMethodStackDelta(m);
             case INVOKEDYNAMIC:
                 InvokeDynamicInsnNode d = (InvokeDynamicInsnNode)ins;
-                s = Type.getArgumentsAndReturnSizes(d.desc);
-                return - (s / 2) + (s % 2); 
-    
+                return getInvokeDynamicStackDelta(d);
             case NEW:
                 return 1;
             case NEWARRAY:
@@ -414,9 +420,49 @@ class CallSiteFinder {
             case IFNULL:
             case IFNONNULL:
                 return -1; // POP-s object to compare
-    
+
             default:
                 throw new RuntimeException(ins.toString() + " = " + ins.getOpcode());
         }
+    }
+    
+    public static int getMethodStackDelta(MethodInsnNode methodInsn) {
+        int argAndReturnSize = Type.getArgumentsAndReturnSizes(methodInsn.desc);
+        int argSlots = argAndReturnSize >> 2; 
+        int returnSlots = argAndReturnSize & 0x03; 
+
+        int delta = 0;
+
+        if (methodInsn.getOpcode() == INVOKESTATIC) {
+            // Since INVOKESTATIC has no receiver, remove the extra 'this' slot ASM added
+            delta -= (argSlots - 1); 
+        } else {
+            // Instance methods pop the exact value argSlots computes (explicit args + 1 receiver)
+            delta -= argSlots; 
+        }
+
+        // Add the computed return values back onto the execution stack tracker
+        delta += returnSlots;
+
+        return delta;
+    }
+    
+    public static int getInvokeDynamicStackDelta(InvokeDynamicInsnNode indyInsn) {
+        int argAndReturnSize = Type.getArgumentsAndReturnSizes(indyInsn.desc);
+        int argSlots = argAndReturnSize >> 2; 
+        int returnSlots = argAndReturnSize & 0x03; 
+
+        int delta = 0;
+
+        // Remove the implicit 'this' slot that ASM baked into argSlots
+        int trueArgSlots = argSlots - 1;
+        
+        // Arguments reduce the stack depth
+        delta -= trueArgSlots;
+        
+        // Return value increases the stack depth
+        delta += returnSlots;
+
+        return delta;
     }
 }
