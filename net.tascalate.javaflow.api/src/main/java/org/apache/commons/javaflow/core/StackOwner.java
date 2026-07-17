@@ -15,7 +15,7 @@
  */
 package org.apache.commons.javaflow.core;
 
-public interface StackOwner {
-    StackRecorder getStack();
-    void setStack(StackRecorder value);
+public abstract class StackOwner {
+    abstract protected StackRecorder getStack();
+    abstract protected void setStack(StackRecorder value);
 }

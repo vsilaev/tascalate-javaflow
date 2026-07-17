@@ -101,17 +101,13 @@ public final class StackRecorder extends Stack {
         StackRecorder stackRecorder = get();
         if (stackRecorder == null) {
             throw new IllegalStateException("No continuation is running");
+        } else {
+            //System.out.println("NULL STACK for " + value);
         }
         return stackRecorder.suspend0(value);
     }
     
     private Object suspend0(SuspendResult value) {
-        log.debug("suspend()");
-
-        StackRecorder stackRecorder = get();
-        if (stackRecorder == null) {
-            throw new IllegalStateException("No continuation is running");
-        }
         boolean needCheckExit = isRestoring;
         
         isCapturing = !isRestoring;
