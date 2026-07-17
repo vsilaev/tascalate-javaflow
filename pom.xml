@@ -58,6 +58,7 @@
 		<module>net.tascalate.javaflow.api-j21</module>
 		<module>net.tascalate.javaflow.api-j25</module>
 		<module>net.tascalate.javaflow.api</module>
+		<module>net.tascalate.javaflow.api-native</module>
 		<module>net.tascalate.javaflow.spi</module>
 		<module>net.tascalate.javaflow.providers.asm3</module>
 		<module>net.tascalate.javaflow.providers.asm4</module>
@@ -148,7 +149,7 @@
 						<configuration> 
 							<!-- DUE TO ElementType.USE -->
 							<source>8</source> 
-							<release>8</release> 
+							<target>8</target> 
 						</configuration>
 					</plugin>
 					<plugin>

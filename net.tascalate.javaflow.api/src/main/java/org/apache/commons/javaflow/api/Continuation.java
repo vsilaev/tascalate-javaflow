@@ -405,6 +405,9 @@ abstract public class Continuation implements Serializable {
         return StackRecorder.suspend(SuspendResult.valueOf(value));
     }
 
+    public static Object suspend(Object value, Runnable stackOwner) {
+        return StackRecorder.suspend(SuspendResult.valueOf(value), stackOwner);
+    }
 
     /**
      * Completes the execution of the running continuation.

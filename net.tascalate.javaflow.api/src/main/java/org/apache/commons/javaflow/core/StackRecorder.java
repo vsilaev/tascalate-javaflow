@@ -86,6 +86,15 @@ public final class StackRecorder extends Stack {
         super(parent);
     }
 
+    public static Object suspend(SuspendResult value, Runnable stackOwner) {
+        StackRecorder stackRecorder = null;
+        if (null != stackOwner) {
+            stackRecorder = ((StackOwner)stackOwner).getStack();
+        }
+        
+        return null != stackRecorder ? stackRecorder.suspend0(value) : suspend(value);
+    }
+    
     public static Object suspend(SuspendResult value) {
         log.debug("suspend()");
 
@@ -93,18 +102,28 @@ public final class StackRecorder extends Stack {
         if (stackRecorder == null) {
             throw new IllegalStateException("No continuation is running");
         }
-        boolean needCheckExit = stackRecorder.isRestoring;
+        return stackRecorder.suspend0(value);
+    }
+    
+    private Object suspend0(SuspendResult value) {
+        log.debug("suspend()");
+
+        StackRecorder stackRecorder = get();
+        if (stackRecorder == null) {
+            throw new IllegalStateException("No continuation is running");
+        }
+        boolean needCheckExit = isRestoring;
         
-        stackRecorder.isCapturing = !stackRecorder.isRestoring;
-        stackRecorder.isRestoring = false;
-        stackRecorder.result      = value;
+        isCapturing = !isRestoring;
+        isRestoring = false;
+        result      = value;
         
         // flow breaks here, actual return will be executed in resumed continuation
         // return in continuation to be suspended is executed as well but ignored
         if (needCheckExit) {
-            stackRecorder.parameter.checkExit();
+            parameter.checkExit();
         }
-        return stackRecorder.parameter.value();
+        return parameter.value();
     }
 
     public SuspendResult execute(final ResumeParameter parameter) {
@@ -120,6 +139,10 @@ public final class StackRecorder extends Stack {
                 if (log.isDebugEnabled()) {
                     log.debug("Restoring state of " + ReflectionUtils.descriptionOfObject(runnable));
                 }
+            }
+            
+            if (runnable instanceof StackOwner) {
+                ((StackOwner) runnable).setStack(this);
             }
             
             log.debug("calling runnable");
