@@ -17,6 +17,8 @@ package org.apache.commons.javaflow.providers.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 
 import org.apache.commons.javaflow.spi.ResourceLoader;
 
@@ -38,4 +40,8 @@ class AsmxResourceLoader implements net.tascalate.asmx.plus.ResourceLoader {
         return resourceLoader.getResourceAsStream(name);
     }
 
+    @Override
+    public Enumeration<URL> getResources(String name) throws IOException {
+        return resourceLoader.getResources(name);
+    }
 }

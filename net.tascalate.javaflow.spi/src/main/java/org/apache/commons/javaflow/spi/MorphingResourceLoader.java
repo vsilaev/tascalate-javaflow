@@ -17,7 +17,9 @@ package org.apache.commons.javaflow.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Map;
 
 public class MorphingResourceLoader implements VetoableResourceLoader {
@@ -63,6 +65,11 @@ public class MorphingResourceLoader implements VetoableResourceLoader {
         } else {
             return delegate.getResourceAsStream(name);
         }
+    }
+    
+    @Override
+    public Enumeration<URL> getResources(String name) throws IOException {
+        return delegate.getResources(name);
     }
     
     @Override

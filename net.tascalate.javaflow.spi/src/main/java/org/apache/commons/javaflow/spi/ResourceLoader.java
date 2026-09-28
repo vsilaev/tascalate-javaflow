@@ -17,8 +17,11 @@ package org.apache.commons.javaflow.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 
 public interface ResourceLoader {
     boolean hasResource(String name);
     InputStream getResourceAsStream(String name) throws IOException;
+    Enumeration<URL> getResources(String name) throws IOException;
 }

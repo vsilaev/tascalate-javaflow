@@ -78,8 +78,8 @@
 
 
 	<properties>
-		<tascalate.asmx.version>9.9.1</tascalate.asmx.version>
-		<tascalate.instrument.version>1.7.0</tascalate.instrument.version>
+		<tascalate.asmx.version>9.10.1</tascalate.asmx.version>
+		<tascalate.instrument.version>1.8.0</tascalate.instrument.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

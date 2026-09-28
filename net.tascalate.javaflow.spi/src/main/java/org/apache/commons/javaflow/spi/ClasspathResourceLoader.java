@@ -31,13 +31,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ClasspathResourceLoader implements VetoableResourceLoader {
 
     private final Reference<ClassLoader> classLoaderRef;
+    private final ReentrantLock vetoStrategyLock;
+    private ClassMatchStrategy vetoStrategy = null;
+    
     
     public ClasspathResourceLoader(ClassLoader classLoader) {
         this.classLoaderRef = new WeakReference<ClassLoader>(classLoader);
+        vetoStrategyLock = new ReentrantLock();
     }
 
     public boolean hasResource(String name) {
@@ -58,17 +63,33 @@ public class ClasspathResourceLoader implements VetoableResourceLoader {
         return result;
     }
     
+    public Enumeration<URL> getResources(String name) throws IOException {
+        ClassLoader classLoader = classLoaderRef.get();
+        if (null == classLoader) {
+            throw new IOException("Underlying class loader was evicted from memory, this resource loader is unusable");
+        }
+        return classLoader.getResources(name);
+    }
+    
     public ClassMatcher createVeto() throws IOException {
         return getVetoStrategy().bind(this);
     }
     
     public ClassMatchStrategy getVetoStrategy() throws IOException {
-        List<ClassMatchStrategy> strategies = new ArrayList<ClassMatchStrategy>();
-        ClassLoader classLoader = classLoaderRef.get();
-        if (null == classLoader) {
-            return ClassMatchStrategies.MATCH_NONE;
+        vetoStrategyLock.lock();
+        try {
+            if (null == vetoStrategy) {
+                vetoStrategy = createVetoStrategy();
+            }
+            return vetoStrategy;
+        } finally {
+            vetoStrategyLock.unlock();
         }
-        Enumeration<URL> allResources = classLoader.getResources("META-INF/net.tascalate.javaflow.veto.cmf");
+    }
+    
+    private ClassMatchStrategy createVetoStrategy() throws IOException {
+        List<ClassMatchStrategy> strategies = new ArrayList<ClassMatchStrategy>();
+        Enumeration<URL> allResources = getResources("META-INF/net.tascalate.javaflow.veto.cmf");
         ClassMatchStrategyFileParser parser = new ClassMatchStrategyFileParser();
         while (allResources.hasMoreElements()) {
             URL resource = allResources.nextElement();
