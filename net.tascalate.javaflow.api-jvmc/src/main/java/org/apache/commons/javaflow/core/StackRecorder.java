@@ -23,8 +23,6 @@
  */
 package org.apache.commons.javaflow.core;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
