@@ -15,20 +15,18 @@
  */
 package org.apache.commons.javaflow.core;
 
-final class PlatformContinuationExecutor {
-    private PlatformContinuationExecutor() {
-        
+final class ScopedValueContinuationExecutor implements ScopedContinuationExecutor {
+
+    static final ScopedContinuationExecutor INSTANCE = new ScopedValueContinuationExecutor();
+    
+    private static final ScopedValue<StackRecorder> STACK_RECORDER = ScopedValue.newInstance();
+    
+    public final void runWith(StackRecorder stackRecorder, Runnable code) {
+        ScopedValue.where(STACK_RECORDER, stackRecorder).run(code);
     }
     
-    static ScopedContinuationExecutor current() {
-        if (CHECK_THREAD) {
-            Thread currentThread = Thread.currentThread();
-            if (currentThread instanceof ScopedContinuationExecutor) {
-                return (ScopedContinuationExecutor)currentThread;
-            }
-        }
-        return ThreadLocalContinuationExecutor.INSTANCE;
+    public final StackRecorder currentStackRecorder() {
+        StackRecorder result = STACK_RECORDER.orElse(StackRecorder.INVALID);
+        return result == StackRecorder.INVALID ? null : result;
     }
-    
-    private static final boolean CHECK_THREAD = Boolean.getBoolean("net.tascalate.javaflow.check-thread"); 
 }

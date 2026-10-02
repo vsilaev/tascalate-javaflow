@@ -16,6 +16,7 @@
 package org.apache.commons.javaflow.core;
 
 final class PlatformContinuationExecutor {
+
     private PlatformContinuationExecutor() {
         
     }
@@ -27,8 +28,9 @@ final class PlatformContinuationExecutor {
                 return (ScopedContinuationExecutor)currentThread;
             }
         }
-        return ThreadLocalContinuationExecutor.INSTANCE;
+        return ScopedValueContinuationExecutor.INSTANCE;
     }
     
     private static final boolean CHECK_THREAD = Boolean.getBoolean("net.tascalate.javaflow.check-thread"); 
+
 }

@@ -19,27 +19,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>${project.groupId}.api-j09</artifactId>
-			<version>${project.version}</version>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>${project.groupId}.api-j21</artifactId>
-			<version>${project.version}</version>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>${project.groupId}.api-j25</artifactId>
-			<version>${project.version}</version>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
@@ -55,60 +34,111 @@
 			<plugin>
 				<groupId>org.moditect</groupId>
 				<artifactId>moditect-maven-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
+				<artifactId>maven-compiler-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>unpack-binaries-09</id>
-						<phase>process-classes</phase>
+						<id>compile-java21</id>
 						<goals>
-							<goal>unpack-dependencies</goal>
+							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<includeGroupIds>${project.groupId}</includeGroupIds>
-							<includeArtifactIds>${project.groupId}.api-j09</includeArtifactIds>
-							<type>jar</type>
-							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
-							<includes>**/module-info.class</includes>
-							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
-						</configuration>
-					</execution>
-					<execution>
-						<id>unpack-binaries-21</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>unpack-dependencies</goal>
-						</goals>
-						<configuration>
-							<includeGroupIds>${project.groupId}</includeGroupIds>
-							<includeArtifactIds>${project.groupId}.api-j21</includeArtifactIds>
-							<type>jar</type>
+							<jdkToolchain>
+								<version>21</version>
+							</jdkToolchain>
+							<release>21</release>
+							<compilerArgs>
+								<arg>--enable-preview</arg>
+							</compilerArgs>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+							</compileSourceRoots>
 							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/21</outputDirectory>
-							<includes>**/PlatformContinuationExecutor.class,**/ScopedValueContinuationExecutor.class,**/module-info.class</includes>
-							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
 						</configuration>
-					</execution>
+					</execution> 
 					<execution>
-						<id>unpack-binaries-25</id>
-						<phase>process-classes</phase>
+						<id>compile-java22</id>
 						<goals>
-							<goal>unpack-dependencies</goal>
+							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<includeGroupIds>${project.groupId}</includeGroupIds>
-							<includeArtifactIds>${project.groupId}.api-j25</includeArtifactIds>
-							<type>jar</type>
-							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/25</outputDirectory>
-							<includes>**/PlatformContinuationExecutor.class,**/ScopedValueContinuationExecutor.class,**/module-info.class</includes>
-							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
+							<jdkToolchain>
+								<version>22</version>
+							</jdkToolchain>
+							<release>22</release>
+							<compilerArgs>
+								<arg>--enable-preview</arg>
+							</compilerArgs>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+							</compileSourceRoots>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/22</outputDirectory>
 						</configuration>
-					</execution>
+					</execution> 
+					<execution>
+						<id>compile-java23</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>23</version>
+							</jdkToolchain>
+							<release>23</release>
+							<compilerArgs>
+								<arg>--enable-preview</arg>
+							</compilerArgs>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+							</compileSourceRoots>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/23</outputDirectory>
+						</configuration>
+					</execution> 
+					<execution>
+						<id>compile-java24</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>24</version>
+							</jdkToolchain>
+							<release>24</release>
+							<compilerArgs>
+								<arg>--enable-preview</arg>
+							</compilerArgs>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/main/java24</compileSourceRoot>
+							</compileSourceRoots>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/24</outputDirectory>
+						</configuration>
+					</execution> 
+					<execution>
+						<id>compile-java25</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>25</version>
+							</jdkToolchain>
+							<release>25</release>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/main/java25</compileSourceRoot>
+							</compileSourceRoots>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/25</outputDirectory>
+						</configuration>
+					</execution> 
 				</executions>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<!--
+					<debug>false</debug>
+					-->
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

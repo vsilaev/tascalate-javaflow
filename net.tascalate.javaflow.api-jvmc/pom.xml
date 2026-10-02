@@ -21,6 +21,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>	
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -43,9 +44,31 @@
 						<configuration>
 							<jdkToolchain>
 								<version>21</version>
-								<vendor>Oracle</vendor>
 							</jdkToolchain>
+							<source>21</source>
+							<target>21</target>
 							<excludes combine.self="override" />
+						</configuration>
+					</execution> 
+					<execution>
+						<id>compile-java25</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<jdkToolchain>
+								<version>25</version>
+							</jdkToolchain>
+							<source>25</source>
+							<target>25</target>
+							<compilerArgs>
+								<arg>--add-exports</arg>
+								<arg>java.base/jdk.internal.vm=net.tascalate.javaflow.api</arg>
+							</compilerArgs>
+							<compileSourceRoots>
+								<compileSourceRoot>${project.basedir}/src/main/java25</compileSourceRoot>
+							</compileSourceRoots>
+							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/25</outputDirectory>
 						</configuration>
 					</execution> 
 				</executions>
@@ -53,7 +76,6 @@
 					<source>21</source>
 					<target>21</target>
 					<compilerArgs>
-						<arg>--enable-preview</arg>
 						<arg>--add-exports</arg>
 						<arg>java.base/jdk.internal.vm=net.tascalate.javaflow.api</arg>
 					</compilerArgs>
@@ -64,65 +86,31 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
+				<artifactId>maven-javadoc-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>unpack-binaries-java25</id>
-						<phase>prepare-package</phase>
+						<id>attach-javadocs</id>
 						<goals>
-							<goal>unpack</goal>
+						<goal>jar</goal>
 						</goals>
 						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.groupId}.api-j25</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.outputDirectory}/META-INF/versions/25</outputDirectory>
-									<includes>**/PlatformContinuationExecutor.class,**/ScopedValueContinuationExecutor.class,**/module-info.class</includes>
-								</artifactItem>
-							</artifactItems>
-							<failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
-						</configuration>
+							<jdkToolchain>
+								<version>21</version>
+								<vendor>Oracle</vendor>
+							</jdkToolchain>
+							<source>21</source>
+							<target>21</target>
+							<legacyMode>true</legacyMode>
+							<!-- 2. Forces underlying javadoc.exe process to bypass module layout -->
+							<additionalJOptions>
+								<additionalJOption>--add-exports=java.base/jdk.internal.vm=ALL-UNNAMED</additionalJOption>
+								<additionalJOption>--add-opens=java.base/jdk.internal.vm=ALL-UNNAMED</additionalJOption>
+							</additionalJOptions>
+						</configuration>	
 					</execution>
 				</executions>
 			</plugin>
-		</plugins>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<executions>
-						<execution>
-							<id>attach-javadocs</id>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-							<configuration>
-								<jdkToolchain>
-									<version>21</version>
-									<vendor>Oracle</vendor>
-								</jdkToolchain>
-								<source>21</source>
-								<target>21</target>
-								<legacyMode>true</legacyMode>
-								<additionalOptions>
-									<additionalOption>--enable-preview</additionalOption>
-								</additionalOptions>
-								<!-- 2. Forces underlying javadoc.exe process to bypass module layout -->
-								<additionalJOptions>
-									<additionalJOption>--add-exports=java.base/jdk.internal.vm=ALL-UNNAMED</additionalJOption>
-									<additionalJOption>--add-opens=java.base/jdk.internal.vm=ALL-UNNAMED</additionalJOption>
-								</additionalJOptions>
-							</configuration>	
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+        	</plugins>
 	</build>
 
 </project>

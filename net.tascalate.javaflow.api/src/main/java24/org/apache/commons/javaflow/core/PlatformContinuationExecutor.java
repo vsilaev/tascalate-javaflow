@@ -15,6 +15,10 @@
  */
 package org.apache.commons.javaflow.core;
 
+import java.lang.management.ManagementFactory;
+import java.util.HashSet;
+import java.util.Set;
+
 final class PlatformContinuationExecutor {
     private PlatformContinuationExecutor() {
         
@@ -27,8 +31,29 @@ final class PlatformContinuationExecutor {
                 return (ScopedContinuationExecutor)currentThread;
             }
         }
-        return ThreadLocalContinuationExecutor.INSTANCE;
+        return DELEGATE;
     }
     
     private static final boolean CHECK_THREAD = Boolean.getBoolean("net.tascalate.javaflow.check-thread"); 
+    private static final ScopedContinuationExecutor DELEGATE;
+    
+    static {
+        var majorVersion = Runtime.version().feature();
+        boolean useScopedValue;
+        if (majorVersion >= 25) {
+            useScopedValue = true;
+        } else if (majorVersion < 21) {
+            useScopedValue = false;
+        } else {
+            Set<String> args = new HashSet<>(ManagementFactory.getRuntimeMXBean().getInputArguments());
+            useScopedValue = args.contains("--enable-preview");
+        }
+        if (useScopedValue) {
+            // Using ScopedValue as scoped continuation executor
+            DELEGATE = ScopedValueContinuationExecutor.INSTANCE;
+        } else {
+            // Using ThreadLocal as scoped continuation executor
+            DELEGATE = ThreadLocalContinuationExecutor.INSTANCE;
+        }
+    }
 }
