@@ -57,10 +57,6 @@
 		<module>net.tascalate.javaflow.api</module>
 		<module>net.tascalate.javaflow.api-jvmc</module>
 		<module>net.tascalate.javaflow.spi</module>
-		<module>net.tascalate.javaflow.providers.asm3</module>
-		<module>net.tascalate.javaflow.providers.asm4</module>
-		<module>net.tascalate.javaflow.providers.asm5</module>
-		<module>net.tascalate.javaflow.providers.asmx</module>
 		<module>net.tascalate.javaflow.providers.core</module>
 		<module>net.tascalate.javaflow.providers.proxy</module>
 		<module>net.tascalate.javaflow.tools.jar</module>
