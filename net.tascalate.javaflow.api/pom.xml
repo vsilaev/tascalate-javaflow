@@ -72,7 +72,7 @@
 								<arg>--enable-preview</arg>
 							</compilerArgs>
 							<compileSourceRoots>
-								<compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+								<compileSourceRoot>${project.basedir}/src/main/java22</compileSourceRoot>
 							</compileSourceRoots>
 							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/22</outputDirectory>
 						</configuration>
@@ -91,7 +91,7 @@
 								<arg>--enable-preview</arg>
 							</compilerArgs>
 							<compileSourceRoots>
-								<compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+								<compileSourceRoot>${project.basedir}/src/main/java22</compileSourceRoot>
 							</compileSourceRoots>
 							<outputDirectory>${project.build.outputDirectory}/META-INF/versions/23</outputDirectory>
 						</configuration>
