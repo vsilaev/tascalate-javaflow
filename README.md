@@ -1,5 +1,18 @@
 [![Maven Central](https://img.shields.io/maven-central/v/net.tascalate.javaflow/net.tascalate.javaflow.parent.svg)](https://search.maven.org/artifact/net.tascalate.javaflow/net.tascalate.javaflow.parent/2.9.0/pom) [![GitHub release](https://img.shields.io/github/release/vsilaev/tascalate-javaflow.svg)](https://github.com/vsilaev/tascalate-javaflow/releases/tag/2.9.0) [![license](https://img.shields.io/github/license/vsilaev/tascalate-javaflow.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+# IMPORTANT NOTICE FOR RELEASE 2.9.0!!!
+We are introducing an experimental **Java 21+ API** that uses native Project Loom continuations, available via the `net.tascalate.javaflow.api-jvmc` dependency.
+To experiment with it:
+1. Swap your dependency from `net.tascalate.javaflow.api` to `net.tascalate.javaflow.api-jvmc`.
+2. Disable all bytecode enhancement build tools and agents (they are ignored/unnecessary with JVMC).
+3. Add the appropriate JVM argument:
+ - Modular: `--add-exports=java.base/jdk.internal.vm=net.tascalate.javaflow.api`
+ - Non-modular: `--add-exports=java.base/jdk.internal.vm=ALL-UNNAMED`
+  
+**Keep in mind**: Source compatibility is preserved, but only single-shot continuations are supported in this experimental mode.
+
+_Note: The original `net.tascalate.javaflow.api` remains our fully maintained mainline implementation. It actually still outperforms the Loom-based version in many tests, and we plan to support both modes in the future._
+
 # IMPORTANT NOTICE FOR RELEASE 2.7.0!!!
 - Agents & Tools projects were refactored to follow consisntent naming of classes and to avoid package name clashes
 - Separate provider was extracted from `CdiProxy` to allow reuse in mutliple scenarious (not only in Java Agent)
