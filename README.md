@@ -9,7 +9,7 @@ To experiment with it:
  - Modular: `--add-exports=java.base/jdk.internal.vm=net.tascalate.javaflow.api`
  - Non-modular: `--add-exports=java.base/jdk.internal.vm=ALL-UNNAMED`
   
-**Keep in mind**: Source compatibility is preserved, but only single-shot continuations are supported in this experimental mode.
+**Keep in mind**: Source compatibility is preserved (but you MUST recompile your project without JavaFlow tools); only single-shot continuations are supported in this experimental mode.
 
 _Note: The original `net.tascalate.javaflow.api` remains our fully maintained mainline implementation. It actually still outperforms the Loom-based version in many tests, and we plan to support both modes in the future._
 
